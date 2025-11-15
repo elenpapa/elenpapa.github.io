@@ -1,22 +1,136 @@
 {
   "items": [
     {
-      "year": 2019,
-      "title": "First Book",
-      "cover": "/images/books/book1.jpg",
-      "blurb": "An exploration of modern web foundations."
-    },
-    {
-      "year": 2021,
-      "title": "Second Book",
-      "cover": "/images/books/book2.jpg",
-      "blurb": "Advanced patterns for scalable frontends."
+      "year": 2025,
+      "title": "Lorem Ipsum Vol 01",
+      "cover": "/images/books/18 Μέρες Μετά.jpg",
+      "blurb": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
     },
     {
       "year": 2024,
-      "title": "Latest Book",
-      "cover": "/images/books/book3.jpg",
-      "blurb": "Designing accessible, performant interfaces."
+      "title": "Lorem Ipsum Vol 02",
+      "cover": "/images/books/9786182250488.jpg",
+      "blurb": "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+    },
+    {
+      "year": 2023,
+      "title": "Lorem Ipsum Vol 03",
+      "cover": "/images/books/Absent.jpg",
+      "blurb": "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris."
+    },
+    {
+      "year": 2022,
+      "title": "Lorem Ipsum Vol 04",
+      "cover": "/images/books/Once Upon A Horror Time.jpg",
+      "blurb": "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum."
+    },
+    {
+      "year": 2021,
+      "title": "Lorem Ipsum Vol 05",
+      "cover": "/images/books/Wednesday.jpg",
+      "blurb": "Eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident."
+    },
+    {
+      "year": 2020,
+      "title": "Lorem Ipsum Vol 06",
+      "cover": "/images/books/Ένα μόνο γράμμα.jpg",
+      "blurb": "Sunt in culpa qui officia deserunt mollit anim id est laborum."
+    },
+    {
+      "year": 2019,
+      "title": "Lorem Ipsum Vol 07",
+      "cover": "/images/books/Αίμα από ασήμι.jpg",
+      "blurb": "Curabitur non nulla sit amet nisl tempus convallis quis ac lectus."
+    },
+    {
+      "year": 2018,
+      "title": "Lorem Ipsum Vol 08",
+      "cover": "/images/books/Αυτόματη Εστιαση.jpg",
+      "blurb": "Vivamus suscipit tortor eget felis porttitor volutpat."
+    },
+    {
+      "year": 2017,
+      "title": "Lorem Ipsum Vol 09",
+      "cover": "/images/books/Για λίγο σ' αγαπώ.png",
+      "blurb": "Praesent sapien massa, convallis a pellentesque nec, egestas non nisi."
+    },
+    {
+      "year": 2016,
+      "title": "Lorem Ipsum Vol 10",
+      "cover": "/images/books/Δείπνο Δολοφόνων.jpg",
+      "blurb": "Pellentesque in ipsum id orci porta dapibus."
+    },
+    {
+      "year": 2015,
+      "title": "Lorem Ipsum Vol 11",
+      "cover": "/images/books/Η κραυγή της μάνας.jpg",
+      "blurb": "Donec sollicitudin molestie malesuada."
+    },
+    {
+      "year": 2014,
+      "title": "Lorem Ipsum Vol 12",
+      "cover": "/images/books/Η Μαντάμ 2.jpg",
+      "blurb": "Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a."
+    },
+    {
+      "year": 2013,
+      "title": "Lorem Ipsum Vol 13",
+      "cover": "/images/books/Η Σιωπή του Πίνακα.jpg",
+      "blurb": "Vestibulum ac diam sit amet quam vehicula elementum."
+    },
+    {
+      "year": 2012,
+      "title": "Lorem Ipsum Vol 14",
+      "cover": "/images/books/Ηλιαχτίδα.jpg",
+      "blurb": "Nulla quis lorem ut libero malesuada feugiat."
+    },
+    {
+      "year": 2011,
+      "title": "Lorem Ipsum Vol 15",
+      "cover": "/images/books/Μέχρι Τέλους.jpg",
+      "blurb": "Quisque velit nisi, pretium ut lacinia in, elementum id enim."
+    },
+    {
+      "year": 2010,
+      "title": "Lorem Ipsum Vol 16",
+      "cover": "/images/books/Μια Αιματοβαμμένη Νύχτα στην Τοσκάνη.jpg",
+      "blurb": "Curabitur aliquet quam id dui posuere blandit."
+    },
+    {
+      "year": 2009,
+      "title": "Lorem Ipsum Vol 17",
+      "cover": "/images/books/Οι Κόρες της Μάγισσας.jpg",
+      "blurb": "Proin eget tortor risus."
+    },
+    {
+      "year": 2008,
+      "title": "Lorem Ipsum Vol 18",
+      "cover": "/images/books/Πεφταστέρι.jpg",
+      "blurb": "Vivamus magna justo, lacinia eget consectetur sed, convallis at tellus."
+    },
+    {
+      "year": 2007,
+      "title": "Lorem Ipsum Vol 19",
+      "cover": "/images/books/Τι κι αν.jpg",
+      "blurb": "Cras ultricies ligula sed magna dictum porta."
+    },
+    {
+      "year": 2006,
+      "title": "Lorem Ipsum Vol 20",
+      "cover": "/images/books/Το Μυστικό της Κρήνης.jpg",
+      "blurb": "Donec rutrum congue leo eget malesuada."
+    },
+    {
+      "year": 2005,
+      "title": "Lorem Ipsum Vol 21",
+      "cover": "/images/books/Το Τέκνο της Λύτρωσης.jpg",
+      "blurb": "Pellentesque in ipsum id orci porta dapibus."
+    },
+    {
+      "year": 2004,
+      "title": "Lorem Ipsum Vol 22",
+      "cover": "/images/books/Χάλκινο Κλειδί.jpeg",
+      "blurb": "Mauris blandit aliquet elit, eget tincidunt nibh pulvinar a."
     }
   ]
 }

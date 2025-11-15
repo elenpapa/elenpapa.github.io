@@ -13,7 +13,7 @@ onMounted(async () => {
     <div class="container intro">
       <div class="text">
         <h2>{{ home?.intro.title }}</h2>
-        <p>{{ home?.intro.text }}</p>
+        <p v-html="home?.intro.text"></p>
       </div>
       <div class="image">
         <div class="backdrop"></div>
@@ -45,9 +45,9 @@ onMounted(async () => {
 }
 .text p {
   font-family: var(--font-serif);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-2xl);
   line-height: 1.7;
-  color: var(--color-muted);
+  color: var(--color-light-gray);
   margin: 0;
 }
 .image {
@@ -62,8 +62,8 @@ onMounted(async () => {
 }
 .image img {
   position: relative;
-  width: 100%;
-  height: 550px;
+  width: 75%;
+  /* height: 550px; */
   object-fit: cover;
   border-radius: var(--radius-lg);
 }

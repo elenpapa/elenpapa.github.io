@@ -73,15 +73,31 @@ onUnmounted(() => globalThis.removeEventListener('resize', onResize))
   >
     <div class="overlay">
       <div class="container inner" ref="innerEl">
-        <h1>{{ home?.hero.title }}</h1>
+        <h1 class="title">{{ home?.hero.title }}</h1>
         <p class="subtitle">{{ home?.hero.subtitle }}</p>
-        <a v-if="home" class="cta" :href="home.hero.cta.href">{{ home.hero.cta.label }}</a>
       </div>
     </div>
   </section>
 </template>
 
 <style scoped>
+.title {
+  background-color: #1a143323;
+  border-radius: 10px 12px;
+  padding: 10px 25px;
+}
+.subtitle {
+  border-radius: 10px 12px;
+  padding: 10px 25px;
+  background-color: #1a143323;
+  color: #f1f1f8;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-2xl);
+  font-weight: 400;
+  margin: 0 0 32px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+}
+
 .hero {
   min-height: 200px;
   background-size: contain;
@@ -105,21 +121,25 @@ onUnmounted(() => globalThis.removeEventListener('resize', onResize))
 }
 h1 {
   color: white;
-  font-size: clamp(2rem, 5vw, 3.25rem);
-  margin: 0 0 12px;
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 16px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
-.subtitle {
-  color: #f1f1f8;
-  margin: 0 0 24px;
-  font-size: 1.1rem;
-}
+
 .cta {
   display: inline-block;
   background: var(--color-primary);
   color: #1a1433;
-  padding: 10px 16px;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  padding: 12px 24px;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
 }
 .cta:hover,
 .cta:focus-visible {

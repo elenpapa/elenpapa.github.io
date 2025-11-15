@@ -52,9 +52,16 @@ onMounted(async () => {
   margin-bottom: 12px;
 }
 .card h3 {
-  margin: 0 0 6px;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0 0 10px;
 }
 .card p {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
   margin: 0;
   color: var(--color-muted);
 }

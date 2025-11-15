@@ -93,15 +93,39 @@ function close() {
 </template>
 
 <style scoped>
+@keyframes headerReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pillPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .site-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   backdrop-filter: blur(18px);
-  background: color-mix(in srgb, var(--color-surface) 85%, rgba(255, 255, 255, 0));
-  border-bottom: 1px solid rgba(179, 157, 219, 0.2);
+  background: linear-gradient(135deg, rgba(179, 157, 219, 0.42), rgba(255, 255, 255, 0.94));
+  border-bottom: 1px solid rgba(179, 157, 219, 0.35);
+  box-shadow: 0 16px 35px rgba(38, 22, 64, 0.12);
   z-index: 50;
+  animation: headerReveal 0.55s ease 0.05s both;
 }
 .spacer {
   height: var(--site-header-height, 76px);
@@ -110,7 +134,7 @@ function close() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.35rem clamp(1rem, 5vw, 2.5rem);
+  padding: 0.5rem clamp(1rem, 5vw, 2.75rem);
   gap: 1rem;
   min-height: 68px;
 }
@@ -126,6 +150,8 @@ function close() {
   width: auto;
   object-fit: contain;
   display: block;
+  padding: 6px;
+  border-radius: var(--radius-md);
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
 }
 .brand-copy {
@@ -149,6 +175,7 @@ function close() {
   display: flex;
   align-items: center;
   gap: 1rem;
+  padding: 0.25rem 0;
 }
 .hamburger {
   display: none;
@@ -194,23 +221,69 @@ function close() {
 }
 .links {
   display: flex;
+  flex-wrap: wrap;
   list-style: none;
-  gap: 0.75rem;
+  gap: 0.65rem 0.85rem;
   margin: 0;
   padding: 0;
 }
 .links a {
   color: var(--color-text);
-  padding: 8px 12px;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  padding: 10px 16px;
   border-radius: 999px;
+  position: relative;
+  border: 1px solid transparent;
+  box-shadow: inset 0 0 0 rgba(179, 157, 219, 0.2);
+  isolation: isolate;
+  overflow: hidden;
   transition:
-    background 0.2s ease,
-    color 0.2s ease;
+    color 0.2s ease,
+    border 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.links a::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4), rgba(179, 157, 219, 0.2));
+  opacity: 0;
+  transform: scale(0.92);
+  z-index: -1;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+.links a::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 6px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-600));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
 }
 .links a:hover,
 .links a:focus-visible {
-  background: rgba(179, 157, 219, 0.18);
+  border-color: var(--color-text);
+  box-shadow: 0 10px 18px rgba(179, 157, 219, 0.25);
   outline: none;
+}
+.links a:hover::after,
+.links a:focus-visible::after {
+  opacity: 1;
+  transform: scale(1);
+  animation: pillPulse 0.4s ease;
+}
+.links a:hover::before,
+.links a:focus-visible::before {
+  transform: scaleX(1);
 }
 
 .sr-only {
@@ -250,9 +323,10 @@ function close() {
     right: clamp(1rem, 6vw, 2rem);
     left: clamp(1rem, 6vw, 2rem);
     flex-direction: column;
-    background: var(--color-surface);
+    background: rgba(255, 255, 255, 0.97);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(179, 157, 219, 0.3);
+    box-shadow: 0 28px 60px rgba(28, 24, 45, 0.2);
     max-height: 0;
     overflow: hidden;
     padding: 0;
@@ -280,6 +354,16 @@ function close() {
   }
   .brand img {
     height: 56px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-header,
+  .links a,
+  .links,
+  .hamburger-box span {
+    animation: none !important;
+    transition: none !important;
   }
 }
 </style>

@@ -67,14 +67,25 @@ onMounted(async () => {
   box-shadow: var(--shadow-sm);
 }
 .meta h3 {
-  margin: 0 0 6px;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0 0 8px;
 }
 .meta .year {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--color-primary-600);
-  font-weight: 600;
+  font-weight: 700;
 }
 .meta .blurb {
-  margin: 6px 0 0;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+  margin: 10px 0 0;
   color: var(--color-muted);
 }
 @media (max-width: 900px) {

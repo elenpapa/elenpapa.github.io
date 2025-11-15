@@ -66,10 +66,17 @@ const isValid = () => name.value.trim() && validEmail(email.value) && message.va
 
 <style scoped>
 h2 {
-  margin: 0 0 8px;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-3xl);
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0 0 12px;
 }
 .desc {
-  margin: 0 0 24px;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-lg);
+  line-height: 1.6;
+  margin: 0 0 28px;
   color: var(--color-muted);
 }
 .form {
@@ -82,15 +89,22 @@ label {
   gap: 8px;
 }
 label span {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 input,
 textarea {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-base);
   border: 1px solid rgba(0, 0, 0, 0.1);
   background: var(--color-surface);
   border-radius: var(--radius-md);
-  padding: 10px 12px;
+  padding: 12px 14px;
   color: inherit;
+  transition: all 0.2s ease;
 }
 input:focus-visible,
 textarea:focus-visible {
@@ -108,9 +122,14 @@ textarea:focus-visible {
 .submit {
   background: var(--color-primary);
   color: #1a1433;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  font-weight: 600;
   border: none;
-  padding: 10px 16px;
+  padding: 12px 24px;
   border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 .submit:disabled {
   opacity: 0.6;

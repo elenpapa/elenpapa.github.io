@@ -5,27 +5,27 @@
   },
   "nav": [
     {
-      "label": "Home",
+      "label": "Αρχική",
       "href": "#home"
     },
     {
-      "label": "Intro",
+      "label": "Για μένα",
       "href": "#intro"
     },
     {
-      "label": "Timeline",
+      "label": "Βιβλιογραφία",
       "href": "#timeline"
     },
     {
-      "label": "Services",
+      "label": "Υπηρεσίες",
       "href": "#services"
     },
     {
-      "label": "Posts",
+      "label": "Συμβουλές",
       "href": "#posts"
     },
     {
-      "label": "Contact",
+      "label": "Επικοινωνία",
       "href": "#contact"
     }
   ],

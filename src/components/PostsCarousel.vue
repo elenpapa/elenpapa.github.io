@@ -67,15 +67,30 @@ function next() {
   box-shadow: var(--shadow-sm);
 }
 .slide h3 {
-  margin: 10px 6px 0;
-  font-size: 1rem;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 12px 6px 0;
+}
+.slide h3 a {
+  transition: color 0.2s ease;
+}
+.slide h3 a:hover,
+.slide h3 a:focus-visible {
+  color: var(--color-primary-600);
+  outline: none;
 }
 .nav {
   background: var(--color-surface);
+  font-family: var(--font-sans);
+  font-size: 24px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 999px;
   width: 36px;
   height: 36px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 .nav:hover,
 .nav:focus-visible {

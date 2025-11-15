@@ -37,10 +37,16 @@ onMounted(async () => {
   align-items: center;
 }
 .text h2 {
-  margin: 0 0 12px;
-  font-size: clamp(1.5rem, 3.2vw, 2.25rem);
+  font-family: var(--font-serif);
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0 0 16px;
 }
 .text p {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-lg);
+  line-height: 1.7;
   color: var(--color-muted);
   margin: 0;
 }
@@ -56,8 +62,10 @@ onMounted(async () => {
 }
 .image img {
   position: relative;
+  width: 100%;
+  height: 550px;
+  object-fit: cover;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-md);
 }
 @media (max-width: 900px) {
   .intro {

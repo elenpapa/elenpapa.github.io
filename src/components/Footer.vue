@@ -38,7 +38,13 @@ onMounted(async () => {
   flex-wrap: wrap;
 }
 .socials a {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--color-muted);
+  transition: color 0.2s ease;
 }
 .socials a:hover,
 .socials a:focus-visible {
@@ -46,8 +52,10 @@ onMounted(async () => {
   outline: none;
 }
 .copy {
-  margin: 8px 0 0;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  margin: 12px 0 0;
   color: var(--color-muted);
-  font-size: 0.9rem;
 }
 </style>

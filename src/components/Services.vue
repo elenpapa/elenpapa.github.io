@@ -14,7 +14,7 @@ const services = computed(() => data.value?.items ?? [])
 </script>
 
 <template>
-  <section id="services" v-reveal aria-labelledby="services-title">
+  <section id="services" v-reveal aria-labelledby="services-title" class="services-section">
     <div class="container">
       <header class="services-header" v-reveal>
         <h2 id="services-title">{{ heading }}</h2>
@@ -54,6 +54,9 @@ const services = computed(() => data.value?.items ?? [])
 </template>
 
 <style scoped>
+.services-section {
+  background: var(--color-surface);
+}
 .services-header {
   max-width: 720px;
   margin: 0 auto 40px;
@@ -78,12 +81,12 @@ const services = computed(() => data.value?.items ?? [])
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: var(--shadow-sm);
   border: 1px solid rgba(255, 255, 255, 0.05);
   outline: none;
+  background: var(--color-bg);
 }
 .card.reveal {
   transition: none;
@@ -99,6 +102,7 @@ const services = computed(() => data.value?.items ?? [])
 .card-media {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
 }
 .icon {
@@ -112,12 +116,10 @@ const services = computed(() => data.value?.items ?? [])
   font-size: 1.5rem;
 }
 .thumb {
-  width: 88px;
-  height: 88px;
+  width: 250px;
+  height: 250px;
   object-fit: cover;
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-  background: rgba(179, 157, 219, 0.25);
 }
 .card-body {
   display: flex;

@@ -10,6 +10,7 @@
   --color-primary: #b39ddb; /* lilac */
   --color-primary-600: #7e57c2; /* Darkened from #9575cd for better contrast (4.51:1) */
 
+  --timeline-space: 80px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;

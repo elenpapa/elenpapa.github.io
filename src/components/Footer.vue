@@ -30,7 +30,7 @@ onMounted(async () => {
 .site-footer {
   padding: 32px 0;
   background: var(--color-surface);
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-top: 5px solid rgba(0, 0, 0, 0.06);
 }
 .socials {
   display: flex;

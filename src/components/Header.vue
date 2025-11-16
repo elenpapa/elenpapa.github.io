@@ -10,6 +10,10 @@ const spacerEl = ref<HTMLElement | null>(null)
 const logoEl = ref<HTMLImageElement | null>(null)
 const menuRef = ref<HTMLElement | null>(null)
 
+// Bubble state (desktop only): morph to floating bubble on scroll, expand on hover/focus
+const isBubble = ref(false)
+const isExpanded = ref(false)
+
 const navItems = computed(() => site.value?.nav ?? [])
 
 // Focus trap for mobile menu
@@ -36,6 +40,10 @@ onMounted(async () => {
     else logoEl.value.addEventListener('load', setHeaderHeight, { once: true })
   }
   globalThis.addEventListener('resize', onResize)
+  // Scroll listener for bubble state (passive + rAF)
+  globalThis.addEventListener('scroll', onScroll, { passive: true })
+  // Escape to collapse expanded state
+  globalThis.addEventListener('keydown', onKeyDown)
 })
 
 const setHeaderHeight = async () => {
@@ -64,6 +72,8 @@ const onResize = () => {
 
 onUnmounted(() => {
   globalThis.removeEventListener('resize', onResize)
+  globalThis.removeEventListener('scroll', onScroll as EventListener)
+  globalThis.removeEventListener('keydown', onKeyDown as EventListener)
   deactivate()
 })
 
@@ -73,10 +83,111 @@ function toggle() {
 function close() {
   open.value = false
 }
+
+// Desktop check
+const isDesktop = () => globalThis.innerWidth >= 1024
+
+// Update bubble state based on scroll position and header height
+const updateBubble = async () => {
+  if (!headerEl.value) return
+  if (!isDesktop()) {
+    isBubble.value = false
+    isExpanded.value = false
+    return
+  }
+  const threshold = headerEl.value.offsetHeight || 0
+  const shouldBubble = globalThis.scrollY > threshold
+
+  const wasBubble = isBubble.value
+  const wasExpanded = isExpanded.value
+
+  // Collapse when exiting bubble state OR when entering bubble state
+  if (!shouldBubble || (shouldBubble && !isBubble.value)) {
+    isExpanded.value = false
+    //sleep for 100ms
+    await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+
+  // console.log(`[Header] Setting isBubble to ${shouldBubble}`)
+  isBubble.value = shouldBubble
+
+  // Log transitions
+  if (wasBubble !== isBubble.value) {
+    console.log(
+      `[Header] Bubble state changed: ${wasBubble} -> ${isBubble.value} (scrollY: ${globalThis.scrollY}, threshold: ${threshold})`,
+    )
+  }
+  if (wasExpanded !== isExpanded.value) {
+    console.log(`[Header] Expanded state changed: ${wasExpanded} -> ${isExpanded.value}`)
+  }
+}
+
+let ticking = false
+const onScroll = () => {
+  if (!ticking) {
+    ticking = true
+    globalThis.requestAnimationFrame(() => {
+      updateBubble()
+      ticking = false
+    })
+  }
+}
+
+// Hover/focus expansion handlers
+function onEnter() {
+  console.log(`[Header] onEnter called - isDesktop: ${isDesktop()}, isBubble: ${isBubble.value}`)
+  if (!isDesktop()) return
+  if (isBubble.value) {
+    console.log(`[Header] Setting isExpanded to true`)
+    isExpanded.value = true
+  }
+}
+function onLeave() {
+  console.log(`[Header] onLeave called - isDesktop: ${isDesktop()}, isBubble: ${isBubble.value}`)
+  if (!isDesktop()) return
+  if (isBubble.value) {
+    console.log(`[Header] Setting isExpanded to false`)
+    isExpanded.value = false
+  }
+}
+function onFocusIn() {
+  console.log(`[Header] onFocusIn called - isDesktop: ${isDesktop()}, isBubble: ${isBubble.value}`)
+  if (!isDesktop()) return
+  if (isBubble.value) {
+    console.log(`[Header] Setting isExpanded to true via focus`)
+    isExpanded.value = true
+  }
+}
+function onFocusOut(e: FocusEvent) {
+  console.log(`[Header] onFocusOut called - isDesktop: ${isDesktop()}, isBubble: ${isBubble.value}`)
+  if (!isDesktop()) return
+  // Collapse when focus leaves the header entirely
+  const related = e.relatedTarget as Node | null
+  if (isBubble.value && headerEl.value && related && !headerEl.value.contains(related)) {
+    console.log(`[Header] Setting isExpanded to false via focus out`)
+    isExpanded.value = false
+  }
+}
+
+// Close expansion with Escape
+const onKeyDown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape') {
+    isExpanded.value = false
+  }
+}
 </script>
 
 <template>
-  <header class="site-header" ref="headerEl" role="banner">
+  <header
+    class="site-header"
+    :class="{ bubble: isBubble, expanded: false }"
+    ref="headerEl"
+    role="banner"
+    @mouseenter="onEnter"
+    @mouseleave="onLeave"
+    @focusin="onFocusIn"
+    @focusout="onFocusOut"
+  >
     <div class="container bar">
       <a href="#home" class="brand" @click="close" aria-label="Home">
         <img v-if="site?.logo" ref="logoEl" :src="site.logo.src" :alt="site.logo.alt" />
@@ -250,6 +361,7 @@ function close() {
   margin: 0;
   padding: 0;
 }
+
 .links a {
   color: var(--color-text);
   font-family: var(--font-serif);
@@ -408,6 +520,86 @@ function close() {
   }
   .brand img {
     height: 56px;
+  }
+}
+
+/* Desktop bubble styles */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .site-header.bubble {
+    top: clamp(0.75rem, 2.5vh, 1.5rem);
+    right: clamp(0.75rem, 2vw, 1.5rem);
+    left: 60px;
+    bottom: auto;
+    width: 120px;
+    height: 120px;
+    border-radius: 999px;
+    border-bottom: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-shadow: 0 18px 40px rgba(28, 24, 45, 0.22);
+    transition:
+      transform 220ms ease,
+      opacity 220ms ease;
+    will-change: transform;
+  }
+  .site-header.bubble .bar {
+    padding: 0;
+    min-height: 0;
+    gap: 0;
+  }
+  .site-header.bubble .nav {
+    position: relative;
+  }
+  .site-header.bubble .brand {
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+  }
+  .site-header.bubble .brand img {
+    padding: 0;
+    height: 67px;
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.12));
+  }
+  .site-header.bubble .links {
+    position: absolute;
+    top: 0;
+    right: calc(100% + 12px);
+    left: auto;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(179, 157, 219, 0.3);
+    box-shadow: 0 28px 60px rgba(28, 24, 45, 0.2);
+    width: max-content;
+    max-width: min(50vw, 560px);
+    padding: 0.5rem 0;
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+    transform-origin: right top;
+    pointer-events: none;
+    transition:
+      opacity 200ms ease,
+      transform 220ms ease;
+    max-height: none;
+    overflow: visible;
+  }
+  .site-header.bubble .links li {
+    width: 100%;
+  }
+  .site-header.bubble .links a,
+  .site-header.bubble .links .nav-link {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+  }
+  .site-header.bubble.expanded .links,
+  .site-header.bubble:focus-within .links {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
   }
 }
 

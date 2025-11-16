@@ -104,8 +104,27 @@ const scrollNext = () => {
           @click="scrollPrev"
           :disabled="!canScrollPrev"
           aria-label="Previous posts"
+          title="Previous posts"
         >
-          ‹
+          <span class="icon" aria-hidden="true">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              focusable="false"
+            >
+              <path
+                d="M15 18L9 12L15 6"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          <span class="sr-only">Previous</span>
         </button>
 
         <div class="embla" ref="emblaRef">
@@ -140,8 +159,27 @@ const scrollNext = () => {
           @click="scrollNext"
           :disabled="!canScrollNext"
           aria-label="Next posts"
+          title="Next posts"
         >
-          ›
+          <span class="icon" aria-hidden="true">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              focusable="false"
+            >
+              <path
+                d="M9 6L15 12L9 18"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </span>
+          <span class="sr-only">Next</span>
         </button>
       </div>
     </div>
@@ -223,31 +261,68 @@ const scrollNext = () => {
 }
 
 .nav {
-  background: var(--color-surface);
+  background: linear-gradient(
+    180deg,
+    var(--color-primary-600),
+    color-mix(in srgb, var(--color-primary-600) 85%, black 5%)
+  );
+  color: var(--color-on-primary, #fff);
   font-family: var(--font-sans);
-  font-size: 24px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: none;
   border-radius: 999px;
-  width: 40px;
-  height: 40px;
-  display: flex;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  color: inherit;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease;
+  box-shadow: 0 6px 14px rgba(20, 24, 40, 0.06);
+}
+
+.nav .icon {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.nav svg {
+  display: block;
+  width: 20px;
+  height: 20px;
 }
 
 .nav:hover:not(:disabled),
 .nav:focus-visible:not(:disabled) {
-  border-color: var(--color-primary-600);
-  outline: 2px solid var(--color-primary-600);
-  outline-offset: 2px;
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 10px 22px rgba(16, 24, 40, 0.12);
+  outline: none;
+}
+
+.nav:focus-visible {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary-600) 16%, transparent);
 }
 
 .nav:disabled {
-  opacity: 0.3;
+  opacity: 0.36;
   cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+/* Utility: visually-hidden for screen readers */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 @media (min-width: 768px) {

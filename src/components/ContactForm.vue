@@ -55,7 +55,7 @@ const submitButtonText = computed(() => {
 </script>
 
 <template>
-  <section id="contact" v-reveal>
+  <section id="contact" class="contact-section" v-reveal>
     <div class="container">
       <h2>{{ data?.title }}</h2>
       <p class="desc">{{ data?.description }}</p>
@@ -121,6 +121,9 @@ const submitButtonText = computed(() => {
 </template>
 
 <style scoped>
+.contact-section {
+  background: var(--color-surface);
+}
 h2 {
   font-family: var(--font-serif);
   font-size: var(--font-size-3xl);

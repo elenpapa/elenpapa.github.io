@@ -11,6 +11,5 @@ import BookTimeline from '@/components/BookTimeline.vue'
 <style scoped>
 main {
   display: block;
-  padding-top: 80px;
 }
 </style>

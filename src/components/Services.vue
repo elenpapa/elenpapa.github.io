@@ -1,78 +1,183 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { content, type ServicesContent } from '@/services/content'
+import { ref, onMounted, computed } from 'vue'
+import { content, type ServiceItem, type ServicesContent } from '@/services/content'
 
 const data = ref<ServicesContent | null>(null)
 onMounted(async () => {
   data.value = await content.getServices()
 })
+
+const getVisualAlt = (srv: ServiceItem) => srv.image?.alt ?? ''
+const heading = computed(() => data.value?.heading ?? 'Services')
+const description = computed(() => data.value?.description ?? '')
+const services = computed(() => data.value?.items ?? [])
 </script>
 
 <template>
-  <section id="services" v-reveal>
-    <div class="container services">
-      <div v-for="(srv, idx) in data?.items" :key="idx" class="card" v-reveal>
-        <div class="icon" aria-hidden="true">★</div>
-        <h3>{{ srv.title }}</h3>
-        <p>{{ srv.description }}</p>
+  <section id="services" v-reveal aria-labelledby="services-title">
+    <div class="container">
+      <header class="services-header" v-reveal>
+        <h2 id="services-title">{{ heading }}</h2>
+        <p v-if="description">{{ description }}</p>
+      </header>
+      <div class="services-grid">
+        <article
+          v-for="(srv, idx) in services"
+          :key="idx"
+          class="card"
+          v-reveal
+          :style="{ '--card-index': idx }"
+        >
+          <div class="card-media">
+            <img
+              v-if="srv.image"
+              class="thumb"
+              :src="srv.image.src"
+              :alt="getVisualAlt(srv)"
+              loading="lazy"
+              decoding="async"
+            />
+            <div v-else class="icon" aria-hidden="true">{{ srv.icon ?? '★' }}</div>
+          </div>
+          <div class="card-body">
+            <p v-if="srv.focus" class="card-focus">{{ srv.focus }}</p>
+            <h3>{{ srv.title }}</h3>
+            <p class="card-description">{{ srv.description }}</p>
+            <ul v-if="srv.highlights?.length" class="card-highlights">
+              <li v-for="(item, hIdx) in srv.highlights" :key="hIdx">{{ item }}</li>
+            </ul>
+          </div>
+        </article>
       </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-.services {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+.services-header {
+  max-width: 720px;
+  margin: 0 auto 40px;
+  text-align: center;
 }
-.card {
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-  outline: none;
-}
-.card:hover,
-.card:focus-visible {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-}
-.icon {
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  background: rgba(179, 157, 219, 0.25);
-  color: var(--color-primary-600);
+.services-header h2 {
+  font-size: clamp(2rem, 2.5vw, 2.5rem);
   margin-bottom: 12px;
 }
-.card h3 {
-  font-family: var(--font-serif);
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  line-height: 1.3;
-  margin: 0 0 10px;
-}
-.card p {
-  font-family: var(--font-serif);
-  font-size: var(--font-size-base);
-  line-height: 1.6;
+.services-header p {
   margin: 0;
   color: var(--color-muted);
 }
-@media (max-width: 900px) {
-  .services {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  outline: none;
+}
+.card.reveal {
+  transition: none;
+}
+.card.reveal.reveal--shown {
+  animation: card-rise 0.7s ease-out both;
+  animation-delay: calc(var(--card-index, 0) * 120ms);
+}
+.card:hover,
+.card:focus-visible {
+  box-shadow: var(--shadow-md);
+}
+.card-media {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.icon {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(179, 157, 219, 0.25);
+  color: var(--color-primary-600);
+  font-size: 1.5rem;
+}
+.thumb {
+  width: 88px;
+  height: 88px;
+  object-fit: cover;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  background: rgba(179, 157, 219, 0.25);
+}
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.card-focus {
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--color-primary-400);
+  margin: 0;
+}
+.card h3 {
+  font-family: var(--font-serif);
+  font-size: var(--font-size-4xl);
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+}
+.card-description {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--font-size-2xl);
+}
+.card-highlights {
+  display: grid;
+  gap: 8px;
+  /* list-style: none; */
+  margin: 0;
+  /* padding: 0; */
+}
+.card-highlights li {
+  /* padding-left: 1.2rem; */
+  position: relative;
+  color: var(--color-text);
+  font-size: var(--font-size-2xl);
+}
+
+@keyframes card-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
+
 @media (max-width: 600px) {
-  .services {
-    grid-template-columns: 1fr;
+  .card {
+    padding: 20px;
+  }
+  .thumb {
+    width: 72px;
+    height: 72px;
   }
 }
 </style>

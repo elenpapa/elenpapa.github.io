@@ -31,8 +31,19 @@ export type TimelineItem = {
 }
 export type TimelineContent = { items: TimelineItem[] }
 
-export type ServiceItem = { title: string; description: string; icon?: string }
-export type ServicesContent = { items: ServiceItem[] }
+export type ServiceItem = {
+  title: string
+  description: string
+  focus?: string
+  highlights?: string[]
+  icon?: string
+  image?: { src: string; alt: string }
+}
+export type ServicesContent = {
+  heading?: string
+  description?: string
+  items: ServiceItem[]
+}
 
 export type PostItem = { title: string; image: string; url: string }
 export type PostsContent = { items: PostItem[] }

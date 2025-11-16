@@ -1,48 +1,53 @@
 {
   "items": [
     {
-      "title": "Post 1",
-      "image": "/images/posts/p1.jpg",
+      "title": "Article",
+      "image": "/images/posts/Article.png",
       "url": "#"
     },
     {
-      "title": "Post 2",
-      "image": "/images/posts/p2.jpg",
+      "title": "Article (1)",
+      "image": "/images/posts/Article (1).png",
       "url": "#"
     },
     {
-      "title": "Post 3",
-      "image": "/images/posts/p3.jpg",
+      "title": "Article (2)",
+      "image": "/images/posts/Article (2).png",
       "url": "#"
     },
     {
-      "title": "Post 4",
-      "image": "/images/posts/p4.jpg",
+      "title": "Article (3)",
+      "image": "/images/posts/Article (3).png",
       "url": "#"
     },
     {
-      "title": "Post 5",
-      "image": "/images/posts/p5.jpg",
+      "title": "Article (4)",
+      "image": "/images/posts/Article (4).png",
       "url": "#"
     },
     {
-      "title": "Post 6",
-      "image": "/images/posts/p6.jpg",
+      "title": "Article (5)",
+      "image": "/images/posts/Article (5).png",
       "url": "#"
     },
     {
-      "title": "Post 7",
-      "image": "/images/posts/p7.jpg",
+      "title": "Article (6)",
+      "image": "/images/posts/Article (6).png",
       "url": "#"
     },
     {
-      "title": "Post 8",
-      "image": "/images/posts/p8.jpg",
+      "title": "Article (7)",
+      "image": "/images/posts/Article (7).png",
       "url": "#"
     },
     {
-      "title": "Post 9",
-      "image": "/images/posts/p9.jpg",
+      "title": "Article (8)",
+      "image": "/images/posts/Article (8).png",
+      "url": "#"
+    },
+    {
+      "title": "Article (9)",
+      "image": "/images/posts/Article (9).png",
       "url": "#"
     }
   ]

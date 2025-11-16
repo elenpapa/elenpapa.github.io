@@ -6,15 +6,16 @@ const data = ref<PostsContent | null>(null)
 onMounted(async () => {
   data.value = await content.getPosts()
 })
-
-const current = ref(0)
+const viewport = ref<HTMLDivElement | null>(null)
 function prev() {
-  if (!data.value) return
-  current.value = (current.value - 1 + data.value.items.length) % data.value.items.length
+  const el = viewport.value
+  if (!el) return
+  el.scrollBy({ left: -el.clientWidth, behavior: 'smooth' })
 }
 function next() {
-  if (!data.value) return
-  current.value = (current.value + 1) % data.value.items.length
+  const el = viewport.value
+  if (!el) return
+  el.scrollBy({ left: el.clientWidth, behavior: 'smooth' })
 }
 </script>
 
@@ -23,8 +24,8 @@ function next() {
     <div class="container carousel">
       <h2 class="visually-hidden">Featured posts</h2>
       <button class="nav" @click="prev" aria-label="Previous">‹</button>
-      <div class="viewport">
-        <div class="track" :style="{ transform: `translateX(-${current * 100}%)` }">
+      <div class="viewport" ref="viewport">
+        <div class="track">
           <article v-for="(post, idx) in data?.items" :key="idx" class="slide">
             <img :src="post.image" :alt="post.title" loading="lazy" decoding="async" />
             <h3>
@@ -48,16 +49,18 @@ function next() {
 .viewport {
   overflow: hidden;
   border-radius: var(--radius-lg);
+  scroll-snap-type: x mandatory;
 }
 .track {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 100%;
-  transition: transform 0.3s ease;
+  grid-auto-columns: calc(100% / 3);
+  gap: 12px;
 }
 .slide {
   padding: 8px;
   background: var(--color-surface);
+  scroll-snap-align: start;
 }
 .slide img {
   width: 100%;
@@ -98,8 +101,16 @@ function next() {
   outline: none;
 }
 @media (max-width: 600px) {
+  .track {
+    grid-auto-columns: 100%;
+  }
   .slide img {
     height: 160px;
+  }
+}
+@media (max-width: 900px) and (min-width: 601px) {
+  .track {
+    grid-auto-columns: 50%;
   }
 }
 </style>

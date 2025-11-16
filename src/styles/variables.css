@@ -1,7 +1,7 @@
 :root {
   /* Force light theme globally */
   color-scheme: light;
-  --color-bg: #b5b5bb;
+  --color-bg: #ccccd0;
   --color-surface: #ffffff;
   --color-light-gray: #3f3f3f;
   --color-text: #1f1f29;

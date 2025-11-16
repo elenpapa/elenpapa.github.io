@@ -1,19 +1,48 @@
 {
+  "heading": "Editorial Services",
+  "description": "Deep partnerships for authors, publishers, and teams who need an editor fluent in narrative craft, translation nuance, and market expectations.",
   "items": [
     {
-      "title": "UI Development",
-      "description": "Responsive, accessible, and fast interfaces.",
-      "icon": "sparkles"
+      "title": "Manuscript Clinics",
+      "focus": "Structural & line editing",
+      "description": "Full-manuscript reads with margin notes, editorial letters, and live debriefs that keep voice, pacing, and emotional stakes intact.",
+      "highlights": [
+        "Macro + micro feedback packages",
+        "Developmental check-ins at each draft",
+        "Submission-ready polish for agents"
+      ],
+      "image": {
+        "src": "/images/services/Service 1.png",
+        "alt": "Marked pages from a novel manuscript"
+      }
     },
     {
-      "title": "Design Systems",
-      "description": "Reusable components and scalable tokens.",
-      "icon": "layers"
+      "title": "Literary Translation",
+      "focus": "English ↔ Spanish",
+      "description": "Faithful, voice-aware translations for fiction, essays, and criticism with bilingual fact checking and glossaries for continuity.",
+      "highlights": [
+        "Parallel style guides and term banks",
+        "Collaborative voice matching sessions",
+        "Rights-ready deliverables in multiple formats"
+      ],
+      "image": {
+        "src": "/images/services/Service 2.png",
+        "alt": "Translator desk with bilingual notes"
+      }
     },
     {
-      "title": "Performance Audits",
-      "description": "Measure, analyze, and optimize load times.",
-      "icon": "gauge"
+      "title": "Professional Reader Reports",
+      "focus": "Acquisitions & sensitivity",
+      "description": "On-demand coverage, comps, and sensitivity feedback so publishers and producers can greenlight projects with confidence.",
+      "highlights": [
+        "Market comps + positioning",
+        "Sensitivity reviews across identity lenses",
+        "Actionable coverage in under two weeks"
+      ],
+      "image": {
+        "src": "/images/services/Service 3.png",
+        "alt": "Reader report annotated with highlights"
+      }
     }
   ]
 }

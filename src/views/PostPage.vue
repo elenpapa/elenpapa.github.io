@@ -40,7 +40,6 @@ const goBack = () => {
           <img :src="post.image" :alt="post.title" loading="eager" decoding="async" />
         </div>
         <h1>{{ post.title }}</h1>
-        <p v-if="post.summary" class="summary">{{ post.summary }}</p>
       </div>
 
       <div class="post-content" v-html="post.contentHtml"></div>
@@ -90,6 +89,7 @@ const goBack = () => {
 
 .image-wrapper {
   position: relative;
+  text-align: justify;
   width: 100%;
   max-width: 600px;
   margin: 0 auto 2rem;

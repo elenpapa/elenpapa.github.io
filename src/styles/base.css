@@ -92,3 +92,7 @@ section {
     scroll-behavior: auto !important;
   }
 }
+
+.post-content p {
+  text-align: justify;
+}

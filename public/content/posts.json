@@ -3,52 +3,72 @@
     {
       "title": "Article",
       "image": "/images/posts/Article.png",
-      "url": "#"
+      "url": "#",
+      "summary": "Short description for the first article.",
+      "contentHtml": "<p><strong>Article</strong> full HTML content. This can include paragraphs, <em>inline emphasis</em>, lists, etc.</p>"
     },
     {
       "title": "Article (1)",
       "image": "/images/posts/Article (1).png",
-      "url": "#"
+      "url": "#",
+      "summary": "Short description for article 1.",
+      "contentHtml": "<p><strong>Article (1)</strong> extended HTML content sample.</p>"
     },
     {
       "title": "Article (2)",
       "image": "/images/posts/Article (2).png",
-      "url": "#"
+      "url": "#",
+      "summary": "Short description for article 2.",
+      "contentHtml": "<p><strong>Article (2)</strong> extended HTML content sample.</p>"
     },
     {
       "title": "Article (3)",
       "image": "/images/posts/Article (3).png",
-      "url": "#"
+      "url": "#",
+      "summary": "Short description for article 3.",
+      "contentHtml": "<p><strong>Article (3)</strong> extended HTML content sample.</p>"
     },
     {
       "title": "Article (4)",
       "image": "/images/posts/Article (4).png",
-      "url": "#"
+      "url": "#",
+      "summary": "Short description for article 4.",
+      "contentHtml": "<p><strong>Article (4)</strong> extended HTML content sample.</p>"
     },
     {
       "title": "Article (5)",
       "image": "/images/posts/Article (5).png",
-      "url": "#"
+      "url": "#",
+      "summary": "Short description for article 5.",
+      "contentHtml": "<p><strong>Article (5)</strong> extended HTML content sample.</p>"
     },
     {
       "title": "Article (6)",
       "image": "/images/posts/Article (6).png",
-      "url": "#"
+      "url": "#",
+      "summary": "Short description for article 6.",
+      "contentHtml": "<p><strong>Article (6)</strong> extended HTML content sample.</p>"
     },
     {
       "title": "Article (7)",
       "image": "/images/posts/Article (7).png",
-      "url": "#"
+      "url": "#",
+      "summary": "Short description for article 7.",
+      "contentHtml": "<p><strong>Article (7)</strong> extended HTML content sample.</p>"
     },
     {
       "title": "Article (8)",
       "image": "/images/posts/Article (8).png",
-      "url": "#"
+      "url": "#",
+      "summary": "Short description for article 8.",
+      "contentHtml": "<p><strong>Article (8)</strong> extended HTML content sample.</p>"
     },
     {
       "title": "Article (9)",
       "image": "/images/posts/Article (9).png",
-      "url": "#"
+      "url": "#",
+      "summary": "Short description for article 9.",
+      "contentHtml": "<p><strong>Article (9)</strong> extended HTML content sample.</p>"
     }
   ]
 }

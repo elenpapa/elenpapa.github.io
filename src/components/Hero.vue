@@ -1,59 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted } from 'vue'
 import { content, type HomeContent } from '@/services/content'
 
 const home = ref<HomeContent | null>(null)
-const heroEl = ref<HTMLElement | null>(null)
-const innerEl = ref<HTMLElement | null>(null)
-const imageRatio = ref<number | null>(null)
-const computedHeight = ref<number | null>(null)
-
-const setHeroHeight = async () => {
-  if (!home.value || !heroEl.value) return
-  const width = heroEl.value.clientWidth
-
-  // Load image once and cache the ratio
-  if (!imageRatio.value) {
-    try {
-      const img = new Image()
-      img.src = home.value.hero.backgroundImage
-      await new Promise((resolve) => {
-        img.onload = resolve
-        img.onerror = resolve
-      })
-      if (img.naturalWidth && img.naturalHeight)
-        imageRatio.value = img.naturalHeight / img.naturalWidth
-      else imageRatio.value = null
-    } catch {
-      imageRatio.value = null
-    }
-  }
-
-  // If ratio is unknown, keep a sensible minimum
-  const scaledHeight = imageRatio.value ? Math.round(width * imageRatio.value) : 450
-  await nextTick()
-  const contentHeight = innerEl.value?.scrollHeight ?? 0
-  // Ensure the hero section is at least tall enough for content
-  computedHeight.value = Math.max(scaledHeight, contentHeight)
-}
-
-// Recompute on resize
-let resizeTimer: number | undefined
-const onResize = () => {
-  clearTimeout(resizeTimer)
-  // throttle the recalculation
-  resizeTimer = globalThis.setTimeout(setHeroHeight, 120)
-}
 
 onMounted(async () => {
   home.value = await content.getHome()
-  // Compute height when content arrives
-  await nextTick()
-  setHeroHeight()
-  globalThis.addEventListener('resize', onResize)
 })
-
-onUnmounted(() => globalThis.removeEventListener('resize', onResize))
 </script>
 
 <template>
@@ -61,18 +14,10 @@ onUnmounted(() => globalThis.removeEventListener('resize', onResize))
     id="home"
     class="hero"
     v-reveal
-    ref="heroEl"
-    :style="
-      home
-        ? {
-            backgroundImage: `url(${home.hero.backgroundImage})`,
-            height: computedHeight ? `${computedHeight}px` : undefined,
-          }
-        : {}
-    "
+    :style="home ? { backgroundImage: `url(${home.hero.backgroundImage})` } : {}"
   >
     <div class="overlay">
-      <div class="container inner" ref="innerEl">
+      <div class="container inner">
         <h1 class="title">{{ home?.hero.title }}</h1>
         <p class="subtitle">{{ home?.hero.subtitle }}</p>
       </div>
@@ -99,8 +44,8 @@ onUnmounted(() => globalThis.removeEventListener('resize', onResize))
 }
 
 .hero {
-  min-height: 200px;
-  background-size: contain;
+  min-height: 400px;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   position: relative;
@@ -118,6 +63,7 @@ onUnmounted(() => globalThis.removeEventListener('resize', onResize))
   place-items: center;
   text-align: center;
   padding: 96px 0;
+  height: 100%;
 }
 h1 {
   color: white;
@@ -145,5 +91,12 @@ h1 {
 .cta:focus-visible {
   background: var(--color-primary-600);
   outline: none;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    aspect-ratio: 4 / 3;
+    min-height: 300px;
+  }
 }
 </style>

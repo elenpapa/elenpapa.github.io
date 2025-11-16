@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, nextTick, ref } from 'vue'
+import { computed, onMounted, onUnmounted, nextTick, ref, watch } from 'vue'
+import { useFocusTrap } from '@vueuse/integrations/useFocusTrap'
 import { content, type SiteContent } from '@/services/content'
 
 const site = ref<SiteContent | null>(null)
@@ -7,8 +8,23 @@ const open = ref(false)
 const headerEl = ref<HTMLElement | null>(null)
 const spacerEl = ref<HTMLElement | null>(null)
 const logoEl = ref<HTMLImageElement | null>(null)
+const menuRef = ref<HTMLElement | null>(null)
 
 const navItems = computed(() => site.value?.nav ?? [])
+
+// Focus trap for mobile menu
+const { activate, deactivate } = useFocusTrap(menuRef, {
+  immediate: false,
+})
+
+// Activate/deactivate focus trap when menu opens/closes
+watch(open, (isOpen) => {
+  if (isOpen) {
+    nextTick(() => activate())
+  } else {
+    deactivate()
+  }
+})
 
 onMounted(async () => {
   site.value = await content.getSite()
@@ -46,10 +62,9 @@ const onResize = () => {
   resizeTimer = globalThis.setTimeout(setHeaderHeight, 100)
 }
 
-/* replaced by combined onMounted above */
-
 onUnmounted(() => {
   globalThis.removeEventListener('resize', onResize)
+  deactivate()
 })
 
 function toggle() {
@@ -61,20 +76,20 @@ function close() {
 </script>
 
 <template>
-  <header class="site-header" ref="headerEl">
+  <header class="site-header" ref="headerEl" role="banner">
     <div class="container bar">
-      <a href="#home" class="brand" @click="close">
+      <a href="#home" class="brand" @click="close" aria-label="Home">
         <img v-if="site?.logo" ref="logoEl" :src="site.logo.src" :alt="site.logo.alt" />
       </a>
-      <nav class="nav" aria-label="Primary">
+      <nav class="nav" aria-label="Primary navigation" ref="menuRef">
         <button
           class="hamburger"
           @click="toggle"
-          aria-label="Toggle navigation"
+          aria-label="Toggle navigation menu"
           :aria-expanded="open"
           aria-controls="primary-navigation"
         >
-          <span class="sr-only">Toggle navigation</span>
+          <span class="sr-only">{{ open ? 'Close' : 'Open' }} navigation</span>
           <span class="hamburger-box" aria-hidden="true">
             <span></span>
             <span></span>

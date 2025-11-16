@@ -10,9 +10,9 @@ import ContactForm from '@/components/ContactForm.vue'
 </script>
 
 <template>
-  <a href="#content" class="skip-link">Skip to content</a>
+  <a href="#content" class="skip-link">Skip to main content</a>
   <Header />
-  <main id="content">
+  <main id="content" role="main">
     <Hero />
     <Introduction />
     <BookTimeline />

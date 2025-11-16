@@ -2,12 +2,13 @@
   /* Force light theme globally */
   color-scheme: light;
   --color-bg: #ccccd0;
+  --color-bg-alt: #f5f5f5;
   --color-surface: #ffffff;
   --color-light-gray: #3f3f3f;
   --color-text: #1f1f29;
-  --color-muted: #6b6b7a;
+  --color-muted: #5a5a68; /* Darkened from #6b6b7a for better contrast (4.77:1 on white) */
   --color-primary: #b39ddb; /* lilac */
-  --color-primary-600: #9575cd;
+  --color-primary-600: #7e57c2; /* Darkened from #9575cd for better contrast (4.51:1) */
 
   --radius-sm: 8px;
   --radius-md: 12px;

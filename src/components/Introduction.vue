@@ -14,6 +14,7 @@ onMounted(async () => {
       <div class="text">
         <h2>{{ home?.intro.title }}</h2>
         <p v-html="home?.intro.text"></p>
+        <RouterLink to="/timeline" class="cta-button">Δείτε την Εργογραφία μου</RouterLink>
       </div>
       <div class="image">
         <div class="backdrop"></div>
@@ -48,7 +49,25 @@ onMounted(async () => {
   font-size: var(--font-size-2xl);
   line-height: 1.7;
   color: var(--color-light-gray);
-  margin: 0;
+  margin: 0 0 24px;
+}
+.cta-button {
+  display: inline-block;
+  padding: 12px 24px;
+  background: var(--color-primary-600);
+  color: white;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+.cta-button:hover,
+.cta-button:focus-visible {
+  background: var(--color-primary-700, #7c5ba1);
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 2px;
 }
 .image {
   position: relative;

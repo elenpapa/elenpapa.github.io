@@ -1,22 +1,22 @@
 {
-  "title": "Get in touch",
-  "description": "Have a question or a project in mind? Drop a line.",
+  "title": "Επικοινωνήστε μαζί μου",
+  "description": "Έχετε μια ερώτηση ή κάποιο έργο στο μυαλό σας; Στείλτε ένα μήνυμα.",
   "fields": {
     "name": {
-      "label": "Name",
-      "placeholder": "Your full name"
+      "label": "Όνομα",
+      "placeholder": "Το πλήρες όνομά σας"
     },
     "email": {
       "label": "Email",
       "placeholder": "name@example.com"
     },
     "message": {
-      "label": "Message",
-      "placeholder": "How can I help?"
+      "label": "Μήνυμα",
+      "placeholder": "Πώς μπορώ να βοηθήσω;"
     }
   },
   "submit": {
-    "label": "Send Message"
+    "label": "Αποστολή μηνύματος"
   },
   "mailto": "mailto:hello@example.com"
 }

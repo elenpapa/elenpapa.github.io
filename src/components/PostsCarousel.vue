@@ -110,11 +110,12 @@ const scrollNext = () => {
 
         <div class="embla" ref="emblaRef">
           <div class="embla__container">
-            <article
+            <RouterLink
               v-for="(post, idx) in data?.items || []"
               :key="idx"
               class="embla__slide"
-              :aria-label="`Post ${idx + 1} of ${data?.items?.length || 0}`"
+              :to="`/posts/${idx}`"
+              :aria-label="`Read post ${idx + 1} of ${data?.items?.length || 0}: ${post.title}`"
             >
               <div class="image-wrapper">
                 <img
@@ -127,10 +128,10 @@ const scrollNext = () => {
                 />
               </div>
               <h3>
-                <a :href="post.url" :aria-label="`Read: ${post.title}`">{{ post.title }}</a>
+                {{ post.title }}
               </h3>
               <p v-if="post.summary" class="summary">{{ post.summary }}</p>
-            </article>
+            </RouterLink>
           </div>
         </div>
 
@@ -172,6 +173,9 @@ const scrollNext = () => {
   padding: 12px;
   background: var(--color-surface);
   border-radius: var(--radius-md);
+  display: block; /* ensure the link fills the slide card */
+  text-decoration: none;
+  color: inherit;
 }
 
 .image-wrapper {
@@ -193,28 +197,26 @@ const scrollNext = () => {
 
 .embla__slide h3 {
   font-family: var(--font-serif);
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-3xl);
   font-weight: 600;
   line-height: 1.4;
   margin: 12px 6px 0;
-}
-
-.embla__slide h3 a {
   transition: color 0.2s ease;
-  text-decoration: none;
-  color: inherit;
 }
 
-.embla__slide h3 a:hover,
-.embla__slide h3 a:focus-visible {
-  color: var(--color-primary-600);
+.embla__slide:hover,
+.embla__slide:focus-visible {
   outline: 2px solid var(--color-primary-600);
   outline-offset: 2px;
-  border-radius: 2px;
+}
+
+.embla__slide:hover h3,
+.embla__slide:focus-visible h3 {
+  color: var(--color-primary-600);
 }
 
 .summary {
-  font-size: var(--font-size-sm, 0.9rem);
+  font-size: var(--font-size-lg, 0.9rem);
   line-height: 1.45;
   margin: 6px 6px 0;
   color: var(--color-text-secondary, #555);

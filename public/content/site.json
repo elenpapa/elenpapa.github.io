@@ -6,27 +6,27 @@
   "nav": [
     {
       "label": "Αρχική",
-      "href": "#home"
+      "href": "/"
     },
     {
       "label": "Για μένα",
-      "href": "#intro"
+      "href": "/#intro"
     },
     {
       "label": "Βιβλιογραφία",
-      "href": "#timeline"
+      "href": "/timeline"
     },
     {
       "label": "Υπηρεσίες",
-      "href": "#services"
+      "href": "/#services"
     },
     {
       "label": "Συμβουλές",
-      "href": "#posts"
+      "href": "/#posts"
     },
     {
       "label": "Επικοινωνία",
-      "href": "#contact"
+      "href": "/#contact"
     }
   ],
   "socials": [

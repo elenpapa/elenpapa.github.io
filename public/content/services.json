@@ -1,47 +1,47 @@
 {
-  "heading": "Editorial Services",
-  "description": "Deep partnerships for authors, publishers, and teams who need an editor fluent in narrative craft, translation nuance, and market expectations.",
+  "heading": "Εκδοτικές Υπηρεσίες",
+  "description": "Βαθιές συνεργασίες για συγγραφείς, εκδότες και ομάδες που χρειάζονται έναν επιμελητή εξοικειωμένο με την αφηγηματική τέχνη, τις αποχρώσεις της μετάφρασης και τις προσδοκίες της αγοράς.",
   "items": [
     {
-      "title": "Manuscript Clinics",
-      "focus": "Structural & line editing",
-      "description": "Full-manuscript reads with margin notes, editorial letters, and live debriefs that keep voice, pacing, and emotional stakes intact.",
+      "title": "Κλινικές Χειρογράφων",
+      "focus": "Δομική & γραμμική επεξεργασία",
+      "description": "Πλήρεις αναγνώσεις χειρογράφων με σημειώσεις περιθωρίου, επιμελητικά γράμματα και ζωντανές αναφορές που διατηρούν τη φωνή, τον ρυθμό και τα συναισθηματικά στοιχήματα άθικτα.",
       "highlights": [
-        "Macro + micro feedback packages",
-        "Developmental check-ins at each draft",
-        "Submission-ready polish for agents"
+        "Πακέτα ανατροφοδότησης μακρο- και μικροεπίπεδου",
+        "Αναπτυξιακοί έλεγχοι σε κάθε προσχέδιο",
+        "Πολιτισμός έτοιμος για υποβολή σε πράκτορες"
       ],
       "image": {
         "src": "/images/services/Service 1.png",
-        "alt": "Marked pages from a novel manuscript"
+        "alt": "Σημαδεμένες σελίδες από χειρόγραφο μυθιστορήματος"
       }
     },
     {
-      "title": "Literary Translation",
-      "focus": "English ↔ Spanish",
-      "description": "Faithful, voice-aware translations for fiction, essays, and criticism with bilingual fact checking and glossaries for continuity.",
+      "title": "Λογοτεχνική Μετάφραση",
+      "focus": "Αγγλικά ↔ Ισπανικά",
+      "description": "Πιστές, φωνητικές μεταφράσεις για μυθοπλασία, δοκίμια και κριτική με δίγλωσση επαλήθευση γεγονότων και γλωσσάρια για συνέχεια.",
       "highlights": [
-        "Parallel style guides and term banks",
-        "Collaborative voice matching sessions",
-        "Rights-ready deliverables in multiple formats"
+        "Παράλληλοι οδηγοί στυλ και τράπεζες όρων",
+        "Συνεργατικές συνεδρίες αντιστοίχισης φωνής",
+        "Παραδοτέα έτοιμα για δικαιώματα σε πολλαπλές μορφές"
       ],
       "image": {
         "src": "/images/services/Service 2.png",
-        "alt": "Translator desk with bilingual notes"
+        "alt": "Γραφείο μεταφραστή με δίγλωσσες σημειώσεις"
       }
     },
     {
-      "title": "Professional Reader Reports",
-      "focus": "Acquisitions & sensitivity",
-      "description": "On-demand coverage, comps, and sensitivity feedback so publishers and producers can greenlight projects with confidence.",
+      "title": "Επαγγελματικές Αναφορές Αναγνωστών",
+      "focus": "Αποκτήσεις & ευαισθησία",
+      "description": "Κάλυψη κατόπιν αιτήματος, συγκρίσεις και ανατροφοδότηση ευαισθησίας ώστε οι εκδότες και οι παραγωγοί να μπορούν να εγκρίνουν έργα με αυτοπεποίθηση.",
       "highlights": [
-        "Market comps + positioning",
-        "Sensitivity reviews across identity lenses",
-        "Actionable coverage in under two weeks"
+        "Συγκρίσεις αγοράς + τοποθέτηση",
+        "Κριτικές ευαισθησίας σε διάφορες ταυτότητες",
+        "Δράσιμη κάλυψη σε λιγότερο από δύο εβδομάδες"
       ],
       "image": {
         "src": "/images/services/Service 3.png",
-        "alt": "Reader report annotated with highlights"
+        "alt": "Αναφορά αναγνώστη με επισημάνσεις"
       }
     }
   ]

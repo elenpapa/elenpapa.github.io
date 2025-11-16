@@ -1,74 +1,74 @@
 {
   "items": [
     {
-      "title": "Article",
+      "title": "Άρθρο",
       "image": "/images/posts/Article.png",
       "url": "#",
-      "summary": "Short description for the first article.",
-      "contentHtml": "<p><strong>Article</strong> full HTML content. This can include paragraphs, <em>inline emphasis</em>, lists, etc.</p>"
+      "summary": "Σύντομη περιγραφή για το πρώτο άρθρο.",
+      "contentHtml": "<p><strong>Άρθρο</strong> πλήρες περιεχόμενο HTML. Αυτό μπορεί να περιλαμβάνει παραγράφους, <em>έμφαση εντός γραμμής</em>, λίστες κ.λπ.</p>"
     },
     {
-      "title": "Article (1)",
+      "title": "Άρθρο (1)",
       "image": "/images/posts/Article (1).png",
       "url": "#",
-      "summary": "Short description for article 1.",
-      "contentHtml": "<p><strong>Article (1)</strong> extended HTML content sample.</p>"
+      "summary": "Σύντομη περιγραφή για το άρθρο 1.",
+      "contentHtml": "<p><strong>Άρθρο (1)</strong> δείγμα εκτεταμένου περιεχομένου HTML.</p>"
     },
     {
-      "title": "Article (2)",
+      "title": "Άρθρο (2)",
       "image": "/images/posts/Article (2).png",
       "url": "#",
-      "summary": "Short description for article 2.",
-      "contentHtml": "<p><strong>Article (2)</strong> extended HTML content sample.</p>"
+      "summary": "Σύντομη περιγραφή για το άρθρο 2.",
+      "contentHtml": "<p><strong>Άρθρο (2)</strong> δείγμα εκτεταμένου περιεχομένου HTML.</p>"
     },
     {
-      "title": "Article (3)",
+      "title": "Άρθρο (3)",
       "image": "/images/posts/Article (3).png",
       "url": "#",
-      "summary": "Short description for article 3.",
-      "contentHtml": "<p><strong>Article (3)</strong> extended HTML content sample.</p>"
+      "summary": "Σύντομη περιγραφή για το άρθρο 3.",
+      "contentHtml": "<p><strong>Άρθρο (3)</strong> δείγμα εκτεταμένου περιεχομένου HTML.</p>"
     },
     {
-      "title": "Article (4)",
+      "title": "Άρθρο (4)",
       "image": "/images/posts/Article (4).png",
       "url": "#",
-      "summary": "Short description for article 4.",
-      "contentHtml": "<p><strong>Article (4)</strong> extended HTML content sample.</p>"
+      "summary": "Σύντομη περιγραφή για το άρθρο 4.",
+      "contentHtml": "<p><strong>Άρθρο (4)</strong> δείγμα εκτεταμένου περιεχομένου HTML.</p>"
     },
     {
-      "title": "Article (5)",
+      "title": "Άρθρο (5)",
       "image": "/images/posts/Article (5).png",
       "url": "#",
-      "summary": "Short description for article 5.",
-      "contentHtml": "<p><strong>Article (5)</strong> extended HTML content sample.</p>"
+      "summary": "Σύντομη περιγραφή για το άρθρο 5.",
+      "contentHtml": "<p><strong>Άρθρο (5)</strong> δείγμα εκτεταμένου περιεχομένου HTML.</p>"
     },
     {
-      "title": "Article (6)",
+      "title": "Άρθρο (6)",
       "image": "/images/posts/Article (6).png",
       "url": "#",
-      "summary": "Short description for article 6.",
-      "contentHtml": "<p><strong>Article (6)</strong> extended HTML content sample.</p>"
+      "summary": "Σύντομη περιγραφή για το άρθρο 6.",
+      "contentHtml": "<p><strong>Άρθρο (6)</strong> δείγμα εκτεταμένου περιεχομένου HTML.</p>"
     },
     {
-      "title": "Article (7)",
+      "title": "Άρθρο (7)",
       "image": "/images/posts/Article (7).png",
       "url": "#",
-      "summary": "Short description for article 7.",
-      "contentHtml": "<p><strong>Article (7)</strong> extended HTML content sample.</p>"
+      "summary": "Σύντομη περιγραφή για το άρθρο 7.",
+      "contentHtml": "<p><strong>Άρθρο (7)</strong> δείγμα εκτεταμένου περιεχομένου HTML.</p>"
     },
     {
-      "title": "Article (8)",
+      "title": "Άρθρο (8)",
       "image": "/images/posts/Article (8).png",
       "url": "#",
-      "summary": "Short description for article 8.",
-      "contentHtml": "<p><strong>Article (8)</strong> extended HTML content sample.</p>"
+      "summary": "Σύντομη περιγραφή για το άρθρο 8.",
+      "contentHtml": "<p><strong>Άρθρο (8)</strong> δείγμα εκτεταμένου περιεχομένου HTML.</p>"
     },
     {
-      "title": "Article (9)",
+      "title": "Άρθρο (9)",
       "image": "/images/posts/Article (9).png",
       "url": "#",
-      "summary": "Short description for article 9.",
-      "contentHtml": "<p><strong>Article (9)</strong> extended HTML content sample.</p>"
+      "summary": "Σύντομη περιγραφή για το άρθρο 9.",
+      "contentHtml": "<p><strong>Άρθρο (9)</strong> δείγμα εκτεταμένου περιεχομένου HTML.</p>"
     }
   ]
 }

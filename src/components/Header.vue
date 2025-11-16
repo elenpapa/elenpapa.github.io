@@ -98,7 +98,15 @@ function close() {
         </button>
         <ul :id="'primary-navigation'" :class="['links', { open }]">
           <li v-for="item in navItems" :key="item.href">
-            <a :href="item.href" @click="close">{{ item.label }}</a>
+            <RouterLink
+              v-if="item.href.startsWith('/')"
+              :to="item.href"
+              @click="close"
+              class="nav-link"
+            >
+              {{ item.label }}
+            </RouterLink>
+            <a v-else :href="item.href" @click="close">{{ item.label }}</a>
           </li>
         </ul>
       </nav>
@@ -259,7 +267,26 @@ function close() {
     border 0.2s ease,
     box-shadow 0.2s ease;
 }
-.links a::after {
+.links .nav-link {
+  text-decoration: none;
+  color: var(--color-text);
+  font-family: var(--font-serif);
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  padding: 10px 16px;
+  border-radius: 999px;
+  position: relative;
+  border: 1px solid transparent;
+  box-shadow: inset 0 0 0 rgba(179, 157, 219, 0.2);
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    color 0.2s ease,
+    border 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.links a::after,
+.links .nav-link::after {
   content: '';
   position: absolute;
   border-radius: 999px;
@@ -272,7 +299,8 @@ function close() {
     opacity 0.3s ease,
     transform 0.3s ease;
 }
-.links a::before {
+.links a::before,
+.links .nav-link::before {
   content: '';
   position: absolute;
   left: 14px;
@@ -285,19 +313,25 @@ function close() {
   transition: transform 0.25s ease;
 }
 .links a:hover,
-.links a:focus-visible {
+.links a:focus-visible,
+.links .nav-link:hover,
+.links .nav-link:focus-visible {
   border-color: var(--color-text);
   box-shadow: 0 10px 18px rgba(179, 157, 219, 0.25);
   outline: none;
 }
 .links a:hover::after,
-.links a:focus-visible::after {
+.links a:focus-visible::after,
+.links .nav-link:hover::after,
+.links .nav-link:focus-visible::after {
   opacity: 1;
   transform: scale(1);
   animation: pillPulse 0.4s ease;
 }
 .links a:hover::before,
-.links a:focus-visible::before {
+.links a:focus-visible::before,
+.links .nav-link:hover::before,
+.links .nav-link:focus-visible::before {
   transform: scaleX(1);
 }
 
@@ -353,6 +387,11 @@ function close() {
     width: 100%;
   }
   .links a {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+  }
+  .links .nav-link {
     display: block;
     width: 100%;
     padding: 12px 16px;

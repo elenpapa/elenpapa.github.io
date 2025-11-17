@@ -116,7 +116,7 @@ section {
 .diagonal--both-rtl,
 .diagonal--both-ltr-rtl,
 .diagonal--both-rtl-ltr {
-  --diag-height: clamp(48px, 6vw, 96px);
+  --diag-height: clamp(48px, 6vw, 94px);
   overflow: hidden;
 }
 
@@ -188,6 +188,18 @@ section {
     100% calc(100% - var(--diag-height)),
     0 100%
   );
+}
+
+.diagonal-padding--top {
+  padding-top: 80px !important;
+}
+.diagonal-padding--bottom {
+  padding-bottom: 80px !important;
+}
+
+.diagonal-padding--both {
+  padding-top: 80px !important;
+  padding-bottom: 80px !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

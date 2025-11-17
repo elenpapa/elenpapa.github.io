@@ -27,14 +27,14 @@ onMounted(async () => {
 
 <style scoped>
 .title {
-  background-color: #1a143323;
-  border-radius: 10px 12px;
-  padding: 10px 25px;
+  background-color: #00000054;
+  /* border-radius: 10px 12px; */
+  /* padding: 10px 25px; */
 }
 .subtitle {
-  border-radius: 10px 12px;
+  /* border-radius: 10px 12px; */
   padding: 10px 25px;
-  background-color: #1a143323;
+  background-color: #00000054;
   color: #f1f1f8;
   font-family: var(--font-serif);
   font-size: var(--font-size-2xl);
@@ -59,10 +59,12 @@ onMounted(async () => {
   inset: 0;
 }
 .inner {
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-direction: column;
   text-align: center;
-  padding: 96px 0;
+  /* padding: 96px 0; */
   height: 100%;
 }
 h1 {

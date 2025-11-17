@@ -6,8 +6,8 @@ import { content, type PostsContent } from '@/services/content'
 const data = ref<PostsContent | null>(null)
 const [emblaRef, emblaApi] = emblaCarouselVue({
   align: 'start',
-  loop: true,
-  skipSnaps: true,
+  loop: false,
+  skipSnaps: false,
   breakpoints: {
     '(min-width: 768px)': { slidesToScroll: 2 },
     '(min-width: 1024px)': { slidesToScroll: 3 },
@@ -106,24 +106,14 @@ const scrollNext = () => {
           aria-label="Previous posts"
           title="Previous posts"
         >
-          <span class="icon" aria-hidden="true">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              focusable="false"
-            >
-              <path
-                d="M15 18L9 12L15 6"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </span>
+          <img
+            src="/images/common/chevron-left.svg"
+            alt=""
+            class="icon"
+            aria-hidden="true"
+            width="20"
+            height="20"
+          />
           <span class="sr-only">Previous</span>
         </button>
 
@@ -161,24 +151,14 @@ const scrollNext = () => {
           aria-label="Next posts"
           title="Next posts"
         >
-          <span class="icon" aria-hidden="true">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              focusable="false"
-            >
-              <path
-                d="M9 6L15 12L9 18"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </span>
+          <img
+            src="/images/common/chevron-right.svg"
+            alt=""
+            class="icon"
+            aria-hidden="true"
+            width="20"
+            height="20"
+          />
           <span class="sr-only">Next</span>
         </button>
       </div>
@@ -284,14 +264,10 @@ const scrollNext = () => {
 }
 
 .nav .icon {
-  display: inline-flex;
-  line-height: 0;
-}
-
-.nav svg {
   display: block;
   width: 20px;
   height: 20px;
+  line-height: 0;
 }
 
 .nav:hover:not(:disabled),

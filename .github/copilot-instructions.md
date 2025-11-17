@@ -20,6 +20,7 @@
 - **Animations**: Use the existing IntersectionObserver reveal utility and honor `prefers-reduced-motion`.
 - **Responsive nav**: Preserve the hamburger/menu logic already living in `Header.vue` when touching navigation.
 - **Assets**: Point to `/images/...` under `public/images` (or update JSON) to avoid broken references highlighted in docs/status notes.
+- **SVG icons**: Never hardcode inline SVG markup in components. Extract all SVG icons to separate files in `public/images/common/` and reference them via `<img>` tags.
 
 ## Coding Standards
 

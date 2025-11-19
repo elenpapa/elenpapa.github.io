@@ -43,6 +43,16 @@ const HomeContentSchema = z.object({
       alt: z.string(),
     }),
   }),
+  education: z
+    .array(
+      z.object({
+        degree: z.string(),
+        institution: z.string(),
+        year: z.string(),
+        icon: z.string().optional(),
+      }),
+    )
+    .optional(),
 })
 
 const TimelineItemSchema = z.object({

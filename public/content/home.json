@@ -11,5 +11,31 @@
       "src": "/images/intro.png",
       "alt": "Portrait"
     }
-  }
+  },
+  "education": [
+    {
+      "degree": "Αγγλική Γλώσσα και Φιλολογία - BA",
+      "institution": "Εθνικό και Καποδιστριακό Πανεπιστήμιο Αθηνών",
+      "year": "2017 - 2021",
+      "icon": "/images/common/icon-bachelor.png"
+    },
+    {
+      "degree": "Επιμέλεια και διόρθωση κειμένου",
+      "institution": "Εθνικό και Καποδιστριακό Πανεπιστήμιο Αθηνών",
+      "year": "2021 - 2022",
+      "icon": "/images/common/icon-seminar.png"
+    },
+    {
+      "degree": "Λογοτεχνία, Θέατρο και Γλώσσα στην Εκπαίδευση - MA",
+      "institution": "Εθνικό και Καποδιστριακό Πανεπιστήμιο Αθηνών",
+      "year": "2023 - 2026",
+      "icon": "/images/common/icon-master2.png"
+    },
+    {
+      "degree": "Δημιουργική Γραφή - MA",
+      "institution": "Ελληνικό Ανοικτό Πανεπιστήμιο",
+      "year": "2023 - 2026",
+      "icon": "/images/common/icon-master1.png"
+    }
+  ]
 }

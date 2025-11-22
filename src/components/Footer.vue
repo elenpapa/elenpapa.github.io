@@ -10,7 +10,7 @@ onMounted(async () => {
 
 <template>
   <footer class="site-footer">
-    <div class="container">
+    <div class="container footer-section">
       <nav aria-label="Social links" class="socials">
         <a
           v-for="s in site?.socials"
@@ -18,10 +18,13 @@ onMounted(async () => {
           :href="s.href"
           target="_blank"
           rel="noopener noreferrer nofollow"
-          >{{ s.label }}</a
+          :aria-label="s.label"
         >
+          <img :src="s.icon" :alt="s.label" class="social-icon" />
+        </a>
       </nav>
       <p class="copy">{{ site?.footer?.copyright }}</p>
+      <p class="developer">{{ site?.footer?.developer }}</p>
     </div>
   </footer>
 </template>

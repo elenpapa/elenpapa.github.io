@@ -9,6 +9,7 @@ const NavItemSchema = z.object({
 const SocialItemSchema = z.object({
   label: z.string(),
   href: z.string(),
+  icon: z.string(),
 })
 
 const SiteContentSchema = z.object({
@@ -20,6 +21,7 @@ const SiteContentSchema = z.object({
   socials: z.array(SocialItemSchema),
   footer: z.object({
     copyright: z.string(),
+    developer: z.string(),
   }),
 })
 

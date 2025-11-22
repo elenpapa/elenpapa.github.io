@@ -1,0 +1,75 @@
+.title {
+  background-color: #00000054;
+}
+
+.subtitle {
+  padding: 10px 25px;
+  background-color: #00000054;
+  color: #f1f1f8;
+  font-family: var(--font-serif);
+  font-size: var(--font-size-2xl);
+  font-weight: 400;
+  margin: 0 0 32px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+}
+
+.hero {
+  min-height: 400px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: relative;
+  padding-top: 0;
+  overflow: hidden;
+}
+
+.overlay {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.25));
+  position: absolute;
+  inset: 0;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-direction: column;
+  text-align: center;
+  height: 100%;
+}
+
+h1 {
+  color: white;
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 16px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.cta {
+  display: inline-block;
+  background: var(--color-primary);
+  color: #1a1433;
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.cta:hover,
+.cta:focus-visible {
+  background: var(--color-primary-600);
+  outline: none;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    aspect-ratio: 4 / 3;
+    min-height: 300px;
+  }
+}

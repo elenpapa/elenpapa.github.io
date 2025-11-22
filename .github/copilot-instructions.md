@@ -17,6 +17,7 @@
 
 - **Content pipeline**: Never hardcode marketing copy; fetch via the typed getters (`getSite`, `getHome`, etc.) that read `public/content/*.json`. Update JSON + associated types when content changes.
 - **Styling**: Extend `src/styles/variables.css` for colors/spacing; keep semi-transparent image backgrounds and lilac accents consistent with the plan.
+- **Scoped styles**: Keep every component and view styled via dedicated files under `src/styles/components` or `src/styles/views`, imported with `<style scoped src="...">`; promote anything shared into `src/styles/base.css` instead of inline blocks.
 - **Animations**: Use the existing IntersectionObserver reveal utility and honor `prefers-reduced-motion`.
 - **Responsive nav**: Preserve the hamburger/menu logic already living in `Header.vue` when touching navigation.
 - **Assets**: Point to `/images/...` under `public/images` (or update JSON) to avoid broken references highlighted in docs/status notes.

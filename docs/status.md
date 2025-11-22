@@ -11,11 +11,13 @@ Updated: 2025-11-16
 ## Checklist
 
 - [x] Content JSON schema defined and created (`public/content/*.json`)
-  - Files: `site.json`, `home.json`, `timeline.json`, `services.json`, `posts.json`, `contact.json`
+  - Files: `site.json`, `home.json`, `timeline.json`, `services.json`, `posts.json`, `contact.json`, `book.json`, `moonlight.json`, `painted-books.json`, `publishers.json`
   - Note: Stored under `public/content` for simple fetching without TS config changes.
-- [x] Typed content service (`src/services/content.ts`) with `getSite`, `getHome`, `getTimeline`, `getServices`, `getPosts`, `getContact`
+- [x] Typed content service (`src/services/content.ts`) with `getSite`, `getHome`, `getTimeline`, `getServices`, `getPosts`, `getContact`, `getBook`, `getMoonlight`, `getPaintedBooks`, `getPublishers`
   - **NEW**: Added Zod schemas for runtime validation
   - **NEW**: Content bundled at build time (no runtime fetch)
+  - **NEW**: Added painted books page with gallery, process, and commission info
+  - **NEW**: Added publishers/collaborators section showcasing trusted partnerships
 - [x] Global styles: variables + base (`src/styles/variables.css`, `src/styles/base.css`), imported in `src/main.ts`
   - **NEW**: Fixed color contrast for WCAG AA compliance
   - **NEW**: Font optimization with @fontsource (70% reduction)

@@ -13,6 +13,18 @@
       "href": "/#intro"
     },
     {
+      "label": "Ένα μόνο γράμμα",
+      "href": "/book"
+    },
+    {
+      "label": "Moonlight Tales",
+      "href": "/moonlight"
+    },
+    {
+      "label": "Ζωγραφισμένα βιβλία",
+      "href": "/painted-books"
+    },
+    {
       "label": "Εργογραφία",
       "href": "/timeline"
     },

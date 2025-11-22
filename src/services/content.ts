@@ -124,6 +124,241 @@ const ContactContentSchema = z.object({
   mailto: z.string().optional(),
 })
 
+const BookEventSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  date: z.string().optional(),
+  location: z.string().optional(),
+  description: z.string(),
+  image: z.object({
+    src: z.string(),
+    alt: z.string(),
+  }),
+})
+
+const BookContentSchema = z.object({
+  hero: z.object({
+    title: z.string(),
+    subtitle: z.string(),
+    tagline: z.string().optional(),
+    cover: z.string(),
+    goodreadsUrl: z.string().url().optional(),
+  }),
+  about: z.object({
+    heading: z.string(),
+    body: z.string(),
+    pullQuote: z.string().optional(),
+  }),
+  events: z.array(BookEventSchema).optional(),
+  preview: z.object({
+    heading: z.string(),
+    lede: z.string().optional(),
+    excerpt: z.string(),
+    note: z.string().optional(),
+  }),
+  cta: z.object({
+    heading: z.string(),
+    body: z.string(),
+    buttons: z
+      .array(
+        z.object({
+          label: z.string(),
+          href: z.string(),
+          variant: z.enum(['primary', 'ghost']).optional(),
+        }),
+      )
+      .optional(),
+  }),
+})
+
+const MoonlightHeroButtonSchema = z.object({
+  label: z.string(),
+  href: z.string(),
+  variant: z.enum(['primary', 'ghost']).optional(),
+})
+
+const MoonlightHeroSchema = z.object({
+  title: z.string(),
+  subtitle: z.string(),
+  description: z.string(),
+  badges: z.array(z.object({ label: z.string(), href: z.string().optional() })).optional(),
+  stats: z
+    .array(
+      z.object({
+        label: z.string(),
+        value: z.string(),
+        description: z.string().optional(),
+      }),
+    )
+    .optional(),
+  media: z.object({
+    primary: z.object({ src: z.string(), alt: z.string() }),
+    secondary: z.object({ src: z.string(), alt: z.string() }).optional(),
+  }),
+  buttons: z.array(MoonlightHeroButtonSchema).optional(),
+})
+
+const MoonlightMissionSchema = z.object({
+  heading: z.string(),
+  body: z.string(),
+  pillars: z.array(
+    z.object({
+      title: z.string(),
+      description: z.string(),
+    }),
+  ),
+})
+
+const MoonlightBubbleSchema = z.object({
+  heading: z.string(),
+  items: z.array(
+    z.object({
+      label: z.string(),
+      value: z.string(),
+      description: z.string().optional(),
+    }),
+  ),
+})
+
+const MoonlightEventSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  date: z.string().optional(),
+  location: z.string().optional(),
+  description: z.string(),
+  image: z.object({
+    src: z.string(),
+    alt: z.string(),
+  }),
+})
+
+const MoonlightReleasesSchema = z.object({
+  heading: z.string(),
+  description: z.string(),
+  books: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      tagline: z.string(),
+      genre: z.string(),
+      cover: z.string(),
+    }),
+  ),
+})
+
+const MoonlightCtaSchema = z.object({
+  heading: z.string(),
+  body: z.string(),
+  buttons: z.array(MoonlightHeroButtonSchema).optional(),
+})
+
+const MoonlightContentSchema = z.object({
+  hero: MoonlightHeroSchema,
+  mission: MoonlightMissionSchema,
+  bubbles: MoonlightBubbleSchema.optional(),
+  events: z.array(MoonlightEventSchema).optional(),
+  releases: MoonlightReleasesSchema.optional(),
+  cta: MoonlightCtaSchema,
+})
+
+const PaintedBooksContentSchema = z.object({
+  hero: z.object({
+    title: z.string(),
+    subtitle: z.string(),
+    description: z.string(),
+    media: z.object({
+      src: z.string(),
+      alt: z.string(),
+    }),
+  }),
+  about: z.object({
+    heading: z.string(),
+    body: z.string(),
+    stats: z
+      .array(
+        z.object({
+          value: z.string(),
+          label: z.string(),
+        }),
+      )
+      .optional(),
+  }),
+  process: z.object({
+    heading: z.string(),
+    steps: z.array(
+      z.object({
+        title: z.string(),
+        description: z.string(),
+        icon: z.string().optional(),
+      }),
+    ),
+  }),
+  gallery: z.object({
+    heading: z.string(),
+    description: z.string().optional(),
+    items: z.array(
+      z.object({
+        id: z.string(),
+        title: z.string(),
+        author: z.string(),
+        theme: z.string(),
+        media: z.object({
+          src: z.string(),
+          alt: z.string(),
+        }),
+      }),
+    ),
+  }),
+  commission: z.object({
+    heading: z.string(),
+    body: z.string(),
+    features: z
+      .array(
+        z.object({
+          title: z.string(),
+          description: z.string(),
+        }),
+      )
+      .optional(),
+    pricing: z
+      .object({
+        note: z.string().optional(),
+      })
+      .optional(),
+  }),
+  cta: z.object({
+    heading: z.string(),
+    body: z.string(),
+    buttons: z
+      .array(
+        z.object({
+          label: z.string(),
+          href: z.string(),
+          variant: z.enum(['primary', 'ghost']).optional(),
+        }),
+      )
+      .optional(),
+  }),
+})
+
+const PublishersContentSchema = z.object({
+  heading: z.string(),
+  description: z.string().optional(),
+  items: z.array(
+    z.object({
+      name: z.string(),
+      description: z.string().optional(),
+      logo: z
+        .object({
+          src: z.string(),
+          alt: z.string(),
+        })
+        .optional(),
+      services: z.array(z.string()).optional(),
+    }),
+  ),
+})
+
 // Infer TypeScript types from schemas
 export type NavItem = z.infer<typeof NavItemSchema>
 export type SocialItem = z.infer<typeof SocialItemSchema>
@@ -136,6 +371,10 @@ export type ServicesContent = z.infer<typeof ServicesContentSchema>
 export type PostItem = z.infer<typeof PostItemSchema>
 export type PostsContent = z.infer<typeof PostsContentSchema>
 export type ContactContent = z.infer<typeof ContactContentSchema>
+export type BookContent = z.infer<typeof BookContentSchema>
+export type MoonlightContent = z.infer<typeof MoonlightContentSchema>
+export type PaintedBooksContent = z.infer<typeof PaintedBooksContentSchema>
+export type PublishersContent = z.infer<typeof PublishersContentSchema>
 
 // Simple in-memory cache to avoid duplicate fetches
 const cache = new Map<string, unknown>()
@@ -163,4 +402,11 @@ export const content = {
     fetchAndParse('/content/posts.json', PostsContentSchema),
   getContact: async (): Promise<ContactContent> =>
     fetchAndParse('/content/contact.json', ContactContentSchema),
+  getBook: async (): Promise<BookContent> => fetchAndParse('/content/book.json', BookContentSchema),
+  getMoonlight: async (): Promise<MoonlightContent> =>
+    fetchAndParse('/content/moonlight.json', MoonlightContentSchema),
+  getPaintedBooks: async (): Promise<PaintedBooksContent> =>
+    fetchAndParse('/content/painted-books.json', PaintedBooksContentSchema),
+  getPublishers: async (): Promise<PublishersContent> =>
+    fetchAndParse('/content/publishers.json', PublishersContentSchema),
 }

@@ -14,7 +14,6 @@ html {
 }
 body {
   margin: 0;
-  /* background: var(--color-bg); */
   color: var(--color-text);
   font-family: var(--font-serif);
   font-size: var(--font-size-base);
@@ -45,7 +44,8 @@ section {
   padding: 64px 0;
 }
 
-.visually-hidden {
+.visually-hidden,
+.sr-only {
   position: absolute !important;
   clip: rect(1px, 1px, 1px, 1px);
   padding: 0 !important;
@@ -191,15 +191,15 @@ section {
 }
 
 .diagonal-padding--top {
-  padding-top: 80px !important;
+  padding-top: 150px !important;
 }
 .diagonal-padding--bottom {
-  padding-bottom: 80px !important;
+  padding-bottom: 150px !important;
 }
 
 .diagonal-padding--both {
-  padding-top: 80px !important;
-  padding-bottom: 80px !important;
+  padding-top: 150px !important;
+  padding-bottom: 150px !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -59,18 +59,4 @@ onBeforeUnmount(() => {
   ></span>
 </template>
 
-<style scoped>
-.svg-icon svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-  color: inherit;
-}
-
-.svg-icon svg path,
-.svg-icon svg circle,
-.svg-icon svg rect {
-  stroke: currentColor;
-  fill: currentColor;
-}
-</style>
+<style scoped src="../styles/components/svg-icon.css"></style>

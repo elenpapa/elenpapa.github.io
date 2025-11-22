@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '@/views/HomePage.vue'
 import TimelinePage from '@/views/TimelinePage.vue'
 import PostPage from '@/views/PostPage.vue'
+import BookPage from '@/views/BookPage.vue'
+import MoonlightPage from '@/views/MoonlightPage.vue'
+import PaintedBooksPage from '@/views/PaintedBooksPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -15,6 +18,21 @@ const router = createRouter({
       path: '/timeline',
       name: 'timeline',
       component: TimelinePage,
+    },
+    {
+      path: '/book',
+      name: 'book',
+      component: BookPage,
+    },
+    {
+      path: '/moonlight',
+      name: 'moonlight',
+      component: MoonlightPage,
+    },
+    {
+      path: '/painted-books',
+      name: 'painted-books',
+      component: PaintedBooksPage,
     },
     {
       path: '/posts/:id',

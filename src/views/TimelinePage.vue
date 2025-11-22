@@ -8,8 +8,4 @@ import BookTimeline from '@/components/BookTimeline.vue'
   </main>
 </template>
 
-<style scoped>
-main {
-  display: block;
-}
-</style>
+<style scoped src="@/styles/views/timeline-page.css"></style>

@@ -52,7 +52,6 @@ export default defineConfig({
         manualChunks: {
           vendor: ['vue'],
           forms: ['vee-validate', '@vee-validate/zod', 'zod'],
-          carousel: ['embla-carousel-vue'],
           utils: ['@vueuse/core', '@vueuse/integrations', '@vueuse/motion'],
         },
       },

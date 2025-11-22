@@ -1,42 +1,60 @@
 {
   "heading": "Συνεργασίες με Εκδοτικούς Οίκους",
-  "description": "Εκδοτικοί οίκοι που με έχουν εμπιστευτεί για επιμέλεια, μεταφράσεις και κριτικές βιβλίων.",
+  "description": "Επιμέλεια, Μετάφραση, Αξιολόγηση.",
   "items": [
     {
-      "name": "Εκδόσεις Πατάκη",
-      "description": "Ένας από τους μεγαλύτερους εκδοτικούς οίκους στην Ελλάδα",
+      "name": "Χάρτινη Πόλη",
+      "description": "",
       "logo": {
-        "src": "/images/publishers/patakis.png",
-        "alt": "Εκδόσεις Πατάκη λογότυπο"
+        "src": "/images/publishers/Χάρτινη Πόλη LOGO.svg",
+        "alt": "Εκδόσεις Χάρτινη Πόλη λογότυπο"
       },
-      "services": ["Επιμέλεια", "Μετάφραση"]
+      "services": ["Επιμέλεια", "Επιμέλεια Μετάφρασης", "Διόρθωση"]
     },
     {
-      "name": "Εκδόσεις Μεταίχμιο",
-      "description": "Κορυφαίος εκδοτικός οίκος με έμφαση στη λογοτεχνία",
+      "name": "Moonlight Tales",
+      "description": "",
       "logo": {
-        "src": "/images/publishers/metaixmio.png",
-        "alt": "Εκδόσεις Μεταίχμιο λογότυπο"
-      },
-      "services": ["Επιμέλεια", "Κριτική Βιβλίων"]
-    },
-    {
-      "name": "Εκδόσεις Ψυχογιός",
-      "description": "Διακεκριμένος εκδοτικός οίκος με πλούσιο κατάλογο",
-      "logo": {
-        "src": "/images/publishers/psichogios.png",
-        "alt": "Εκδόσεις Ψυχογιός λογότυπο"
+        "src": "/images/publishers/Moonlight Tales LOGO.png",
+        "alt": "Εκδόσεις Moonlight Tales  λογότυπο"
       },
       "services": ["Επιμέλεια", "Διόρθωση"]
     },
     {
-      "name": "Εκδόσεις Κλειδάριθμος",
-      "description": "Ανεξάρτητος εκδοτικός οίκος με καινοτόμες εκδόσεις",
+      "name": "Bookstagram Editions",
+      "description": "",
       "logo": {
-        "src": "/images/publishers/kleidarithmos.png",
-        "alt": "Εκδόσεις Κλειδάριθμος λογότυπο"
+        "src": "/images/publishers/Bookstagram editions.png",
+        "alt": "Εκδόσεις Bookstagram editions λογότυπο"
       },
-      "services": ["Επιμέλεια", "Μετάφραση", "Κριτική Βιβλίων"]
+      "services": ["Επιμέλεια", "Διόρθωση"]
+    },
+    {
+      "name": "Υδροπλάνο",
+      "description": "",
+      "logo": {
+        "src": "/images/publishers/Υδροπλάνο LOGO.svg",
+        "alt": "Εκδόσεις Υδροπλάνο λογότυπο"
+      },
+      "services": ["Επιμέλεια", "Διόρθωση"]
+    },
+    {
+      "name": "Γραφή",
+      "description": "",
+      "logo": {
+        "src": "/images/publishers/Γραφή LOGO.png",
+        "alt": "Εκδόσεις Γραφή λογότυπο"
+      },
+      "services": ["Αξιολόγηση"]
+    },
+    {
+      "name": "Εντύποις",
+      "description": "",
+      "logo": {
+        "src": "/images/publishers/Εντύποις LOGO.png",
+        "alt": "Εκδόσεις Εντύποις λογότυπο"
+      },
+      "services": ["Επιμέλεια", "Διόρθωση"]
     }
   ]
 }

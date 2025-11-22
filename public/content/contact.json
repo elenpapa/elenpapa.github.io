@@ -1,10 +1,10 @@
 {
-  "title": "Επικοινωνήστε μαζί μου",
-  "description": "Έχετε μια ερώτηση ή κάποιο έργο στο μυαλό σας; Στείλτε ένα μήνυμα.",
+  "title": "Είσαι συγγραφέας;",
+  "description": "Επικοινώνησε μαζί μου.",
   "fields": {
     "name": {
-      "label": "Όνομα",
-      "placeholder": "Το πλήρες όνομά σας"
+      "label": "Ονοματεπώνυμο",
+      "placeholder": ""
     },
     "email": {
       "label": "Email",
@@ -12,11 +12,11 @@
     },
     "message": {
       "label": "Μήνυμα",
-      "placeholder": "Πώς μπορώ να βοηθήσω;"
+      "placeholder": ""
     }
   },
   "submit": {
-    "label": "Αποστολή μηνύματος"
+    "label": "Υποβολή"
   },
   "mailto": "mailto:hello@example.com"
 }

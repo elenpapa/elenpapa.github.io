@@ -144,7 +144,8 @@ const BookContentSchema = z.object({
     subtitle: z.string(),
     tagline: z.string().optional(),
     cover: z.string(),
-    goodreadsUrl: z.string().url().optional(),
+    goodreadsUrl: z.string().url().optional(), 
+    moonlighttalesUrl: z.string().url().optional()
   }),
   about: z.object({
     heading: z.string(),
@@ -157,19 +158,7 @@ const BookContentSchema = z.object({
     lede: z.string().optional(),
     excerpt: z.string(),
     note: z.string().optional(),
-  }),
-  cta: z.object({
-    heading: z.string(),
-    body: z.string(),
-    buttons: z
-      .array(
-        z.object({
-          label: z.string(),
-          href: z.string(),
-          variant: z.enum(['primary', 'ghost']).optional(),
-        }),
-      )
-      .optional(),
+    previewUrl: z.string().url().optional(),
   }),
 })
 

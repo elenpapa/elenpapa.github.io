@@ -8,7 +8,6 @@ const hero = computed(() => data.value?.hero)
 const about = computed(() => data.value?.about)
 const events = computed(() => data.value?.events ?? [])
 const preview = computed(() => data.value?.preview)
-const cta = computed(() => data.value?.cta)
 
 type BookEvent = NonNullable<BookContent['events']>[number]
 const eventMedia = (event: BookEvent) => event.image
@@ -24,23 +23,11 @@ onMounted(async () => {
     <section v-if="hero" class="book-hero diagonal-padding--bottom diagonal--ltr" v-reveal>
       <div class="container hero-inner">
         <div class="hero-text">
-          <p class="eyebrow">Νέο βιβλίο</p>
           <h1>{{ hero.title }}</h1>
           <p class="subtitle">{{ hero.subtitle }}</p>
           <p v-if="hero.tagline" class="tagline">{{ hero.tagline }}</p>
 
-          <div class="hero-actions">
-            <a
-              v-if="hero.goodreadsUrl"
-              class="primary-button"
-              :href="hero.goodreadsUrl"
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              Δείτε το στο Goodreads
-            </a>
-            <RouterLink to="/timeline" class="ghost-button"> Δείτε την εργογραφία </RouterLink>
-          </div>
+     
         </div>
         <div class="hero-cover">
           <div class="cover-backdrop"></div>
@@ -57,6 +44,27 @@ onMounted(async () => {
         <div class="about-copy">
           <h2>{{ about.heading }}</h2>
           <p class="body-text">{{ about.body }}</p>
+               <div class="hero-actions">
+            <a
+              v-if="hero?.goodreadsUrl"
+              class="primary-button"
+              :href="hero?.goodreadsUrl"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Δείτε το στο Goodreads
+            </a>
+            <a
+              v-if="hero?.moonlighttalesUrl"
+              class="primary-button"
+              :href="hero?.moonlighttalesUrl"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Διαβάστε τη συνέντευξη 
+            </a>
+           
+          </div>
         </div>
         <aside v-if="about.pullQuote" class="about-quote" aria-label="Book highlight quote">
           <p class="quote">{{ about.pullQuote }}</p>
@@ -114,37 +122,10 @@ onMounted(async () => {
         </header>
         <div class="preview-body">
           <p class="preview-excerpt">{{ preview.excerpt }}</p>
-          <p v-if="preview.note" class="preview-note">{{ preview.note }}</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- CTA -->
-    <section v-if="cta" class="book-cta diagonal-padding--top diagonal--top-ltr" v-reveal>
-      <div class="container cta-inner">
-        <div class="cta-copy">
-          <h2>{{ cta.heading }}</h2>
-          <p class="body-text">{{ cta.body }}</p>
-        </div>
-        <div class="cta-actions" v-if="cta.buttons?.length">
-          <template v-for="button in cta.buttons" :key="button.label + button.href">
-            <a
-              v-if="button.href.startsWith('http')"
-              :href="button.href"
-              :class="button.variant === 'ghost' ? 'ghost-button' : 'primary-button'"
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              {{ button.label }}
-            </a>
-            <RouterLink
-              v-else
-              :to="button.href"
-              :class="button.variant === 'ghost' ? 'ghost-button' : 'primary-button'"
-            >
-              {{ button.label }}
-            </RouterLink>
-          </template>
+          <p v-if="preview.note && preview.previewUrl" class="preview-note">
+            <a :href="preview.previewUrl" target="_blank" rel="noopener noreferrer">{{ preview.note }}</a>
+          </p>
+          <p v-else-if="preview.note" class="preview-note">{{ preview.note }}</p>
         </div>
       </div>
     </section>

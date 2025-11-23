@@ -43,6 +43,7 @@
   font-size: var(--font-size-lg);
   margin: 0 0 24px;
   color: var(--color-text);
+  text-align: justify;
 }
 
 .hero-actions {
@@ -268,6 +269,7 @@
   font-family: var(--font-serif);
   font-size: var(--font-size-lg);
   line-height: 1.9;
+  text-align: justify;
 }
 
 .preview-note {

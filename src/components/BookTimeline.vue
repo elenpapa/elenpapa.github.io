@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { content, type TimelineContent } from '@/services/content'
 
 const data = ref<TimelineContent | null>(null)
+const timelineItems = computed(() => data.value?.items ?? [])
+const getTimelineCoverSrc = (coverSrc: string | undefined) => coverSrc || ''
+
 onMounted(async () => {
   data.value = await content.getTimeline()
 })
@@ -15,7 +18,7 @@ onMounted(async () => {
       <div class="timeline-grid" aria-hidden="false">
         <div class="timeline-column timeline-column--left">
           <article
-            v-for="(item, idx) in (data?.items || []).filter((_, i) => i % 2 === 0)"
+            v-for="(item, idx) in timelineItems.filter((_, i) => i % 2 === 0)"
             :key="`left-${idx}`"
             class="entry reveal--pageflip-left"
             v-reveal="{ threshold: 0.2, rootMargin: '0px 0px -10% 0px', once: true }"
@@ -23,10 +26,12 @@ onMounted(async () => {
             <span class="branch" aria-hidden="true"></span>
             <img
               class="cover"
-              :src="item.cover"
+              :src="getTimelineCoverSrc(item.cover)"
               :alt="item.title"
               loading="lazy"
               decoding="async"
+              width="200"
+              height="300"
             />
             <div class="meta">
               <h3>{{ item.title }}</h3>
@@ -39,7 +44,7 @@ onMounted(async () => {
         <div class="timeline-divider" aria-hidden="true"></div>
         <div class="timeline-column timeline-column--right">
           <article
-            v-for="(item, idx) in (data?.items || []).filter((_, i) => i % 2 === 1)"
+            v-for="(item, idx) in timelineItems.filter((_, i) => i % 2 === 1)"
             :key="`right-${idx}`"
             class="entry entry--right reveal--pageflip-right"
             v-reveal="{ threshold: 0.2, rootMargin: '0px 0px -10% 0px', once: true }"
@@ -47,10 +52,12 @@ onMounted(async () => {
             <span class="branch" aria-hidden="true"></span>
             <img
               class="cover"
-              :src="item.cover"
+              :src="getTimelineCoverSrc(item.cover)"
               :alt="item.title"
               loading="lazy"
               decoding="async"
+              width="200"
+              height="300"
             />
             <div class="meta">
               <h3>{{ item.title }}</h3>

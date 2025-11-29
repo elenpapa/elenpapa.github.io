@@ -11,10 +11,17 @@ onMounted(async () => {
 const heading = computed(() => data.value?.heading ?? '')
 const description = computed(() => data.value?.description ?? '')
 const publishers = computed(() => data.value?.items ?? [])
+const getPublisherLogoSrc = (logoSrc: string | undefined) => logoSrc || ''
+const getPublisherLogoAlt = (logoAlt: string | undefined) => logoAlt || ''
 </script>
 
 <template>
-  <section id="publishers" v-reveal aria-labelledby="publishers-title" class="publishers-section">
+  <section
+    id="publishers"
+    v-reveal
+    aria-labelledby="publishers-title"
+    class="publishers-section diagonal--top-rtl diagonal-padding--both"
+  >
     <div class="container">
       <header class="publishers-header">
         <h2 id="publishers-title">{{ heading }}</h2>
@@ -23,7 +30,14 @@ const publishers = computed(() => data.value?.items ?? [])
       <ul class="publishers-grid">
         <li v-for="publisher in publishers" :key="publisher.name" class="publisher-card">
           <div v-if="publisher.logo" class="publisher-logo">
-            <img :src="publisher.logo.src" :alt="publisher.logo.alt" loading="lazy" />
+            <img
+              :src="getPublisherLogoSrc(publisher.logo.src)"
+              :alt="getPublisherLogoAlt(publisher.logo.alt)"
+              loading="lazy"
+              decoding="async"
+              width="120"
+              height="120"
+            />
           </div>
           <div class="publisher-info">
             <h3>{{ publisher.name }}</h3>

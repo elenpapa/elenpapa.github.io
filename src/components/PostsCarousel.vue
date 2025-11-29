@@ -66,14 +66,16 @@ const getImageLoading = (idx: number): 'eager' | 'lazy' => {
   // Eagerly load first 3 images, lazy load the rest
   return idx < 3 ? 'eager' : 'lazy'
 }
+
+const posts = computed(() => data.value?.items ?? [])
+const getPostImageSrc = (imageSrc: string | undefined) => imageSrc || ''
 </script>
 
 <template>
   <section
     id="posts"
-    v-reveal
     aria-labelledby="posts-title"
-    class="posts-section diagonal--both-ltr-rtl"
+    class="posts-section diagonal--both-ltr-rtl diagonal-padding--both"
   >
     <div class="container">
       <header class="posts-header" v-reveal>
@@ -117,15 +119,15 @@ const getImageLoading = (idx: number): 'eager' | 'lazy' => {
           @fromEdge="handleStateChange"
         >
           <SwiperSlide
-            v-for="(post, idx) in data?.items || []"
+            v-for="(post, idx) in posts"
             :key="idx"
             class="carousel__slide"
-            :aria-label="`Read post ${idx + 1} of ${data?.items?.length || 0}: ${post.title}`"
+            :aria-label="`Read post ${idx + 1} of ${posts.length}: ${post.title}`"
           >
             <RouterLink :to="`/posts/${idx}`" class="slide-link">
               <div class="image-wrapper">
                 <img
-                  :src="post.image"
+                  :src="getPostImageSrc(post.image)"
                   :alt="post.title"
                   :loading="getImageLoading(idx)"
                   :fetchpriority="getImagePriority(idx)"

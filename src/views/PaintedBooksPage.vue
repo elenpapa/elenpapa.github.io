@@ -5,6 +5,8 @@ import { content, type PaintedBooksContent } from '@/services/content'
 const data = ref<PaintedBooksContent | null>(null)
 
 const hero = computed(() => data.value?.hero)
+const heroMediaSrc = computed(() => hero.value?.media.src || '')
+const heroMediaAlt = computed(() => hero.value?.media.alt || '')
 const about = computed(() => data.value?.about)
 const process = computed(() => data.value?.process)
 const gallery = computed(() => data.value?.gallery)
@@ -28,7 +30,15 @@ onMounted(async () => {
         </div>
         <div class="hero-image">
           <div class="image-glow"></div>
-          <img :src="hero.media.src" :alt="hero.media.alt" loading="eager" decoding="async" />
+          <img
+            :src="heroMediaSrc"
+            :alt="heroMediaAlt"
+            loading="eager"
+            decoding="async"
+            width="500"
+            height="400"
+            fetchpriority="high"
+          />
         </div>
       </div>
     </section>
@@ -82,7 +92,14 @@ onMounted(async () => {
           <li v-for="item in gallery.items" :key="item.id" class="gallery-card">
             <div class="gallery-image">
               <div class="gallery-glow"></div>
-              <img :src="item.media.src" :alt="item.media.alt" loading="lazy" decoding="async" />
+              <img
+                :src="item.media.src"
+                :alt="item.media.alt"
+                loading="lazy"
+                decoding="async"
+                width="300"
+                height="400"
+              />
             </div>
             <div class="gallery-info">
               <h3>{{ item.title }}</h3>

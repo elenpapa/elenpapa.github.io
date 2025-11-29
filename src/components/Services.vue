@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { content, type ServiceItem, type ServicesContent } from '@/services/content'
+import { content, type ServicesContent } from '@/services/content'
 
 const data = ref<ServicesContent | null>(null)
 onMounted(async () => {
   data.value = await content.getServices()
 })
 
-const getVisualAlt = (srv: ServiceItem) => srv.image?.alt ?? ''
 const heading = computed(() => data.value?.heading ?? 'Services')
 const description = computed(() => data.value?.description ?? '')
 const services = computed(() => data.value?.items ?? [])
+const getServiceImageSrc = (imageSrc: string | undefined) => imageSrc || ''
+const getServiceImageAlt = (imageAlt: string | undefined) => imageAlt || ''
 </script>
 
 <template>
@@ -32,10 +33,12 @@ const services = computed(() => data.value?.items ?? [])
             <img
               v-if="srv.image"
               class="thumb"
-              :src="srv.image.src"
-              :alt="getVisualAlt(srv)"
+              :src="getServiceImageSrc(srv.image.src)"
+              :alt="getServiceImageAlt(srv.image.alt)"
               loading="lazy"
               decoding="async"
+              width="300"
+              height="200"
             />
             <div v-else class="icon" aria-hidden="true">{{ srv.icon ?? '★' }}</div>
           </div>

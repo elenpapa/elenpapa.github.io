@@ -406,9 +406,27 @@
     margin-left: 20px;
   }
 
+  /*
+   * Full nav bar state (not bubble)
+   * GSAP handles the transition animations, CSS just defines the end states
+   */
+  .site-header:not(.bubble) {
+    /* No CSS transitions - GSAP handles morphing */
+    transition: none;
+  }
+
+  .site-header:not(.bubble) .links {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /*
+   * Bubble state - compact floating pill
+   * GSAP animates to these values when scrolling down
+   */
   .site-header.bubble {
     top: clamp(0.75rem, 2.5vh, 1.5rem);
-    right: clamp(0.75rem, 2vw, 1.5rem);
+    right: auto;
     left: 60px;
     bottom: auto;
     width: 120px;
@@ -420,9 +438,8 @@
     justify-content: center;
     padding: 0;
     box-shadow: 0 18px 40px rgba(28, 24, 45, 0.22);
-    animation: var(--nice-animation);
-    transition: var(--nice-transition);
-    will-change: transform;
+    /* No CSS transitions - GSAP handles morphing */
+    transition: none;
   }
 
   .site-header.bubble .bar {
@@ -449,10 +466,10 @@
     filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.12));
   }
 
+  /* Links in bubble state: hidden by default */
   .site-header.bubble .links {
     position: absolute;
     top: 35px;
-    /* right: calc(100% + 12px); */
     left: -118px;
     flex-direction: column;
     background: rgba(255, 255, 255, 0.97);
@@ -463,11 +480,17 @@
     max-width: min(50vw, 560px);
     padding: 0.5rem 0;
     opacity: 0;
+    visibility: hidden;
     transform: translateY(6px) scale(0.98);
     overflow: visible;
     transform-origin: right top;
     pointer-events: none;
     max-height: none;
+    /* NO transition for hover/focus expand because it causes flashes when initial transition occurs */
+    /* transition:
+      opacity 0.25s ease,
+      visibility 0s linear 0.25s,
+      transform 0.25s ease; */
   }
 
   .site-header.bubble .links li {
@@ -481,11 +504,17 @@
     padding: 12px 16px;
   }
 
+  /* Expanded dropdown menu when hovering bubble */
   .site-header.bubble.expanded .links,
   .site-header.bubble:focus-within .links {
     opacity: 1;
+    visibility: visible;
     transform: translateY(0) scale(1);
     pointer-events: auto;
+    transition:
+      opacity 0.25s ease,
+      visibility 0s linear 0s,
+      transform 0.25s ease;
   }
 }
 

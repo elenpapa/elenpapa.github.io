@@ -5,6 +5,7 @@ import { content, type BookContent } from '@/services/content'
 const data = ref<BookContent | null>(null)
 
 const hero = computed(() => data.value?.hero)
+const heroCoverSrc = computed(() => hero.value?.cover || '')
 const about = computed(() => data.value?.about)
 const events = computed(() => data.value?.events ?? [])
 const preview = computed(() => data.value?.preview)
@@ -26,13 +27,19 @@ onMounted(async () => {
           <h1>{{ hero.title }}</h1>
           <p class="subtitle">{{ hero.subtitle }}</p>
           <p v-if="hero.tagline" class="tagline">{{ hero.tagline }}</p>
-
-     
         </div>
         <div class="hero-cover">
           <div class="cover-backdrop"></div>
           <div class="cover-frame">
-            <img :src="hero.cover" alt="Εξώφυλλο βιβλίου" loading="eager" decoding="async" />
+            <img
+              :src="heroCoverSrc"
+              alt="Εξώφυλλο βιβλίου"
+              loading="eager"
+              decoding="async"
+              width="300"
+              height="450"
+              fetchpriority="high"
+            />
           </div>
         </div>
       </div>
@@ -44,7 +51,7 @@ onMounted(async () => {
         <div class="about-copy">
           <h2>{{ about.heading }}</h2>
           <p class="body-text">{{ about.body }}</p>
-               <div class="hero-actions">
+          <div class="hero-actions">
             <a
               v-if="hero?.goodreadsUrl"
               class="primary-button"
@@ -61,9 +68,8 @@ onMounted(async () => {
               target="_blank"
               rel="noreferrer noopener"
             >
-              Διαβάστε τη συνέντευξη 
+              Διαβάστε τη συνέντευξη
             </a>
-           
           </div>
         </div>
         <aside v-if="about.pullQuote" class="about-quote" aria-label="Book highlight quote">
@@ -97,6 +103,8 @@ onMounted(async () => {
                 :alt="eventMedia(event).alt"
                 loading="lazy"
                 decoding="async"
+                width="400"
+                height="300"
               />
             </div>
             <div class="event-content">
@@ -114,7 +122,7 @@ onMounted(async () => {
     </section>
 
     <!-- Text preview -->
-    <section v-if="preview" class="book-preview diagonal--both-ltr diagonal-padding--both" v-reveal>
+    <section v-if="preview" class="book-preview diagonal--top-ltr diagonal-padding--both" v-reveal>
       <div class="container preview-inner">
         <header class="section-header">
           <h2>{{ preview.heading }}</h2>
@@ -123,7 +131,9 @@ onMounted(async () => {
         <div class="preview-body">
           <p class="preview-excerpt">{{ preview.excerpt }}</p>
           <p v-if="preview.note && preview.previewUrl" class="preview-note">
-            <a :href="preview.previewUrl" target="_blank" rel="noopener noreferrer">{{ preview.note }}</a>
+            <a :href="preview.previewUrl" target="_blank" rel="noopener noreferrer">{{
+              preview.note
+            }}</a>
           </p>
           <p v-else-if="preview.note" class="preview-note">{{ preview.note }}</p>
         </div>

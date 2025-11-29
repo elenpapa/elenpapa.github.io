@@ -17,6 +17,8 @@ const post = computed(() => {
   return data.value.items[postId.value]
 })
 
+const postImageSrc = computed(() => post.value?.image || '')
+
 onMounted(async () => {
   data.value = await content.getPosts()
   // Redirect if post doesn't exist
@@ -37,7 +39,15 @@ const goBack = () => {
 
       <div class="post-header">
         <div class="image-wrapper">
-          <img :src="post.image" :alt="post.title" loading="eager" decoding="async" />
+          <img
+            :src="postImageSrc"
+            :alt="post.title"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+            width="800"
+            height="440"
+          />
         </div>
         <h1>{{ post.title }}</h1>
       </div>

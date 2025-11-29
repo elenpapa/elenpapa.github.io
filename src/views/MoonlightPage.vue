@@ -14,6 +14,9 @@ const releases = computed(() => data.value?.releases)
 const cta = computed(() => data.value?.cta)
 
 const eventMedia = (event: MoonlightEvent) => event.image
+const getEventImageSrc = (imageSrc: string | undefined) => imageSrc || ''
+const getEventImageAlt = (imageAlt: string | undefined) => imageAlt || ''
+const getReleaseImageSrc = (coverSrc: string | undefined) => coverSrc || ''
 
 onMounted(async () => {
   data.value = await content.getMoonlight()
@@ -144,8 +147,8 @@ onMounted(async () => {
             <div class="event-media">
               <div class="event-glow"></div>
               <img
-                :src="eventMedia(event).src"
-                :alt="eventMedia(event).alt"
+                :src="getEventImageSrc(eventMedia(event).src)"
+                :alt="getEventImageAlt(eventMedia(event).alt)"
                 loading="lazy"
                 decoding="async"
               />
@@ -174,7 +177,12 @@ onMounted(async () => {
         <div class="release-grid">
           <article v-for="book in releases.books" :key="book.id" class="release-card">
             <div class="release-cover">
-              <img :src="book.cover" :alt="book.title" loading="lazy" decoding="async" />
+              <img
+                :src="getReleaseImageSrc(book.cover)"
+                :alt="book.title"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
             <div class="release-body">
               <p class="release-genre">{{ book.genre }}</p>

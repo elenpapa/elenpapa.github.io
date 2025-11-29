@@ -98,13 +98,13 @@ section {
 }
 
 /* Diagonal section utilities
-  - Use `.diagonal--ltr` or `.diagonal` for a bottom diagonal that descends left → right
-  - Use `.diagonal--rtl` for a bottom diagonal that descends right → left
-  - Use `.diagonal--top` or `.diagonal--top-ltr` for a top diagonal that descends left → right
-  - Use `.diagonal--top-rtl` for a top diagonal that descends right → left
-  - Use `.diagonal--both-ltr`, `.diagonal--both-rtl`, `.diagonal--both-ltr-rtl`, or `.diagonal--both-rtl-ltr` for combined top and bottom diagonals
-  - Adjust the height of the diagonal with `--diag-height` on the element
-    e.g. `style="--diag-height: 120px"` or via a modifier class.
+   Usage:
+   - `.diagonal` or `.diagonal--ltr` — bottom edge slopes down left → right
+   - `.diagonal--rtl` — bottom edge slopes down right → left
+   - `.diagonal--top` or `.diagonal--top-ltr` — top edge slopes down left → right
+   - `.diagonal--top-rtl` — top edge slopes down right → left
+   - `.diagonal--both-*` variants combine top and bottom edges
+   - Customize height via `--diag-height` (default: clamp(48px, 6vw, 94px))
 */
 .diagonal,
 .diagonal--ltr,
@@ -117,82 +117,55 @@ section {
 .diagonal--both-ltr-rtl,
 .diagonal--both-rtl-ltr {
   --diag-height: clamp(48px, 6vw, 94px);
-  overflow: hidden;
 }
 
-/* Bottom Left → Right (default shape) */
-.diagonal--ltr,
-.diagonal {
+/* Bottom Left → Right */
+.diagonal,
+.diagonal--ltr {
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--diag-height)), 0 100%);
-  -webkit-clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--diag-height)), 0 100%);
 }
 
 /* Bottom Right → Left */
 .diagonal--rtl {
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 calc(100% - var(--diag-height)));
-  -webkit-clip-path: polygon(0 0, 100% 0, 100% 100%, 0 calc(100% - var(--diag-height)));
 }
 
-/* Top Left → Right (top edge slopes, top-left lowered) */
+/* Top Left → Right */
 .diagonal--top,
 .diagonal--top-ltr {
   clip-path: polygon(0 var(--diag-height), 100% 0, 100% 100%, 0 100%);
-  -webkit-clip-path: polygon(0 var(--diag-height), 100% 0, 100% 100%, 0 100%);
 }
 
-/* Top Right → Left (top edge slopes, top-right lowered) */
+/* Top Right → Left */
 .diagonal--top-rtl {
   clip-path: polygon(0 0, 100% var(--diag-height), 100% 100%, 0 100%);
-  -webkit-clip-path: polygon(0 0, 100% var(--diag-height), 100% 100%, 0 100%);
 }
 
-/* Combined: Top LTR and Bottom LTR */
+/* Combined: Top LTR + Bottom LTR */
 .diagonal--both-ltr {
   clip-path: polygon(0 var(--diag-height), 100% 0, 100% calc(100% - var(--diag-height)), 0 100%);
-  -webkit-clip-path: polygon(
-    0 var(--diag-height),
-    100% 0,
-    100% calc(100% - var(--diag-height)),
-    0 100%
-  );
 }
 
-/* Combined: Top RTL and Bottom RTL */
+/* Combined: Top RTL + Bottom RTL */
 .diagonal--both-rtl {
   clip-path: polygon(0 0, 100% var(--diag-height), 100% 100%, 0 calc(100% - var(--diag-height)));
-  -webkit-clip-path: polygon(
-    0 0,
-    100% var(--diag-height),
-    100% 100%,
-    0 calc(100% - var(--diag-height))
-  );
 }
 
-/* Combined: Top LTR and Bottom RTL */
+/* Combined: Top LTR + Bottom RTL */
 .diagonal--both-ltr-rtl {
   clip-path: polygon(0 var(--diag-height), 100% 0, 100% 100%, 0 calc(100% - var(--diag-height)));
-  -webkit-clip-path: polygon(
-    0 var(--diag-height),
-    100% 0,
-    100% 100%,
-    0 calc(100% - var(--diag-height))
-  );
 }
 
-/* Combined: Top RTL and Bottom LTR */
+/* Combined: Top RTL + Bottom LTR */
 .diagonal--both-rtl-ltr {
   clip-path: polygon(0 0, 100% var(--diag-height), 100% calc(100% - var(--diag-height)), 0 100%);
-  -webkit-clip-path: polygon(
-    0 0,
-    100% var(--diag-height),
-    100% calc(100% - var(--diag-height)),
-    0 100%
-  );
 }
 
+/* Diagonal padding helpers */
 .diagonal-padding--top {
   padding-top: 150px !important;
 }
+
 .diagonal-padding--bottom {
   padding-bottom: 150px !important;
 }
@@ -213,8 +186,6 @@ section {
   .diagonal--both-rtl,
   .diagonal--both-ltr-rtl,
   .diagonal--both-rtl-ltr {
-    /* no transition effects to respect reduced motion */
     clip-path: none;
-    -webkit-clip-path: none;
   }
 }

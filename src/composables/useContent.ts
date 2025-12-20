@@ -8,6 +8,10 @@ import type {
   ServicesContent,
   PostsContent,
   ContactContent,
+  BookContent,
+  MoonlightContent,
+  PaintedBooksContent,
+  PublishersContent,
 } from '@/services/content'
 
 export function useSiteContent() {
@@ -88,6 +92,62 @@ export function useContactContent() {
 
   return {
     contact: state as typeof state & { value: ContactContent | null },
+    isLoading,
+    error,
+    isReady,
+  }
+}
+
+export function useBookContent() {
+  const { state, isLoading, error, isReady } = useAsyncState(content.getBook, null, {
+    immediate: true,
+    resetOnExecute: false,
+  })
+
+  return {
+    book: state as typeof state & { value: BookContent | null },
+    isLoading,
+    error,
+    isReady,
+  }
+}
+
+export function useMoonlightContent() {
+  const { state, isLoading, error, isReady } = useAsyncState(content.getMoonlight, null, {
+    immediate: true,
+    resetOnExecute: false,
+  })
+
+  return {
+    moonlight: state as typeof state & { value: MoonlightContent | null },
+    isLoading,
+    error,
+    isReady,
+  }
+}
+
+export function usePaintedBooksContent() {
+  const { state, isLoading, error, isReady } = useAsyncState(content.getPaintedBooks, null, {
+    immediate: true,
+    resetOnExecute: false,
+  })
+
+  return {
+    paintedBooks: state as typeof state & { value: PaintedBooksContent | null },
+    isLoading,
+    error,
+    isReady,
+  }
+}
+
+export function usePublishersContent() {
+  const { state, isLoading, error, isReady } = useAsyncState(content.getPublishers, null, {
+    immediate: true,
+    resetOnExecute: false,
+  })
+
+  return {
+    publishers: state as typeof state & { value: PublishersContent | null },
     isLoading,
     error,
     isReady,

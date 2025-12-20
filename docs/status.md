@@ -14,8 +14,9 @@ Updated: 2025-11-16
   - Files: `site.json`, `home.json`, `timeline.json`, `services.json`, `posts.json`, `contact.json`, `book.json`, `moonlight.json`, `painted-books.json`, `publishers.json`
   - Note: Stored under `public/content` for simple fetching without TS config changes.
 - [x] Typed content service (`src/services/content.ts`) with `getSite`, `getHome`, `getTimeline`, `getServices`, `getPosts`, `getContact`, `getBook`, `getMoonlight`, `getPaintedBooks`, `getPublishers`
-  - **NEW**: Added Zod schemas for runtime validation
-  - **NEW**: Content bundled at build time (no runtime fetch)
+  - **NEW**: Added Zod schemas for runtime validation with auto-inferred TypeScript types
+  - **NEW**: Runtime fetch with in-memory caching (JSON stored in `public/content/` for simple fetching)
+  - **NEW**: Composables in `src/composables/useContent.ts` provide loading states via `useAsyncState`
   - **NEW**: Added painted books page with gallery, process, and commission info
   - **NEW**: Added publishers/collaborators section showcasing trusted partnerships
 - [x] Global styles: variables + base (`src/styles/variables.css`, `src/styles/base.css`), imported in `src/main.ts`
@@ -31,11 +32,11 @@ Updated: 2025-11-16
 - [x] Book timeline (`src/components/BookTimeline.vue`)
 - [x] Services cards (`src/components/Services.vue`)
 - [x] Posts carousel (`src/components/PostsCarousel.vue`)
-  - **NEW**: Migrated to Embla Carousel (13KB savings)
-  - **NEW**: Enhanced keyboard navigation
+  - Uses Swiper with A11y module for keyboard navigation
   - **NEW**: WebP image optimization (57% size reduction)
   - **NEW**: Smart loading strategy (eager first 3, lazy rest)
   - **NEW**: Loading skeleton for better UX
+  - **NEW**: Simplified initialization (removed race conditions)
 - [x] Contact form (`src/components/ContactForm.vue`)
   - **NEW**: VeeValidate + Zod validation
   - **NEW**: Accessible error messages with ARIA
@@ -84,10 +85,10 @@ Updated: 2025-11-16
 
 ### Completed ✅
 
-- **Carousel**: Migrated to Embla Carousel
-  - 13KB smaller bundle
-  - Better keyboard navigation
+- **Carousel**: Swiper with A11y module
+  - Keyboard navigation support
   - Disabled state indicators
+  - Proper ARIA attributes
 - **Form Validation**: VeeValidate + Zod
   - Real-time error messages
   - ARIA `aria-invalid` and `aria-describedby`
@@ -143,7 +144,18 @@ Expected scores after optimizations:
 ## Next Steps (Optional Phase 4)
 
 1. Run Lighthouse audit and address any remaining issues
-2. Add PWA support with service worker
+2. ~~Add PWA support with service worker~~ ✅ **DONE** (vite-plugin-pwa configured)
 3. Add Open Graph meta tags
 4. Consider implementing @vueuse/motion for declarative animations
 5. Add automated testing (Vitest + Testing Library)
+
+## Known Placeholder Content
+
+The following content needs replacement with real data:
+
+- **Timeline titles**: Currently "Lorem Ipsum Vol XX" — needs actual book titles (see `docs/timeline-mapping.md`)
+- **Painted books images**: Placeholder paths need actual artwork photos (see `public/images/painted-books/README.md`)
+
+## Package.json Cleanup Notes
+
+- **Build plugins in dependencies**: `rollup-plugin-visualizer`, `vite-plugin-compression`, `vite-plugin-image-optimizer` should move to devDependencies

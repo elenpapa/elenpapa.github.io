@@ -19,7 +19,7 @@ const getServiceImageAlt = (imageAlt: string | undefined) => imageAlt || ''
     <div class="container">
       <header class="services-header" v-reveal>
         <h2 id="services-title">{{ heading }}</h2>
-        <p v-if="description">{{ description }}</p>
+        <p class="services-description" v-if="description">{{ description }}</p>
       </header>
       <div class="services-grid">
         <article

@@ -23,3 +23,56 @@
    - Set up prettier for code formatting
    - Set up Husky for pre-commit hooks to run linting and formatting checks
    - Configure vs code extensions to follow eslint and prettier rules
+
+---
+
+## Implementation Status
+
+### Completed ✅
+
+- All core sections built (Hero, Intro, Timeline, Services, Posts Carousel, Contact, Footer)
+- Content pipeline: JSON → Zod schemas → typed services → components
+- Responsive design (375/768/1024/1280 breakpoints)
+- Hamburger menu with focus trap
+- Scroll animations (IntersectionObserver reveal directive)
+- Font optimization (70% reduction via @fontsource)
+- Image optimization (73% reduction via WebP/AVIF)
+- Bundle compression (Brotli/Gzip)
+- Accessibility (WCAG AA contrast, ARIA labels, focus management)
+- PWA support (vite-plugin-pwa)
+
+### Pending ⏳
+
+- Lighthouse audit (target ≥90 all categories)
+- Replace placeholder content (timeline titles, painted-books images)
+
+---
+
+## Phase 5: Post-Lighthouse Polish (Optional)
+
+After Lighthouse audit is complete:
+
+### Performance Enhancements
+
+1. **Route lazy-loading**: Convert static imports in `src/router/index.ts` to dynamic imports for non-home views
+2. **Remove unused packages**: Uninstall `swiper` (PostsCarousel uses Embla)
+3. **Move build plugins to devDependencies**: `rollup-plugin-visualizer`, `vite-plugin-compression`, `vite-plugin-image-optimizer`
+
+### Code Quality
+
+4. **Standardize content loading**: Use `useContent` composables consistently instead of mixed direct `getX()` calls
+5. **Header refactoring**: Extract GSAP animation logic into `useHeaderAnimation` composable (reduce 403 lines)
+
+### Animation System
+
+6. **@vueuse/motion integration**: Replace reveal directive with declarative motion patterns using existing `src/utils/animations.ts` configs
+
+### Content Completion
+
+7. **Timeline content**: Replace "Lorem Ipsum Vol XX" with actual book titles (see `docs/timeline-mapping.md`)
+8. **Painted books gallery**: Add actual artwork photos (see `public/images/painted-books/README.md`)
+
+### Testing (Future)
+
+9. **Vitest + Testing Library**: Add unit tests for content service and key components
+10. **Playwright**: Add E2E tests for critical user flows

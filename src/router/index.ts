@@ -1,10 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
+
+// Eager load HomePage for fastest initial render
 import HomePage from '@/views/HomePage.vue'
-import TimelinePage from '@/views/TimelinePage.vue'
-import PostPage from '@/views/PostPage.vue'
-import BookPage from '@/views/BookPage.vue'
-import MoonlightPage from '@/views/MoonlightPage.vue'
-import PaintedBooksPage from '@/views/PaintedBooksPage.vue'
+
+// Lazy load secondary pages to reduce initial bundle size
+const TimelinePage = () => import('@/views/TimelinePage.vue')
+const PostPage = () => import('@/views/PostPage.vue')
+const BookPage = () => import('@/views/BookPage.vue')
+const MoonlightPage = () => import('@/views/MoonlightPage.vue')
+const PaintedBooksPage = () => import('@/views/PaintedBooksPage.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

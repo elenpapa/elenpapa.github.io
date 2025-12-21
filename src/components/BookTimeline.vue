@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { content, type TimelineContent } from '@/services/content'
 
 const data = ref<TimelineContent | null>(null)
-const timelineItems = computed(() => data.value?.items ?? [])
+const timelineItems = computed(() => (data.value?.items ?? []).slice().reverse())
 const getTimelineCoverSrc = (coverSrc: string | undefined) => coverSrc || ''
 
 onMounted(async () => {

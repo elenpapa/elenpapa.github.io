@@ -1,20 +1,58 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import { content, type BookContent } from '@/services/content'
+
+declare global {
+  interface Window {
+    instgrm?: {
+      Embeds?: {
+        process?: () => void
+      }
+    }
+  }
+}
+
+const INSTAGRAM_EMBED_SCRIPT_ID = 'instagram-embed-script'
+
+const ensureInstagramEmbedsReady = async (): Promise<void> => {
+  if (document.getElementById(INSTAGRAM_EMBED_SCRIPT_ID)) {
+    window.instgrm?.Embeds?.process?.()
+    return
+  }
+
+  await new Promise<void>((resolve) => {
+    const script = document.createElement('script')
+    script.id = INSTAGRAM_EMBED_SCRIPT_ID
+    script.async = true
+    script.defer = true
+    script.src = 'https://www.instagram.com/embed.js'
+    script.onload = () => resolve()
+    script.onerror = () => resolve()
+    document.body.appendChild(script)
+  })
+
+  window.instgrm?.Embeds?.process?.()
+}
 
 const data = ref<BookContent | null>(null)
 
 const hero = computed(() => data.value?.hero)
 const heroCoverSrc = computed(() => hero.value?.cover || '')
 const about = computed(() => data.value?.about)
-const events = computed(() => data.value?.events ?? [])
+const eventsSection = computed(() => data.value?.eventsSection)
+const events = computed(() => data.value?.events || [])
 const preview = computed(() => data.value?.preview)
-
-type BookEvent = NonNullable<BookContent['events']>[number]
-const eventMedia = (event: BookEvent) => event.image
 
 onMounted(async () => {
   data.value = await content.getBook()
+
+  const hasInstagramEmbeds = (data.value?.events || []).some((event) =>
+    Boolean(event.instagramEmbedHtml),
+  )
+  if (!hasInstagramEmbeds) return
+
+  await nextTick()
+  await ensureInstagramEmbedsReady()
 })
 </script>
 
@@ -25,7 +63,6 @@ onMounted(async () => {
       <div class="container hero-inner">
         <div class="hero-text">
           <h1>{{ hero.title }}</h1>
-          <p class="subtitle">{{ hero.subtitle }}</p>
           <p v-if="hero.tagline" class="tagline">{{ hero.tagline }}</p>
         </div>
         <div class="hero-cover">
@@ -33,7 +70,7 @@ onMounted(async () => {
           <div class="cover-frame">
             <img
               :src="heroCoverSrc"
-              alt="Εξώφυλλο βιβλίου"
+              :alt="hero.coverAlt || ''"
               loading="eager"
               decoding="async"
               width="300"
@@ -53,26 +90,26 @@ onMounted(async () => {
           <p class="body-text">{{ about.body }}</p>
           <div class="hero-actions">
             <a
-              v-if="hero?.goodreadsUrl"
+              v-if="hero?.goodreadsUrl && hero?.goodreadsLabel"
               class="primary-button"
               :href="hero?.goodreadsUrl"
               target="_blank"
               rel="noreferrer noopener"
             >
-              Δείτε το στο Goodreads
+              {{ hero.goodreadsLabel }}
             </a>
             <a
-              v-if="hero?.moonlighttalesUrl"
+              v-if="hero?.moonlighttalesUrl && hero?.moonlighttalesLabel"
               class="primary-button"
               :href="hero?.moonlighttalesUrl"
               target="_blank"
               rel="noreferrer noopener"
             >
-              Διαβάστε τη συνέντευξη
+              {{ hero.moonlighttalesLabel }}
             </a>
           </div>
         </div>
-        <aside v-if="about.pullQuote" class="about-quote" aria-label="Book highlight quote">
+        <aside v-if="about.pullQuote" class="about-quote" :aria-label="about.pullQuoteAriaLabel">
           <p class="quote">{{ about.pullQuote }}</p>
         </aside>
       </div>
@@ -86,36 +123,18 @@ onMounted(async () => {
       v-reveal
     >
       <div class="container">
-        <header class="section-header">
-          <h2 id="book-events-heading">Στιγμιότυπα &amp; εκδηλώσεις</h2>
-          <p class="section-subtitle">
-            Μερικές ενδεικτικές στιγμές που θα αποτυπωθούν με πραγματικές φωτογραφίες από
-            παρουσιάσεις, εργαστήρια και συναντήσεις.
-          </p>
+        <header v-if="eventsSection?.heading" class="section-header">
+          <h2 id="book-events-heading">{{ eventsSection.heading }}</h2>
+          <!-- <p v-if="eventsSection.subtitle" class="section-subtitle">{{ eventsSection.subtitle }}</p> -->
         </header>
 
         <ul class="events-grid">
           <li v-for="event in events" :key="event.id" class="event-card">
-            <div class="event-image-wrapper">
-              <div class="event-image-backdrop"></div>
-              <img
-                :src="eventMedia(event).src"
-                :alt="eventMedia(event).alt"
-                loading="lazy"
-                decoding="async"
-                width="400"
-                height="300"
-              />
-            </div>
-            <div class="event-content">
-              <p v-if="event.date || event.location" class="event-meta">
-                <span v-if="event.date" class="event-date">{{ event.date }}</span>
-                <span v-if="event.date && event.location" aria-hidden="true"> · </span>
-                <span v-if="event.location" class="event-location">{{ event.location }}</span>
-              </p>
-              <h3 class="event-title">{{ event.title }}</h3>
-              <p class="event-description">{{ event.description }}</p>
-            </div>
+            <div
+              v-if="event.instagramEmbedHtml"
+              class="event-embed"
+              v-html="event.instagramEmbedHtml"
+            />
           </li>
         </ul>
       </div>

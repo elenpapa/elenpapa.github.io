@@ -8,7 +8,7 @@ onMounted(async () => {
 })
 
 const heading = computed(() => data.value?.heading ?? 'Services')
-const description = computed(() => data.value?.description ?? '')
+// const description = computed(() => data.value?.description ?? '')
 const services = computed(() => data.value?.items ?? [])
 const getServiceImageSrc = (imageSrc: string | undefined) => imageSrc || ''
 const getServiceImageAlt = (imageAlt: string | undefined) => imageAlt || ''
@@ -19,7 +19,7 @@ const getServiceImageAlt = (imageAlt: string | undefined) => imageAlt || ''
     <div class="container">
       <header class="services-header" v-reveal>
         <h2 id="services-title">{{ heading }}</h2>
-        <p class="services-description" v-if="description">{{ description }}</p>
+        <!-- <p class="services-description" v-if="description">{{ description }}</p> -->
       </header>
       <div class="services-grid">
         <article

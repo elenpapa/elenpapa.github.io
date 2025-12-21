@@ -9,6 +9,10 @@
       "href": "/"
     },
     {
+      "label": "Υπηρεσίες",
+      "href": "/#services"
+    },
+    {
       "label": "Ένα μόνο γράμμα",
       "href": "/book"
     },
@@ -23,10 +27,6 @@
     {
       "label": "Εργογραφία",
       "href": "/timeline"
-    },
-    {
-      "label": "Υπηρεσίες",
-      "href": "/#services"
     },
     {
       "label": "Επικοινωνία",

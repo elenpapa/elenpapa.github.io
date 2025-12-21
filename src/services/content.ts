@@ -128,10 +128,11 @@ const ContactContentSchema = z.object({
 
 const BookEventSchema = z.object({
   id: z.string(),
-  title: z.string(),
+  title: z.string().optional(),
   date: z.string().optional(),
   location: z.string().optional(),
-  description: z.string(),
+  description: z.string().optional(),
+  instagramEmbedHtml: z.string().optional(),
   image: z.object({
     src: z.string(),
     alt: z.string(),
@@ -141,17 +142,27 @@ const BookEventSchema = z.object({
 const BookContentSchema = z.object({
   hero: z.object({
     title: z.string(),
-    subtitle: z.string(),
+    // subtitle: z.string(),
     tagline: z.string().optional(),
     cover: z.string(),
-    goodreadsUrl: z.string().url().optional(), 
-    moonlighttalesUrl: z.string().url().optional()
+    coverAlt: z.string().optional(),
+    goodreadsUrl: z.string().url().optional(),
+    goodreadsLabel: z.string().optional(),
+    moonlighttalesUrl: z.string().url().optional(),
+    moonlighttalesLabel: z.string().optional(),
   }),
   about: z.object({
     heading: z.string(),
     body: z.string(),
     pullQuote: z.string().optional(),
+    pullQuoteAriaLabel: z.string().optional(),
   }),
+  eventsSection: z
+    .object({
+      heading: z.string(),
+      subtitle: z.string().optional(),
+    })
+    .optional(),
   events: z.array(BookEventSchema).optional(),
   preview: z.object({
     heading: z.string(),

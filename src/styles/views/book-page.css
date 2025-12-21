@@ -228,6 +228,17 @@
   padding: 16px 18px 18px;
 }
 
+.event-embed {
+  padding: 0 18px 18px;
+}
+
+.event-embed :deep(.instagram-media) {
+  max-width: 100% !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
 .event-meta {
   margin: 0 0 8px;
   font-family: var(--font-sans);

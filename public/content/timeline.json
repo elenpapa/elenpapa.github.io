@@ -188,6 +188,27 @@
       "cover": "/images/books/Wednesday.jpg",
       "blurb": "Εφηβικό μυθιστόρημα",
       "actions": "Επιμέλεια μετάφρασης"
+    },
+    {
+      "year": 2026,
+      "title": "The 50 most mysterious places ever",
+      "cover": "/images/books/The 50 most mysterious places ever.jpg",
+      "blurb": "Βιβλίο για παιδιά",
+      "actions": "Επιμέλεια μετάφρασης"
+    },
+    {
+      "year": 2026,
+      "title": "Do you know? Jobs and work people do",
+      "cover": "/images/books/Do you know? Jobs and work people do.jpg",
+      "blurb": "Βιβλίο για παιδιά",
+      "actions": "Μετάφραση"
+    },
+    {
+      "year": 2026,
+      "title": "Κακό Ρομάντζο",
+      "cover": "/images/books/bad romance.jpg",
+      "blurb": "Ρομαντικό μυθιστόρημα",
+      "actions": "Διόρθωση"
     }
   ]
 }

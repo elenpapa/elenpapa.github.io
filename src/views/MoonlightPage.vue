@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { content, type MoonlightContent } from '@/services/content'
 
 const data = ref<MoonlightContent | null>(null)
@@ -18,9 +18,12 @@ const getEventImageSrc = (imageSrc: string | undefined) => imageSrc || ''
 const getEventImageAlt = (imageAlt: string | undefined) => imageAlt || ''
 const getReleaseImageSrc = (coverSrc: string | undefined) => coverSrc || ''
 
-onMounted(async () => {
+const fetchData = async () => {
   data.value = await content.getMoonlight()
-})
+}
+
+onServerPrefetch(fetchData)
+onMounted(fetchData)
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { content, type HomeContent } from '@/services/content'
 
 const home = ref<HomeContent | null>(null)
@@ -7,9 +7,19 @@ const heroBackgroundImage = computed(() => home.value?.hero.backgroundImage || '
 const heroTitle = computed(() => home.value?.hero.title || '')
 const heroSubtitle = computed(() => home.value?.hero.subtitle || '')
 
-onMounted(async () => {
+const scrollToContact = () => {
+  const contactSection = document.getElementById('contact')
+  if (contactSection) {
+    contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
+
+const fetchData = async () => {
   home.value = await content.getHome()
-})
+}
+
+onServerPrefetch(fetchData)
+onMounted(fetchData)
 </script>
 
 <template>
@@ -23,6 +33,9 @@ onMounted(async () => {
       <div class="container inner">
         <h1 class="title">{{ heroTitle }}</h1>
         <p class="subtitle">{{ heroSubtitle }}</p>
+        <button class="cta" @click="scrollToContact" aria-label="Scroll to contact form">
+          Ας συνεργαστούμε
+        </button>
       </div>
     </div>
   </section>

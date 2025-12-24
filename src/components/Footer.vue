@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { content, type SiteContent } from '@/services/content'
 
 const site = ref<SiteContent | null>(null)
 const socials = computed(() => site.value?.socials ?? [])
 const getSocialIconSrc = (iconSrc: string | undefined) => iconSrc || ''
 
-onMounted(async () => {
+const fetchData = async () => {
   site.value = await content.getSite()
-})
+}
+
+onServerPrefetch(fetchData)
+onMounted(fetchData)
 </script>
 
 <template>

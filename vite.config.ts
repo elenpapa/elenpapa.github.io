@@ -1,4 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
+import process from 'node:process'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -7,6 +8,11 @@ import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 import viteCompression from 'vite-plugin-compression'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { VitePWA } from 'vite-plugin-pwa'
+// Import vite-ssg to get augmented types for ssgOptions
+import 'vite-ssg'
+
+// Check if running vite-ssg build (set via VITE_SSG=true in package.json scripts)
+const isSSGBuild = process.env.VITE_SSG === 'true'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -15,6 +21,8 @@ export default defineConfig({
     vueDevTools(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Disable PWA during SSG to prevent regeneration issues with workbox paths
+      disable: isSSGBuild,
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,json,svg}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // Increase limit to 5MB for other assets if needed
@@ -70,13 +78,26 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  // SSG Configuration
+  ssgOptions: {
+    script: 'async',
+    formatting: 'none', // Disable formatting to avoid issues with Instagram embed HTML
+    mock: true,
+  },
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['vue'],
-          forms: ['vee-validate', '@vee-validate/zod', 'zod'],
-          utils: ['@vueuse/core', '@vueuse/integrations', '@vueuse/motion'],
+        // Only apply manualChunks for client build (not SSR)
+        manualChunks(id) {
+          // Skip chunking during SSR build
+          if (process.env.VITE_SSG) return undefined
+
+          if (id.includes('node_modules')) {
+            if (id.includes('vue')) return 'vendor'
+            if (id.includes('vee-validate') || id.includes('zod')) return 'forms'
+            if (id.includes('@vueuse')) return 'utils'
+          }
+          return undefined
         },
       },
     },

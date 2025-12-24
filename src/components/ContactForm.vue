@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { useForm, useField } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
@@ -8,9 +8,12 @@ import { content, type ContactContent } from '@/services/content'
 const data = ref<ContactContent | null>(null)
 const submitStatus = ref<'idle' | 'success' | 'error'>('idle')
 
-onMounted(async () => {
+const fetchData = async () => {
   data.value = await content.getContact()
-})
+}
+
+onServerPrefetch(fetchData)
+onMounted(fetchData)
 
 // Validation schema
 const schema = toTypedSchema(

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from 'vue'
+import { ref, onMounted, onServerPrefetch, computed, nextTick } from 'vue'
 import { content, type BookContent } from '@/services/content'
 
 declare global {
@@ -43,8 +43,14 @@ const eventsSection = computed(() => data.value?.eventsSection)
 const events = computed(() => data.value?.events || [])
 const preview = computed(() => data.value?.preview)
 
-onMounted(async () => {
+const fetchData = async () => {
   data.value = await content.getBook()
+}
+
+onServerPrefetch(fetchData)
+
+onMounted(async () => {
+  await fetchData()
 
   const hasInstagramEmbeds = (data.value?.events || []).some((event) =>
     Boolean(event.instagramEmbedHtml),

@@ -384,9 +384,23 @@ const cache = new Map<string, unknown>()
 async function fetchAndParse<T>(url: string, schema: z.ZodSchema<T>): Promise<T> {
   if (cache.has(url)) return schema.parse(cache.get(url))
 
-  const res = await fetch(url, { headers: { 'cache-control': 'no-cache' } })
-  if (!res.ok) throw new Error(`Failed to load content: ${url} (${res.status})`)
-  const json = await res.json()
+  // SSR/SSG: use file system during build, fetch during runtime
+  let json: unknown
+
+  if (typeof globalThis.fetch === 'undefined' || import.meta.env.SSR) {
+    // During SSG build, read from file system
+    const fs = await import('node:fs/promises')
+    const path = await import('node:path')
+    const filePath = path.join(process.cwd(), 'public', url)
+    const fileContent = await fs.readFile(filePath, 'utf-8')
+    json = JSON.parse(fileContent)
+  } else {
+    // During client-side runtime, use fetch
+    const res = await fetch(url, { headers: { 'cache-control': 'no-cache' } })
+    if (!res.ok) throw new Error(`Failed to load content: ${url} (${res.status})`)
+    json = await res.json()
+  }
+
   const parsed = schema.parse(json)
   cache.set(url, parsed)
   return parsed

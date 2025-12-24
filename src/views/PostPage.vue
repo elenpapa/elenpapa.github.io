@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { content, type PostsContent } from '@/services/content'
 
@@ -19,8 +19,14 @@ const post = computed(() => {
 
 const postImageSrc = computed(() => post.value?.image || '')
 
-onMounted(async () => {
+const fetchData = async () => {
   data.value = await content.getPosts()
+}
+
+onServerPrefetch(fetchData)
+
+onMounted(async () => {
+  await fetchData()
   // Redirect if post doesn't exist
   if (!post.value) {
     router.push('/')

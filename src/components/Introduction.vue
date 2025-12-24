@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { content, type HomeContent } from '@/services/content'
 
 const home = ref<HomeContent | null>(null)
@@ -9,9 +9,12 @@ const introImageAlt = computed(() => home.value?.intro.image.alt || 'Intro image
 // Helper for milestone icons
 const getMilestoneIconSrc = (iconSrc: string | undefined) => iconSrc || ''
 
-onMounted(async () => {
+const fetchData = async () => {
   home.value = await content.getHome()
-})
+}
+
+onServerPrefetch(fetchData)
+onMounted(fetchData)
 </script>
 
 <template>

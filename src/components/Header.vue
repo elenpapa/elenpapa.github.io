@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, nextTick, ref, watch } from 'vue'
+import { computed, onMounted, onServerPrefetch, onUnmounted, nextTick, ref, watch } from 'vue'
 import { useFocusTrap } from '@vueuse/integrations/useFocusTrap'
 import { content, type SiteContent } from '@/services/content'
 import { useHeaderAnimation } from '@/composables/useHeaderAnimation'
@@ -50,8 +50,14 @@ watch(open, (isOpen) => {
   }
 })
 
-onMounted(async () => {
+const fetchData = async () => {
   site.value = await content.getSite()
+}
+
+onServerPrefetch(fetchData)
+
+onMounted(async () => {
+  await fetchData()
   // recompute header height once content (logo) is rendered
   await nextTick()
   setHeaderHeight()
@@ -84,7 +90,7 @@ const setHeaderHeight = async () => {
 }
 
 // recompute on resize and after images load
-let resizeTimer: number | undefined
+let resizeTimer: ReturnType<typeof setTimeout> | undefined
 const onResize = () => {
   clearTimeout(resizeTimer)
   resizeTimer = globalThis.setTimeout(setHeaderHeight, 100)

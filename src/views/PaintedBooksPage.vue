@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { content, type PaintedBooksContent } from '@/services/content'
 
 const data = ref<PaintedBooksContent | null>(null)
@@ -13,9 +13,12 @@ const gallery = computed(() => data.value?.gallery)
 const commission = computed(() => data.value?.commission)
 const cta = computed(() => data.value?.cta)
 
-onMounted(async () => {
+const fetchData = async () => {
   data.value = await content.getPaintedBooks()
-})
+}
+
+onServerPrefetch(fetchData)
+onMounted(fetchData)
 </script>
 
 <template>

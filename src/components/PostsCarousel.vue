@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, nextTick, computed } from 'vue'
+import { ref, onMounted, onServerPrefetch, watch, nextTick, computed } from 'vue'
 import SvgIcon from '@/components/SvgIcon.vue'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import type { Swiper as SwiperType } from 'swiper/types'
@@ -36,9 +36,12 @@ const handleStateChange = (swiper: SwiperType) => {
   updateButtons(swiper)
 }
 
-onMounted(async () => {
+const fetchData = async () => {
   data.value = await content.getPosts()
-})
+}
+
+onServerPrefetch(fetchData)
+onMounted(fetchData)
 
 watch(
   () => data.value?.items?.length,

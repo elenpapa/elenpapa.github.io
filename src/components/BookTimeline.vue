@@ -1,14 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { content, type TimelineContent } from '@/services/content'
 
 const data = ref<TimelineContent | null>(null)
 const timelineItems = computed(() => (data.value?.items ?? []).slice().reverse())
 const getTimelineCoverSrc = (coverSrc: string | undefined) => coverSrc || ''
 
-onMounted(async () => {
+// Fetch data both on server (SSG) and client
+const fetchData = async () => {
   data.value = await content.getTimeline()
-})
+}
+
+// SSG: Prefetch data during server-side rendering
+onServerPrefetch(fetchData)
+
+// Client: Fetch data on mount (for hydration and client-side navigation)
+onMounted(fetchData)
 </script>
 
 <template>

@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { content, type ServicesContent } from '@/services/content'
 
 const data = ref<ServicesContent | null>(null)
-onMounted(async () => {
+
+const fetchData = async () => {
   data.value = await content.getServices()
-})
+}
+
+onServerPrefetch(fetchData)
+onMounted(fetchData)
 
 const heading = computed(() => data.value?.heading ?? 'Services')
 // const description = computed(() => data.value?.description ?? '')

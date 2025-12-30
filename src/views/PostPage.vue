@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useHead } from '@unhead/vue'
 import { content, type PostsContent } from '@/services/content'
 
 const route = useRoute()
@@ -18,6 +19,56 @@ const post = computed(() => {
 })
 
 const postImageSrc = computed(() => post.value?.image || '')
+
+// SEO: Generate absolute URL for the post
+const siteUrl = 'https://helenvasilopoulou.gr' // Update with actual domain
+const canonicalUrl = computed(() => `${siteUrl}/posts/${postId.value}`)
+const absoluteImageUrl = computed(() => {
+  if (!postImageSrc.value) return `${siteUrl}/logo.png`
+  // If image starts with /, make it absolute
+  return postImageSrc.value.startsWith('/') ? `${siteUrl}${postImageSrc.value}` : postImageSrc.value
+})
+
+// Dynamic head meta tags for SEO and social sharing
+useHead(
+  computed(() => ({
+    title: post.value?.title || 'Άρθρο',
+    meta: [
+      // Basic SEO
+      {
+        name: 'description',
+        content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Ελένη Παπαδοπούλου',
+      },
+      { name: 'robots', content: 'index, follow' },
+      { name: 'author', content: 'Ελένη Παπαδοπούλου' },
+
+      // Open Graph (Facebook, LinkedIn, etc.)
+      { property: 'og:type', content: 'article' },
+      { property: 'og:title', content: post.value?.title || 'Άρθρο' },
+      {
+        property: 'og:description',
+        content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Ελένη Παπαδοπούλου',
+      },
+      { property: 'og:image', content: absoluteImageUrl.value },
+      { property: 'og:image:width', content: '1200' },
+      { property: 'og:image:height', content: '630' },
+      { property: 'og:url', content: canonicalUrl.value },
+      { property: 'og:site_name', content: 'Ελένη Παπαδοπούλου' },
+      { property: 'og:locale', content: 'el_GR' },
+
+      // Twitter Card
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: post.value?.title || 'Άρθρο' },
+      {
+        name: 'twitter:description',
+        content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Ελένη Παπαδοπούλου',
+      },
+      { name: 'twitter:image', content: absoluteImageUrl.value },
+      // Add twitter:site if you have a Twitter handle: { name: 'twitter:site', content: '@handle' },
+    ],
+    link: [{ rel: 'canonical', href: canonicalUrl.value }],
+  })),
+)
 
 const fetchData = async () => {
   data.value = await content.getPosts()

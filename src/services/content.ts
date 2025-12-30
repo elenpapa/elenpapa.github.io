@@ -173,23 +173,15 @@ const BookContentSchema = z.object({
   }),
 })
 
-const MoonlightHeroButtonSchema = z.object({
-  label: z.string(),
-  href: z.string(),
-  variant: z.enum(['primary', 'ghost']).optional(),
-})
-
 const MoonlightHeroSchema = z.object({
   title: z.string(),
   subtitle: z.string(),
   description: z.string(),
-  badges: z.array(z.object({ label: z.string(), href: z.string().optional() })).optional(),
   stats: z
     .array(
       z.object({
         label: z.string(),
         value: z.string(),
-        description: z.string().optional(),
       }),
     )
     .optional(),
@@ -197,16 +189,21 @@ const MoonlightHeroSchema = z.object({
     primary: z.object({ src: z.string(), alt: z.string() }),
     secondary: z.object({ src: z.string(), alt: z.string() }).optional(),
   }),
-  buttons: z.array(MoonlightHeroButtonSchema).optional(),
 })
 
 const MoonlightMissionSchema = z.object({
+  eyebrow: z.string(),
   heading: z.string(),
-  body: z.string(),
+  body: z.string().optional(),
   pillars: z.array(
     z.object({
-      title: z.string(),
-      description: z.string(),
+      firstName: z.string(),
+      lastName: z.string(),
+      href: z.string(),
+      image: z.object({
+        src: z.string(),
+        alt: z.string(),
+      }),
     }),
   ),
 })
@@ -222,15 +219,17 @@ const MoonlightBubbleSchema = z.object({
   ),
 })
 
-const MoonlightEventSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  date: z.string().optional(),
-  location: z.string().optional(),
+const MoonlightBookJournalSchema = z.object({
+  heading: z.string(),
   description: z.string(),
   image: z.object({
     src: z.string(),
     alt: z.string(),
+  }),
+  instagramHighlight: z.object({
+    label: z.string(),
+    href: z.string(),
+    thumbnailSrc: z.string(),
   }),
 })
 
@@ -250,16 +249,16 @@ const MoonlightReleasesSchema = z.object({
 
 const MoonlightCtaSchema = z.object({
   heading: z.string(),
-  body: z.string(),
-  buttons: z.array(MoonlightHeroButtonSchema).optional(),
+  // body: z.string(),
 })
 
 const MoonlightContentSchema = z.object({
   hero: MoonlightHeroSchema,
   mission: MoonlightMissionSchema,
   bubbles: MoonlightBubbleSchema.optional(),
-  events: z.array(MoonlightEventSchema).optional(),
+  bookJournal: MoonlightBookJournalSchema.optional(),
   releases: MoonlightReleasesSchema.optional(),
+  socials: z.array(SocialItemSchema).optional(),
   cta: MoonlightCtaSchema,
 })
 

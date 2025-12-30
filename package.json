@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev-host": "npm run dev -- --host",
     "build": "run-p type-check \"build-only {@}\" --",
     "build:ssg": "VITE_SSG=true vite-ssg build",
     "preview": "vite preview",

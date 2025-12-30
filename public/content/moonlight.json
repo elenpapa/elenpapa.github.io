@@ -1,34 +1,24 @@
 {
   "hero": {
     "title": "Moonlight Tales",
-    "subtitle": "Το πιο φωτεινό ελληνικό blog για τα βιβλία και τους δημιουργούς τους",
-    "description": "Δημιούργησα το Moonlight Tales ως χώρο συνάντησης για συγγραφείς, αναγνώστριες κι επαγγελματίες του βιβλίου. Από συνεντεύξεις και θεματικές στήλες μέχρι launch-parties, το blog μεγάλωσε σε μια ενεργή κοινότητα με χιλιάδες ιστορίες.",
-    "badges": [
-      {
-        "label": "Από το 2012"
-      },
-      {
-        "label": "Instagram @moonlightalesbooks"
-      },
-      {
-        "label": "TikTok συναντήσεις"
-      }
-    ],
+    "subtitle": "Το μεγαλύτερο ελληνικό blog για συγγραφείς, αναγνώστριες και αναγνώστες",
+    "description": "Το Moonlight Tales είναι ένα λογοτεχνικό blog (που λειτουργεί από το 2013 – πώς περνούν τα χρόνια, βρε παιδί μου!) όπου συναντιούνται και αλληλοεπιδρούν άνθρωποι που αγαπούν τη λογοτεχνία. Ως αναγνώστης ή αναγνώστρια, μπορείς να διαβάσεις περισσότερες από 200 ιστορίες ή διηγήματα ανερχόμενων –και όχι μόνο– συγγραφέων, πολλές από τις οποίες βρίσκονται ήδη υπό εκδοτική στέγη. Ως συγγραφέας, μπορείς να δημοσιεύσεις απλά, αξιόπιστα και δωρεάν τη δουλειά σου, αλλά και να διαβάσεις άρθρα, στα οποία έμπειροι και έμπειρες συγγραφείς και εισηγητές και εισηγήτριες ειδικών σεμιναρίων αναλύουν λογοτεχνικά και τεχνικά ζητήματα. Παράλληλα, μπορείς να βρεις συνεντεύξεις γνωστών συγγραφέων και εβδομαδιαίες κληρώσεις των βιβλίων τους. Από το 2020, το Moonlight Tales εκδίδει συλλογές διηγημάτων (2 από τις οποίες έχουν κερδίσει το πρώτο βραβείο στα Everlies για την καλύτερη ελληνική συλλογή διηγημάτων – αν δεν παινέψεις και λίγο το σπίτι σου θα πέσει να σε πλακώσει).",
     "stats": [
       {
+        "label": "Προβολές",
+        "value": "920.000+"
+      },
+      {
         "label": "Αναρτήσεις",
-        "value": "1500+",
-        "description": "Συνεντεύξεις, σειρές, tips"
+        "value": "3.000+"
       },
       {
-        "label": "Συντάκτριες",
-        "value": "25",
-        "description": "Ενεργή ομάδα"
+        "label": "Συλλογές Διηγήμάτων",
+        "value": "5+"
       },
       {
-        "label": "Εκδηλώσεις",
-        "value": "40+",
-        "description": "Παρουσιάσεις & lives"
+        "label": "Βραβεία Everlies",
+        "value": "2"
       }
     ],
     "media": {
@@ -40,144 +30,148 @@
         "src": "/images/moonlight/mock-hero-secondary.png",
         "alt": "Moonlight Tales backstage στιγμιότυπο"
       }
-    },
-    "buttons": [
-      {
-        "label": "Επισκεφθείτε το Moonlight Tales",
-        "href": "https://www.moonlightales.com/",
-        "variant": "primary"
-      },
-      {
-        "label": "Instagram προφίλ",
-        "href": "https://www.instagram.com/moonlightalesbooks/",
-        "variant": "ghost"
-      }
-    ]
+    }
   },
   "mission": {
-    "heading": "Moonlight Tales σημαίνει κοινότητα",
-    "body": "Επιμελούμαστε στήλες, συνεντεύξεις, workshops και challenges που βοηθούν νέες και έμπειρες συγγραφείς να εξελίσσονται. Παρέχουμε mentoring, πρακτικούς οδηγούς και μια ζωντανή πλατφόρμα προώθησης ιστοριών.",
+    "eyebrow": "Οι ιδιοκτητριες",
+    "heading": "Πίσω από το Moonlight Tales",
     "pillars": [
       {
-        "title": "Mentoring",
-        "description": "Συνεχής υποστήριξη σε drafts, pitches και αναθεωρήσεις."
+        "firstName": "Αγγελίνα",
+        "lastName": "Παπαδημητρίου",
+        "href": "https://www.angelinapapadimitriou.gr/p/blog-page.html",
+        "image": {
+          "src": "/images/moonlight/creator-1.jpeg",
+          "alt": "Αγγελίνα Παπαδημητρίου"
+        }
       },
       {
-        "title": "Events",
-        "description": "Pop-up clubs, bookstagram nights και θεματικά podcast sessions."
+        "firstName": "Έλενα",
+        "lastName": "Παπαδοπούλου",
+        "href": "/",
+        "image": {
+          "src": "/images/intro.png",
+          "alt": "Έλενα Παπαδοπούλου"
+        }
       },
       {
-        "title": "Publishing",
-        "description": "Συλλογές και ανεξάρτητες εκδόσεις με την υπογραφή του blog."
+        "firstName": "Εύη",
+        "lastName": "Φρυγανά",
+        "href": "http://www.evifrigana.gr/p/books.html",
+        "image": {
+          "src": "/images/moonlight/creator-3.png",
+          "alt": "Εύη Φρυγανά"
+        }
       }
     ]
   },
   "bubbles": {
-    "heading": "Moments in moonlight",
+    "heading": "Moonlight Tales in Numbers",
     "items": [
       {
-        "label": "Writer sprints",
-        "value": "120",
-        "description": "Live sessions με prompts το χρόνο"
+        "label": "Συνεντεύξεις",
+        "value": "255+",
+        "description": "Με συγγραφείς και επαγγελματίες του εκδοτικού χώρου"
       },
       {
-        "label": "Podcast επεισόδια",
-        "value": "85",
-        "description": "Ιστορίες από #moonlightcrew"
+        "label": "Διηγήματα",
+        "value": "187+",
+        "description": "Ελληνίδων και Ελλήνων συγγραφέων"
       },
       {
-        "label": "Workshops",
-        "value": "18",
-        "description": "Δημιουργική γραφή & marketing"
+        "label": "Βιβλία",
+        "value": "83+",
+        "description": "Συνεργατών που έχουν εκδοθεί"
       },
       {
-        "label": "Αναγνωστικές λέσχες",
-        "value": "12",
-        "description": "Θεματικά κύματα ανά σεζόν"
+        "label": "Διαθέσιμες ιστορίες",
+        "value": "84+",
+        "description": "Που μπορείς να διαβάσεις online"
+      },
+      {
+        "label": "Συγγραφικά άρθρα",
+        "value": "73+",
+        "description": "Για νέους και νέες συγγραφείς"
       }
     ]
   },
-  "events": [
-    {
-      "id": "athens-live",
-      "title": "Moonlight Live in Athens",
-      "date": "2025-02-08",
-      "location": "Ρομαντικό βιβλιοπωλείο, Αθήνα",
-      "description": "Συζητήσαμε για τις νέες digital εκδόσεις, παρουσιάσαμε fan art και στήσαμε μικρή γωνιά ηχογράφησης stories.",
-      "image": {
-        "src": "/images/moonlight/mock-event-1.png",
-        "alt": "Moonlight Tales live event στην Αθήνα"
-      }
+  "bookJournal": {
+    "heading": "Book Journal",
+    "description": "Το Book Journal του Moonlight Tales είναι ο ιδανικός σύντροφος για bookworms. Χρωμάτισε τις μέρες που διάβασες, γέμισε τη βιβλιοθήκη με λιλιπούτια βιβλία, παίξε βιβλιομπίνγκο, γράψε κριτικές για τα βιβλία που διάβασες, μέτρα τα αδιάβαστά σου, κόλλα αυτοκόλλητα και κάνε μια μεγαλόπρεπη κηδεία στα βιβλία που δεν τελείωσες ποτέ.",
+    "image": {
+      "src": "/images/moonlight/bookjournalpng.png",
+      "alt": "Moonlight Tales Book Journal"
     },
-    {
-      "id": "salonica-club",
-      "title": "Book Club by Night",
-      "date": "2025-03-22",
-      "location": "Θεσσαλονίκη",
-      "description": "Ανοιχτή λέσχη με μικρόφωνο, ζωντανό sketching και announcement για την επόμενη ανθολογία.",
-      "image": {
-        "src": "/images/moonlight/mock-event-2.png",
-        "alt": "Moonlight Tales book club session"
-      }
-    },
-    {
-      "id": "creator-day",
-      "title": "Creator Day with TikTokers",
-      "date": "2025-04-19",
-      "location": "Online + Studio",
-      "description": "Συνεργασία με Greek BookTok, masterclass για μικρής διάρκειας storytelling και backstage Q&A.",
-      "image": {
-        "src": "/images/moonlight/mock-event-3.png",
-        "alt": "Moonlight Tales συνεργασία με δημιουργούς"
-      }
+    "instagramHighlight": {
+      "label": "Book Journal Stories",
+      "href": "https://www.instagram.com/s/aGlnaGxpZ2h0OjE3OTIzNDEwODE1OTY3Nzgy?story_media_id=3464925618580428192_2991724476&igsh=MTltNHo4eXBjcHQxcw==",
+      "thumbnailSrc": "/images/moonlight/book-journal-highlight.png"
     }
-  ],
+  },
   "releases": {
-    "heading": "Εκδόσεις & συλλογές",
-    "description": "Κάθε χρόνο συντονίζουμε θεματικές συλλογές και συνεργασίες με ανεξάρτητους εκδότες. Οι τίτλοι αυτοί είναι mockups που θα αντικατασταθούν με τα πραγματικά εξώφυλλα.",
+    "heading": "Εκδόσεις & Συλλογές",
+    "description": "Κάθε χρόνο εκδίδουμε θεματικές συλλογές διηγημάτων Ελλήνων και Ελληνίδων συγγραφέων. Ανακάλυψε νέες πένες και φρέσκες φωνές σε λιγότερες από δέκα σελίδες ανά συγγραφέα.",
     "books": [
       {
         "id": "moon-anthology",
-        "title": "Moonlight Anthology Vol. 4",
-        "tagline": "24 μικρές ιστορίες για τη νύχτα",
-        "genre": "Συλλογή διηγημάτων",
-        "cover": "/images/moonlight/mock-book-1.png"
+        "title": "Halloween",
+        "tagline": "19 συγγραφείς",
+        "genre": "Συλλογη διηγηματων",
+        "cover": "/images/books/Once Upon A Horror Time.jpg"
       },
       {
         "id": "urban-poetry",
-        "title": "Neon Poems",
-        "tagline": "Ποιήματα δρόμου από την κοινότητά μας",
-        "genre": "Ποίηση",
-        "cover": "/images/moonlight/mock-book-2.png"
+        "title": "Παραμύθια αλλιώς",
+        "tagline": "27 συγγραφείς",
+        "genre": "Συλλογη διηγηματων",
+        "cover": "/images/books/And they lived happily ever after.jpg"
       },
       {
         "id": "fantasy-novella",
-        "title": "The Midnight Map",
-        "tagline": "Σειρά φαντασίας που ξεκίνησε ως web serial",
-        "genre": "Fantasy",
-        "cover": "/images/moonlight/mock-book-3.png"
+        "title": "Ελληνική Μυθολογία",
+        "tagline": "22 συγγραφείς",
+        "genre": "Συλλογη διηγηματων",
+        "cover": "/images/books/There once was a myth.jpg"
+      },
+      {
+        "id": "fantasy-novella",
+        "title": "Χαμένοι πολιτισμοί",
+        "tagline": "28 συγγραφείς",
+        "genre": "Συλλογη διηγηματων",
+        "cover": "/images/books/echoes of a lost time.jpg"
+      },
+      {
+        "id": "fantasy-novella",
+        "title": "What if...?",
+        "tagline": "37 συγγραφείς",
+        "genre": "Συλλογη διηγηματων",
+        "cover": "/images/books/The path not taken.jpg"
       }
     ]
   },
+  "socials": [
+    {
+      "label": "Moonlight Tales Website",
+      "href": "https://www.moonlightales.com/",
+      "icon": "/images/common/website.svg"
+    },
+    {
+      "label": "Facebook",
+      "href": "https://www.facebook.com/moonlightalesbooks",
+      "icon": "/images/common/facebook.svg"
+    },
+    {
+      "label": "Instagram",
+      "href": "https://www.instagram.com/moonlightalesbooks/",
+      "icon": "/images/common/instagram.svg"
+    },
+    {
+      "label": "TikTok",
+      "href": "https://www.tiktok.com/@moonlightalesbooks",
+      "icon": "/images/common/tiktok.svg"
+    }
+  ],
   "cta": {
-    "heading": "Ακολουθήστε το Moonlight Tales",
-    "body": "Μπείτε στην κοινότητα, στείλτε μας ιστορίες και μείνετε ενημερωμένοι για τα επόμενα events.",
-    "buttons": [
-      {
-        "label": "moonlightales.com",
-        "href": "https://www.moonlightales.com/",
-        "variant": "primary"
-      },
-      {
-        "label": "Facebook page",
-        "href": "https://www.facebook.com/moonlightales/",
-        "variant": "ghost"
-      },
-      {
-        "label": "TikTok @moonlightalesbooks",
-        "href": "https://www.tiktok.com/@moonlightalesbooks",
-        "variant": "ghost"
-      }
-    ]
+    "heading": "Ακολουθήστε το Moonlight Tales"
   }
 }

@@ -11,12 +11,24 @@
   --color-primary-600: #7e57c2; /* Darkened from #9575cd for better contrast (4.51:1) */
 
   --timeline-space: 80px;
+  --timeline-entry-height: 340px;
+  --timeline-cover-width: 200px;
+  --timeline-cover-height: 280px;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  --gradient-primary: linear-gradient(
+    135deg,
+    #d4c5f0 0%,
+    #b39ddb 25%,
+    #9575cd 50%,
+    #7e57c2 75%,
+    #6b4ea8 100%
+  );
 
   --container: 1200px;
 

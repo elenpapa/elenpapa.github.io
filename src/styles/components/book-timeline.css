@@ -30,15 +30,19 @@
 .timeline-column {
   display: flex;
   flex-direction: column;
+  gap: var(--timeline-space);
+}
+
+.timeline-column--right {
+  padding-top: calc(var(--timeline-space) / 2 + var(--timeline-entry-height) / 2);
 }
 
 .entry {
   display: grid;
-  grid-template-columns: 220px auto;
+  grid-template-columns: 200px 1fr;
   gap: 16px;
   padding: 24px;
   position: relative;
-  margin-bottom: var(--timeline-space);
   align-items: center;
   transform-style: preserve-3d;
   background: linear-gradient(180deg, #fffef7 0%, #f6f2e6 100%);
@@ -52,12 +56,14 @@
   background-size:
     180px 180px,
     auto;
+  /* Fixed dimensions for consistency */
+  min-height: var(--timeline-entry-height);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .entry--right {
-  grid-template-columns: auto 220px;
-  margin-top: var(--timeline-space);
-  margin-bottom: 0;
+  grid-template-columns: 1fr 200px;
 }
 
 .entry--right .meta {
@@ -109,15 +115,18 @@
 }
 
 .cover {
-  width: 100%;
-  height: auto;
+  width: var(--timeline-cover-width);
+  height: var(--timeline-cover-height);
+  object-fit: cover;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
 }
 
 .meta {
   height: 100%;
   align-content: center;
+  overflow: hidden;
 }
 
 .meta h3 {
@@ -171,7 +180,17 @@
 
   .entry,
   .entry--right {
-    grid-template-columns: 200px auto;
+    grid-template-columns: 180px 1fr;
+    min-height: 300px;
+  }
+
+  .entry--right {
+    grid-template-columns: 1fr 180px;
+  }
+
+  .cover {
+    width: 180px;
+    height: 250px;
   }
 }
 
@@ -196,6 +215,11 @@
   .timeline-column {
     border-left: 2px solid rgba(0, 0, 0, 0.1);
     padding-left: 12px;
+    gap: 20px;
+  }
+
+  .timeline-column--right {
+    padding-top: 0;
   }
 
   .entry,
@@ -203,11 +227,11 @@
     grid-template-columns: 120px 1fr;
     gap: 12px;
     padding: 16px;
-    margin-bottom: 20px;
+    min-height: auto;
   }
 
   .entry--right {
-    margin-top: 20px;
+    grid-template-columns: 120px 1fr;
   }
 
   .entry--right .meta {
@@ -221,7 +245,7 @@
   .entry .cover,
   .entry--right .cover {
     width: 120px;
-    height: auto;
+    height: 170px;
     align-self: flex-start;
   }
 

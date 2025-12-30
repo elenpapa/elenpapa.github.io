@@ -5,6 +5,14 @@ import { content, type TimelineContent } from '@/services/content'
 const data = ref<TimelineContent | null>(null)
 const timelineItems = computed(() => (data.value?.items ?? []).slice().reverse())
 const getTimelineCoverSrc = (coverSrc: string | undefined) => coverSrc || ''
+const placeholderSrc = '/images/common/book-placeholder.svg'
+
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  if (img.src !== placeholderSrc && !img.src.endsWith('book-placeholder.svg')) {
+    img.src = placeholderSrc
+  }
+}
 
 // Fetch data both on server (SSG) and client
 const fetchData = async () => {
@@ -38,7 +46,8 @@ onMounted(fetchData)
               loading="lazy"
               decoding="async"
               width="200"
-              height="300"
+              height="280"
+              @error="handleImageError"
             />
             <div class="meta">
               <h3>{{ item.title }}</h3>
@@ -64,7 +73,8 @@ onMounted(fetchData)
               loading="lazy"
               decoding="async"
               width="200"
-              height="300"
+              height="280"
+              @error="handleImageError"
             />
             <div class="meta">
               <h3>{{ item.title }}</h3>

@@ -4,19 +4,16 @@ import { content, type MoonlightContent } from '@/services/content'
 
 const data = ref<MoonlightContent | null>(null)
 
-type MoonlightEvent = NonNullable<MoonlightContent['events']>[number]
-
 const hero = computed(() => data.value?.hero)
 const mission = computed(() => data.value?.mission)
 const bubbles = computed(() => data.value?.bubbles)
-const events = computed<MoonlightEvent[]>(() => data.value?.events ?? [])
+const bookJournal = computed(() => data.value?.bookJournal)
 const releases = computed(() => data.value?.releases)
 const cta = computed(() => data.value?.cta)
+const socials = computed(() => data.value?.socials ?? [])
 
-const eventMedia = (event: MoonlightEvent) => event.image
-const getEventImageSrc = (imageSrc: string | undefined) => imageSrc || ''
-const getEventImageAlt = (imageAlt: string | undefined) => imageAlt || ''
 const getReleaseImageSrc = (coverSrc: string | undefined) => coverSrc || ''
+const getSocialIconSrc = (iconSrc: string | undefined) => iconSrc || ''
 
 const fetchData = async () => {
   data.value = await content.getMoonlight()
@@ -29,94 +26,98 @@ onMounted(fetchData)
 <template>
   <main id="content" role="main" class="moonlight-page">
     <!-- Hero -->
-    <section v-if="hero" class="moonlight-hero diagonal--both-rtl" v-reveal>
+    <section v-if="hero" class="moonlight-hero diagonal--ltr diagonal-padding--bottom" v-reveal>
       <div class="container hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow">Moonlight Tales</p>
-          <h1>{{ hero.title }}</h1>
-          <p class="subtitle">{{ hero.subtitle }}</p>
-          <p class="description">{{ hero.description }}</p>
-
-          <ul v-if="hero.badges?.length" class="hero-badges">
-            <li v-for="badge in hero.badges" :key="badge.label">
-              <a v-if="badge.href" :href="badge.href" target="_blank" rel="noreferrer noopener">
-                {{ badge.label }}
-              </a>
-              <span v-else>{{ badge.label }}</span>
-            </li>
-          </ul>
-
-          <div v-if="hero.stats?.length" class="hero-stats">
-            <article v-for="stat in hero.stats" :key="stat.label" class="stat-pill">
-              <span class="stat-value">{{ stat.value }}</span>
-              <span class="stat-label">{{ stat.label }}</span>
-              <span v-if="stat.description" class="stat-description">{{ stat.description }}</span>
-            </article>
+          <div class="hero-header">
+            <p class="eyebrow">Moonlight Tales</p>
+            <h1>{{ hero.title }}</h1>
           </div>
-
-          <div v-if="hero.buttons?.length" class="hero-buttons">
-            <template v-for="button in hero.buttons" :key="button.label + button.href">
-              <a
-                v-if="!button.href.startsWith('/')"
-                :href="button.href"
-                :class="button.variant === 'ghost' ? 'ghost-button' : 'primary-button'"
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                {{ button.label }}
-              </a>
-              <RouterLink
-                v-else
-                :to="button.href"
-                :class="button.variant === 'ghost' ? 'ghost-button' : 'primary-button'"
-              >
-                {{ button.label }}
-              </RouterLink>
-            </template>
+          <p class="subtitle">{{ hero.subtitle }}</p>
+          <div class="hero-description-wrapper">
+            <p class="description">{{ hero.description }}</p>
           </div>
         </div>
 
         <div class="hero-media" aria-label="Moonlight Tales media preview">
-          <div class="media-primary">
-            <div class="media-glow"></div>
-            <img
-              :src="hero.media.primary.src"
-              :alt="hero.media.primary.alt"
-              loading="eager"
-              decoding="async"
-            />
-          </div>
-          <div v-if="hero.media.secondary" class="media-secondary">
-            <img
-              :src="hero.media.secondary.src"
-              :alt="hero.media.secondary.alt"
-              loading="lazy"
-              decoding="async"
-            />
+          <div class="media-frame">
+            <div class="media-primary">
+              <div class="media-glow"></div>
+              <img
+                :src="hero.media.primary.src"
+                :alt="hero.media.primary.alt"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+            <div v-if="hero.media.secondary" class="media-secondary">
+              <img
+                :src="hero.media.secondary.src"
+                :alt="hero.media.secondary.alt"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
           </div>
         </div>
+      </div>
+      <!-- stats moved to the bottom of the section -->
+      <div v-if="hero.stats?.length" class="hero-stats">
+        <article v-for="stat in hero.stats" :key="stat.label" class="stat-pill">
+          <span class="stat-value">{{ stat.value }}</span>
+          <span class="stat-label">{{ stat.label }}</span>
+        </article>
       </div>
     </section>
 
     <!-- Mission -->
-    <section v-if="mission" class="moonlight-mission" v-reveal>
+    <section
+      v-if="mission"
+      class="moonlight-mission diagonal--both-ltr-rtl diagonal-padding--both"
+      v-reveal
+    >
       <div class="container mission-grid">
         <div class="mission-copy">
-          <p class="eyebrow">Η αποστολή μας</p>
+          <p class="eyebrow">{{ mission.eyebrow }}</p>
           <h2>{{ mission.heading }}</h2>
-          <p class="body-text">{{ mission.body }}</p>
         </div>
         <ul class="mission-pillars">
-          <li v-for="pillar in mission.pillars" :key="pillar.title" class="pillar-card">
-            <h3>{{ pillar.title }}</h3>
-            <p>{{ pillar.description }}</p>
+          <li
+            v-for="pillar in mission.pillars"
+            :key="`${pillar.firstName}-${pillar.lastName}`"
+            class="pillar-card"
+          >
+            <a
+              :href="pillar.href"
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              class="pillar-link"
+              :aria-label="`Δείτε περισσότερα για τον/την ${pillar.firstName} ${pillar.lastName}`"
+            >
+              <div class="pillar-image">
+                <img
+                  :src="pillar.image.src"
+                  :alt="pillar.image.alt"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <h3>
+                <span class="pillar-first-name">{{ pillar.firstName }}</span>
+                <span class="pillar-last-name">{{ pillar.lastName }}</span>
+              </h3>
+            </a>
           </li>
         </ul>
       </div>
     </section>
 
     <!-- Bubble stats -->
-    <section v-if="bubbles?.items?.length" class="moonlight-bubbles diagonal--ltr" v-reveal>
+    <section
+      v-if="bubbles?.items?.length"
+      class="moonlight-bubbles diagonal--both-rtl-ltr diagonal-padding--both"
+      v-reveal
+    >
       <div class="container">
         <header class="section-header">
           <h2>{{ bubbles.heading }}</h2>
@@ -135,43 +136,54 @@ onMounted(fetchData)
       </div>
     </section>
 
-    <!-- Events -->
-    <section v-if="events.length" class="moonlight-events diagonal--both-ltr" v-reveal>
-      <div class="container">
-        <header class="section-header">
-          <h2>Στιγμές από την κοινότητα</h2>
-          <p class="section-subtitle">
-            Mock φωτογραφίες από παρουσιάσεις, book clubs, lives και συνεργασίες με δημιουργούς στο
-            Instagram και το TikTok.
-          </p>
-        </header>
-        <ul class="events-grid">
-          <li v-for="event in events" :key="event.id" class="event-card">
-            <div class="event-media">
-              <div class="event-glow"></div>
+    <!-- Book Journal -->
+    <section
+      v-if="bookJournal"
+      class="moonlight-book-journal diagonal--both-ltr-rtl diagonal-padding--both"
+      v-reveal
+    >
+      <div class="container book-journal-grid">
+        <div class="book-journal-media">
+          <div class="book-journal-glow"></div>
+          <img
+            :src="bookJournal.image.src"
+            :alt="bookJournal.image.alt"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+        <div class="book-journal-content">
+          <header class="section-header">
+            <h2>{{ bookJournal.heading }}</h2>
+            <p class="section-subtitle">{{ bookJournal.description }}</p>
+          </header>
+          <a
+            :href="bookJournal.instagramHighlight.href"
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            class="instagram-highlight-link"
+            :aria-label="`Δείτε τα ${bookJournal.instagramHighlight.label} στο Instagram`"
+          >
+            <div class="highlight-bubble">
               <img
-                :src="getEventImageSrc(eventMedia(event).src)"
-                :alt="getEventImageAlt(eventMedia(event).alt)"
+                :src="bookJournal.instagramHighlight.thumbnailSrc"
+                :alt="bookJournal.instagramHighlight.label"
                 loading="lazy"
                 decoding="async"
               />
             </div>
-            <div class="event-body">
-              <p v-if="event.date || event.location" class="event-meta">
-                <span v-if="event.date">{{ event.date }}</span>
-                <span v-if="event.date && event.location" aria-hidden="true"> · </span>
-                <span v-if="event.location">{{ event.location }}</span>
-              </p>
-              <h3>{{ event.title }}</h3>
-              <p>{{ event.description }}</p>
-            </div>
-          </li>
-        </ul>
+            <span class="highlight-label">{{ bookJournal.instagramHighlight.label }}</span>
+          </a>
+        </div>
       </div>
     </section>
 
     <!-- Releases -->
-    <section v-if="releases" class="moonlight-releases" v-reveal>
+    <section
+      v-if="releases"
+      class="moonlight-releases diagonal--both-rtl-ltr diagonal-padding--both"
+      v-reveal
+    >
       <div class="container">
         <header class="section-header">
           <h2>{{ releases.heading }}</h2>
@@ -198,32 +210,36 @@ onMounted(fetchData)
     </section>
 
     <!-- CTA -->
-    <section v-if="cta" class="moonlight-cta diagonal--top-rtl" v-reveal>
+    <section v-if="cta" class="moonlight-cta diagonal--top-ltr diagonal-padding--both" v-reveal>
       <div class="container cta-inner">
         <div class="cta-copy">
           <h2>{{ cta.heading }}</h2>
-          <p class="body-text">{{ cta.body }}</p>
         </div>
-        <div v-if="cta.buttons?.length" class="cta-buttons">
-          <template v-for="button in cta.buttons" :key="button.label + button.href">
-            <a
-              v-if="!button.href.startsWith('/')"
-              :href="button.href"
-              :class="button.variant === 'ghost' ? 'ghost-button' : 'primary-button'"
-              target="_blank"
-              rel="noreferrer noopener"
-            >
-              {{ button.label }}
-            </a>
-            <RouterLink
-              v-else
-              :to="button.href"
-              :class="button.variant === 'ghost' ? 'ghost-button' : 'primary-button'"
-            >
-              {{ button.label }}
-            </RouterLink>
-          </template>
-        </div>
+        <nav
+          v-if="socials.length"
+          aria-label="Moonlight Tales social media links"
+          class="cta-socials"
+        >
+          <a
+            v-for="s in socials"
+            :key="s.href"
+            :href="s.href"
+            target="_blank"
+            rel="noopener noreferrer nofollow"
+            :aria-label="s.label"
+            class="social-link"
+          >
+            <img
+              :src="getSocialIconSrc(s.icon)"
+              :alt="s.label"
+              class="social-icon"
+              width="40"
+              height="40"
+              loading="lazy"
+              decoding="async"
+            />
+          </a>
+        </nav>
       </div>
     </section>
   </main>

@@ -16,6 +16,8 @@ const isSSGBuild = process.env.VITE_SSG === 'true'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // Base URL for GitHub Pages (user page at elenpapa.github.io)
+  base: '/',
   plugins: [
     vue(),
     vueDevTools(),
@@ -83,6 +85,13 @@ export default defineConfig({
     script: 'async',
     formatting: 'none', // Disable formatting to avoid issues with Instagram embed HTML
     mock: true,
+    // Include all static routes plus dynamic post routes (0-9 based on posts.json)
+    includedRoutes: async (paths) => {
+      // Filter out dynamic route patterns and add concrete post routes
+      const staticRoutes = paths.filter((path) => !path.includes(':'))
+      const postRoutes = Array.from({ length: 10 }, (_, i) => `/posts/${i}`)
+      return [...staticRoutes, ...postRoutes]
+    },
   },
   build: {
     rollupOptions: {

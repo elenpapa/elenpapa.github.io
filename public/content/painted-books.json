@@ -1,8 +1,8 @@
 {
   "hero": {
-    "title": "Ζωγραφισμένες άκρες βιβλίων",
-    "subtitle": "Όπου η λογοτεχνία συναντά την τέχνη",
-    "description": "Κάθε βιβλίο που ζωγραφίζω είναι ένα μοναδικό έργο τέχνης. Με πινέλα και στυλό δημιουργώ χρωματιστές άκρες που δίνουν νέα πνοή σε αγαπημένες ιστορίες.",
+    "title": "Χρωματιστές άκρες (Σόκορα) βιβλίων",
+    "subtitle": "Θυμάστε που σας έλεγα ότι ενίοτε ζωγραφίζω πάνω ή μέσα σε βιβλία;",
+    "description": "Όλο και πιο συχνά και οι εκδοτικοί στην Ελλάδα επιλέγουν να κυκλοφορήσουν συλλεκτικές εκδόσεις βιβλίων με ζωγραφισμένες σελίδες. Επειδή, όμως, δεν βγαίνουν έτσι όλα τα βιβλία, πήρα την κατάσταση στα χέρια μου. Παρακάτω θα βρείτε μερικά από τα βιβλία που έχω ζωγραφίσει μέχρι σήμερα.",
     "media": {
       "src": "/images/painted-books/hero-painted-book.png",
       "alt": "Ζωγραφισμένες άκρες βιβλίου με λεπτομέρεια"
@@ -17,7 +17,7 @@
         "title": "Το Όνομα του Ρόδου",
         "author": "Umberto Eco",
         "media": {
-          "src": "/images/painted-books/book-1.png",
+          "src": "/images/painted-books/book-1.jpg",
           "alt": "Ζωγραφισμένες άκρες Όνομα του Ρόδου"
         }
       },
@@ -26,7 +26,7 @@
         "title": "Περηφάνια και Προκατάληψη",
         "author": "Jane Austen",
         "media": {
-          "src": "/images/painted-books/book-2.png",
+          "src": "/images/painted-books/book-2.jpg",
           "alt": "Ζωγραφισμένες άκρες Περηφάνια και Προκατάληψη"
         }
       },
@@ -35,7 +35,7 @@
         "title": "Ο Άρχοντας των Δαχτυλιδιών",
         "author": "J.R.R. Tolkien",
         "media": {
-          "src": "/images/painted-books/book-3.png",
+          "src": "/images/painted-books/book-3.jpg",
           "alt": "Ζωγραφισμένες άκρες Άρχοντας των Δαχτυλιδιών"
         }
       },
@@ -44,7 +44,7 @@
         "title": "Η Χειρωνακτική του Ερασιτέχνη",
         "author": "Donna Tartt",
         "media": {
-          "src": "/images/painted-books/book-4.png",
+          "src": "/images/painted-books/book-4.jpg",
           "alt": "Ζωγραφισμένες άκρες Χειρωνακτική"
         }
       },
@@ -53,7 +53,7 @@
         "title": "Εκατό Χρόνια Μοναξιά",
         "author": "Gabriel García Márquez",
         "media": {
-          "src": "/images/painted-books/book-5.png",
+          "src": "/images/painted-books/book-5.jpg",
           "alt": "Ζωγραφισμένες άκρες Εκατό Χρόνια Μοναξιά"
         }
       },
@@ -62,7 +62,7 @@
         "title": "Η Αθώωση",
         "author": "Tana French",
         "media": {
-          "src": "/images/painted-books/book-6.png",
+          "src": "/images/painted-books/book-6.jpg",
           "alt": "Ζωγραφισμένες άκρες Αθώωση"
         }
       },
@@ -71,7 +71,7 @@
         "title": "Η Αθώωση",
         "author": "Tana French",
         "media": {
-          "src": "/images/painted-books/book-6.png",
+          "src": "/images/painted-books/book-6.jpg",
           "alt": "Ζωγραφισμένες άκρες Αθώωση"
         }
       },
@@ -80,7 +80,7 @@
         "title": "Η Αθώωση",
         "author": "Tana French",
         "media": {
-          "src": "/images/painted-books/book-6.png",
+          "src": "/images/painted-books/book-6.jpg",
           "alt": "Ζωγραφισμένες άκρες Αθώωση"
         }
       },
@@ -89,7 +89,7 @@
         "title": "Η Αθώωση",
         "author": "Tana French",
         "media": {
-          "src": "/images/painted-books/book-6.png",
+          "src": "/images/painted-books/book-6.jpg",
           "alt": "Ζωγραφισμένες άκρες Αθώωση"
         }
       }
@@ -97,17 +97,12 @@
   },
   "cta": {
     "heading": "Ενδιαφέρεστε για ένα custom βιβλίο;",
-    "body": "Επικοινωνήστε μαζί μου για να συζητήσουμε το επόμενο ζωγραφισμένο βιβλίο σας.",
+    "body": "Επικοινωνήστε μαζί μου",
     "buttons": [
       {
         "label": "Στείλτε μήνυμα",
         "href": "/#contact",
         "variant": "primary"
-      },
-      {
-        "label": "Δείτε την εργογραφία",
-        "href": "/timeline",
-        "variant": "ghost"
       }
     ]
   }

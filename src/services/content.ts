@@ -278,60 +278,20 @@ const PaintedBooksContentSchema = z.object({
       alt: z.string(),
     }),
   }),
-  about: z.object({
-    heading: z.string(),
-    body: z.string(),
-    stats: z
-      .array(
-        z.object({
-          value: z.string(),
-          label: z.string(),
-        }),
-      )
-      .optional(),
-  }),
-  process: z.object({
-    heading: z.string(),
-    steps: z.array(
-      z.object({
-        title: z.string(),
-        description: z.string(),
-        icon: z.string().optional(),
-      }),
-    ),
-  }),
   gallery: z.object({
     heading: z.string(),
-    description: z.string().optional(),
+    itemsPerPage: z.number().optional(),
     items: z.array(
       z.object({
         id: z.string(),
         title: z.string(),
         author: z.string(),
-        theme: z.string(),
         media: z.object({
           src: z.string(),
           alt: z.string(),
         }),
       }),
     ),
-  }),
-  commission: z.object({
-    heading: z.string(),
-    body: z.string(),
-    features: z
-      .array(
-        z.object({
-          title: z.string(),
-          description: z.string(),
-        }),
-      )
-      .optional(),
-    pricing: z
-      .object({
-        note: z.string().optional(),
-      })
-      .optional(),
   }),
   cta: z.object({
     heading: z.string(),

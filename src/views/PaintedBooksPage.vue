@@ -7,11 +7,43 @@ const data = ref<PaintedBooksContent | null>(null)
 const hero = computed(() => data.value?.hero)
 const heroMediaSrc = computed(() => hero.value?.media.src || '')
 const heroMediaAlt = computed(() => hero.value?.media.alt || '')
-const about = computed(() => data.value?.about)
-const process = computed(() => data.value?.process)
 const gallery = computed(() => data.value?.gallery)
-const commission = computed(() => data.value?.commission)
 const cta = computed(() => data.value?.cta)
+
+// Pagination state
+const currentPage = ref(1)
+const itemsPerPage = computed(() => gallery.value?.itemsPerPage ?? 4)
+const totalItems = computed(() => gallery.value?.items.length ?? 0)
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value))
+
+const paginatedItems = computed(() => {
+  if (!gallery.value?.items) return []
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return gallery.value.items.slice(start, end)
+})
+
+const goToFirst = () => {
+  currentPage.value = 1
+}
+const goToLast = () => {
+  currentPage.value = totalPages.value
+}
+const goToPrev = () => {
+  if (currentPage.value > 1) currentPage.value--
+}
+const goToNext = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++
+}
+
+// Fallback image handling
+const placeholderSrc = '/images/common/book-placeholder.svg'
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  if (img.src !== placeholderSrc && !img.src.endsWith('book-placeholder.svg')) {
+    img.src = placeholderSrc
+  }
+}
 
 const fetchData = async () => {
   data.value = await content.getPaintedBooks()
@@ -41,42 +73,9 @@ onMounted(fetchData)
             width="500"
             height="400"
             fetchpriority="high"
+            @error="handleImageError"
           />
         </div>
-      </div>
-    </section>
-
-    <!-- About -->
-    <section v-if="about" class="painted-about diagonal--both-rtl diagonal-padding--both" v-reveal>
-      <div class="container about-inner">
-        <div class="about-copy">
-          <h2>{{ about.heading }}</h2>
-          <p class="body-text">{{ about.body }}</p>
-        </div>
-        <div v-if="about.stats" class="about-stats">
-          <article v-for="stat in about.stats" :key="stat.label" class="stat-card">
-            <span class="stat-value">{{ stat.value }}</span>
-            <span class="stat-label">{{ stat.label }}</span>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- Process -->
-    <section v-if="process" class="painted-process" v-reveal>
-      <div class="container">
-        <header class="section-header">
-          <h2>{{ process.heading }}</h2>
-        </header>
-        <ol class="process-steps">
-          <li v-for="(step, idx) in process.steps" :key="step.title" class="step-card">
-            <div class="step-number">{{ idx + 1 }}</div>
-            <div class="step-content">
-              <h3>{{ step.title }}</h3>
-              <p>{{ step.description }}</p>
-            </div>
-          </li>
-        </ol>
       </div>
     </section>
 
@@ -89,10 +88,9 @@ onMounted(fetchData)
       <div class="container">
         <header class="section-header">
           <h2>{{ gallery.heading }}</h2>
-          <p v-if="gallery.description" class="section-subtitle">{{ gallery.description }}</p>
         </header>
         <ul class="gallery-grid">
-          <li v-for="item in gallery.items" :key="item.id" class="gallery-card">
+          <li v-for="item in paginatedItems" :key="item.id" class="gallery-card">
             <div class="gallery-image">
               <div class="gallery-glow"></div>
               <img
@@ -102,39 +100,56 @@ onMounted(fetchData)
                 decoding="async"
                 width="300"
                 height="400"
+                @error="handleImageError"
               />
             </div>
             <div class="gallery-info">
               <h3>{{ item.title }}</h3>
               <p class="author">{{ item.author }}</p>
-              <p class="theme">{{ item.theme }}</p>
             </div>
           </li>
         </ul>
-      </div>
-    </section>
-
-    <!-- Commission info -->
-    <section v-if="commission" class="painted-commission" v-reveal>
-      <div class="container commission-inner">
-        <div class="commission-copy">
-          <h2>{{ commission.heading }}</h2>
-          <p class="body-text">{{ commission.body }}</p>
-        </div>
-        <ul v-if="commission.features" class="commission-features">
-          <li v-for="feature in commission.features" :key="feature.title" class="feature-card">
-            <h3>{{ feature.title }}</h3>
-            <p>{{ feature.description }}</p>
-          </li>
-        </ul>
-        <div v-if="commission.pricing?.note" class="pricing-note">
-          <p>{{ commission.pricing.note }}</p>
-        </div>
+        <!-- Pagination controls -->
+        <nav v-if="totalPages > 1" class="gallery-pagination" aria-label="Πλοήγηση γκαλερί">
+          <button
+            class="pagination-btn"
+            :disabled="currentPage === 1"
+            @click="goToFirst"
+            aria-label="Πρώτη σελίδα"
+          >
+            <span aria-hidden="true">«</span>
+          </button>
+          <button
+            class="pagination-btn"
+            :disabled="currentPage === 1"
+            @click="goToPrev"
+            aria-label="Προηγούμενη σελίδα"
+          >
+            <span aria-hidden="true">‹</span>
+          </button>
+          <span class="pagination-info"> {{ currentPage }} / {{ totalPages }} </span>
+          <button
+            class="pagination-btn"
+            :disabled="currentPage === totalPages"
+            @click="goToNext"
+            aria-label="Επόμενη σελίδα"
+          >
+            <span aria-hidden="true">›</span>
+          </button>
+          <button
+            class="pagination-btn"
+            :disabled="currentPage === totalPages"
+            @click="goToLast"
+            aria-label="Τελευταία σελίδα"
+          >
+            <span aria-hidden="true">»</span>
+          </button>
+        </nav>
       </div>
     </section>
 
     <!-- CTA -->
-    <section v-if="cta" class="painted-cta diagonal-padding--top diagonal--top-rtl" v-reveal>
+    <section v-if="cta" class="painted-cta diagonal-padding--top diagonal--top-ltr" v-reveal>
       <div class="container cta-inner">
         <div class="cta-copy">
           <h2>{{ cta.heading }}</h2>

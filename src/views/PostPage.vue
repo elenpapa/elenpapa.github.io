@@ -8,6 +8,7 @@ const route = useRoute()
 const router = useRouter()
 const data = ref<PostsContent | null>(null)
 const siteData = ref<SiteContent | null>(null)
+const postContentHtml = ref<string>('')
 
 const postId = computed(() => {
   const id = route.params.id
@@ -20,6 +21,19 @@ const post = computed(() => {
 })
 
 const postImageSrc = computed(() => post.value?.image || '')
+
+// Fetch HTML content from the file path
+const fetchPostContent = async () => {
+  if (!post.value?.contentHtml) return
+  try {
+    const response = await fetch(post.value.contentHtml)
+    if (response.ok) {
+      postContentHtml.value = await response.text()
+    }
+  } catch (error) {
+    console.error('Failed to fetch post content:', error)
+  }
+}
 
 // SEO: Use site configuration for base URL
 const siteUrl = computed(() => siteData.value?.seo.siteUrl || '')
@@ -74,6 +88,7 @@ const fetchData = async () => {
   const [postsData, site] = await Promise.all([content.getPosts(), content.getSite()])
   data.value = postsData
   siteData.value = site
+  await fetchPostContent()
 }
 
 onServerPrefetch(fetchData)
@@ -111,7 +126,7 @@ const goBack = () => {
         <h1>{{ post.title }}</h1>
       </div>
 
-      <div class="post-content" v-html="post.contentHtml"></div>
+      <div class="post-content" v-html="postContentHtml"></div>
     </article>
   </main>
 </template>

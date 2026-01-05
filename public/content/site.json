@@ -1,4 +1,10 @@
 {
+  "seo": {
+    "siteUrl": "https://elenpapa.github.io",
+    "defaultImage": "/images/intro.png",
+    "siteName": "Ελένη Παπαδοπούλου",
+    "locale": "el_GR"
+  },
   "logo": {
     "src": "/logo.png",
     "alt": "Site logo"

@@ -13,6 +13,12 @@ const SocialItemSchema = z.object({
 })
 
 const SiteContentSchema = z.object({
+  seo: z.object({
+    siteUrl: z.string(),
+    defaultImage: z.string(),
+    siteName: z.string(),
+    locale: z.string(),
+  }),
   logo: z.object({
     src: z.string(),
     alt: z.string(),

@@ -4,9 +4,9 @@
  */
 
 import satori from 'satori'
-import { html } from 'satori-html'
 import { Resvg } from '@resvg/resvg-js'
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import sharp from 'sharp'
+import { readFile, writeFile, mkdir, access } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -18,140 +18,282 @@ const WIDTH = 1200
 const HEIGHT = 630
 
 /**
- * Create the OG image HTML template
+ * Convert image file to base64 data URI
+ * @param {string} imagePath - Path to the image file
+ * @param {number} size - Size to resize to (default 160)
+ * @returns {Promise<string|null>} Base64 data URI or null on failure
  */
-function createOgTemplate(title, description, siteName, accentColor = '#b39ddb') {
+async function imageToDataUri(imagePath, size = 160) {
+  try {
+    // Check if file exists first
+    await access(imagePath)
+    
+    // Resize image to optimize memory usage
+    const resizedBuffer = await sharp(imagePath)
+      .resize(size, size, { fit: 'cover', position: 'center' })
+      .png()
+      .toBuffer()
+
+    const base64 = resizedBuffer.toString('base64')
+    return `data:image/png;base64,${base64}`
+  } catch (error) {
+    console.warn(`Failed to load image ${imagePath}:`, error.message)
+    return null
+  }
+}
+
+/**
+ * Create the OG image as a React-like JSX object for satori
+ * Using JSX objects instead of satori-html to avoid HTML escaping issues
+ */
+function createOgTemplate(title, description, siteName, accentColor = '#b39ddb', imageDataUri = null) {
   // Truncate description if too long
-  const maxDescLength = 120
+  const maxDescLength = 140
   const truncatedDesc =
     description.length > maxDescLength ? description.substring(0, maxDescLength) + '...' : description
 
   // Truncate title if too long
-  const maxTitleLength = 80
+  const maxTitleLength = 90
   const truncatedTitle = title.length > maxTitleLength ? title.substring(0, maxTitleLength) + '...' : title
 
-  return html`
-    <div
-      style="
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
-        font-family: 'EB Garamond', serif;
-      "
-    >
-      <!-- Accent bar at top -->
-      <div
-        style="
-          display: flex;
-          width: 100%;
-          height: 8px;
-          background: ${accentColor};
-        "
-      ></div>
+  // Create avatar element - either image or initials fallback
+  const avatarElement = imageDataUri
+    ? {
+        type: 'img',
+        props: {
+          src: imageDataUri,
+          width: 80,
+          height: 80,
+          style: {
+            borderRadius: '50%',
+            marginRight: '20px',
+            border: `3px solid ${accentColor}`,
+            objectFit: 'cover',
+          },
+        },
+      }
+    : {
+        type: 'div',
+        props: {
+          style: {
+            display: 'flex',
+            width: '80px',
+            height: '80px',
+            background: accentColor,
+            borderRadius: '50%',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: '20px',
+          },
+          children: {
+            type: 'span',
+            props: {
+              style: {
+                fontSize: '36px',
+                color: 'white',
+                fontWeight: 600,
+              },
+              children: 'ΕΠ',
+            },
+          },
+        },
+      }
 
-      <!-- Main content area -->
-      <div
-        style="
-          display: flex;
-          flex-direction: column;
-          flex: 1;
-          padding: 60px 70px;
-          justify-content: space-between;
-        "
-      >
-        <!-- Title and description -->
-        <div style="display: flex; flex-direction: column;">
-          <h1
-            style="
-              font-size: 52px;
-              font-weight: 600;
-              color: #2c3e50;
-              margin: 0 0 24px 0;
-              line-height: 1.2;
-              letter-spacing: -0.5px;
-            "
-          >
-            ${truncatedTitle}
-          </h1>
-          <p
-            style="
-              font-size: 26px;
-              color: #5a6c7d;
-              margin: 0;
-              line-height: 1.5;
-              max-width: 900px;
-            "
-          >
-            ${truncatedDesc}
-          </p>
-        </div>
-
-        <!-- Footer with branding -->
-        <div
-          style="
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-          "
-        >
-          <div style="display: flex; align-items: center;">
-            <!-- Logo circle -->
-            <div
-              style="
-                display: flex;
-                width: 56px;
-                height: 56px;
-                background: ${accentColor};
-                border-radius: 50%;
-                align-items: center;
-                justify-content: center;
-                margin-right: 16px;
-              "
-            >
-              <span style="font-size: 28px; color: white; font-weight: 600;">ΕΠ</span>
-            </div>
-            <div style="display: flex; flex-direction: column;">
-              <span style="font-size: 24px; font-weight: 600; color: #2c3e50;">${siteName}</span>
-              <span style="font-size: 16px; color: #7f8c8d;">Συγγραφέας & Επιμελήτρια</span>
-            </div>
-          </div>
-
-          <!-- Decorative element -->
-          <div
-            style="
-              display: flex;
-              width: 120px;
-              height: 120px;
-              background: ${accentColor};
-              opacity: 0.15;
-              border-radius: 50%;
-            "
-          ></div>
-        </div>
-      </div>
-
-      <!-- Bottom accent bar -->
-      <div
-        style="
-          display: flex;
-          width: 100%;
-          height: 4px;
-          background: ${accentColor};
-        "
-      ></div>
-    </div>
-  `
+  return {
+    type: 'div',
+    props: {
+      style: {
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%)',
+        fontFamily: 'EB Garamond, serif',
+      },
+      children: [
+        // Top accent bar
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              width: '100%',
+              height: '8px',
+              background: accentColor,
+            },
+          },
+        },
+        // Main content area
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              flexDirection: 'column',
+              flex: 1,
+              padding: '60px 70px',
+              justifyContent: 'space-between',
+            },
+            children: [
+              // Title and description section
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    flexDirection: 'column',
+                  },
+                  children: [
+                    // Title
+                    {
+                      type: 'h1',
+                      props: {
+                        style: {
+                          fontSize: '52px',
+                          fontWeight: 600,
+                          color: '#2c3e50',
+                          margin: '0 0 24px 0',
+                          lineHeight: 1.2,
+                          letterSpacing: '-0.5px',
+                        },
+                        children: truncatedTitle,
+                      },
+                    },
+                    // Description
+                    {
+                      type: 'p',
+                      props: {
+                        style: {
+                          fontSize: '26px',
+                          color: '#5a6c7d',
+                          margin: '0 0 20px 0',
+                          lineHeight: 1.5,
+                          maxWidth: '900px',
+                        },
+                        children: truncatedDesc,
+                      },
+                    },
+                    // Call to action button
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '12px 28px',
+                          background: accentColor,
+                          borderRadius: '8px',
+                          fontSize: '22px',
+                          fontWeight: 600,
+                          color: 'white',
+                          alignSelf: 'flex-start',
+                        },
+                        children: 'Διαβάστε περισσότερα →',
+                      },
+                    },
+                  ],
+                },
+              },
+              // Footer with branding
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  },
+                  children: [
+                    // Avatar and name section
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          display: 'flex',
+                          alignItems: 'center',
+                        },
+                        children: [
+                          avatarElement,
+                          // Name and title
+                          {
+                            type: 'div',
+                            props: {
+                              style: {
+                                display: 'flex',
+                                flexDirection: 'column',
+                              },
+                              children: [
+                                {
+                                  type: 'span',
+                                  props: {
+                                    style: {
+                                      fontSize: '28px',
+                                      fontWeight: 600,
+                                      color: '#2c3e50',
+                                    },
+                                    children: siteName,
+                                  },
+                                },
+                                {
+                                  type: 'span',
+                                  props: {
+                                    style: {
+                                      fontSize: '18px',
+                                      color: '#7f8c8d',
+                                    },
+                                    children: 'Συγγραφέας & Επιμελήτρια',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    // Decorative element
+                    {
+                      type: 'div',
+                      props: {
+                        style: {
+                          display: 'flex',
+                          width: '120px',
+                          height: '120px',
+                          background: accentColor,
+                          opacity: 0.15,
+                          borderRadius: '50%',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        // Bottom accent bar
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              width: '100%',
+              height: '4px',
+              background: accentColor,
+            },
+          },
+        },
+      ],
+    },
+  }
 }
 
 /**
- * Generate OG image for a single post
+ * Generate OG image for a single post or page
  */
-async function generateOgImage(title, description, siteName, outputPath, fontData) {
-  const template = createOgTemplate(title, description, siteName)
+async function generateOgImage(title, description, siteName, outputPath, fontData, imageDataUri = null) {
+  const template = createOgTemplate(title, description, siteName, '#b39ddb', imageDataUri)
 
-  // Generate SVG with satori
+  // Generate SVG with satori (using JSX objects directly)
   const svg = await satori(template, {
     width: WIDTH,
     height: HEIGHT,
@@ -206,13 +348,25 @@ async function main() {
   const siteData = JSON.parse(await readFile(sitePath, 'utf-8'))
   const siteName = siteData.seo?.siteName || 'Ελένη Παπαδοπούλου'
 
+  // Load home data for intro image (used for non-post pages)
+  const homePath = join(rootDir, 'public', 'content', 'home.json')
+  const homeData = JSON.parse(await readFile(homePath, 'utf-8'))
+  const introImagePath = join(rootDir, 'public', homeData.intro.image.src)
+  const introImageDataUri = await imageToDataUri(introImagePath, 160)
+
+  if (introImageDataUri) {
+    console.log('✓ Loaded intro image for avatar')
+  } else {
+    console.warn('⚠ Could not load intro image, will use initials fallback')
+  }
+
   // Load font - using a Google Font that's publicly available
-  // We'll fetch EB Garamond from Google Fonts
   let fontData
   try {
     // Try to load local font first
     const localFontPath = join(rootDir, 'src', 'styles', 'fonts', 'EBGaramond-Regular.ttf')
     fontData = await readFile(localFontPath)
+    console.log('✓ Using local EB Garamond font')
   } catch {
     // Fallback: fetch from Google Fonts
     console.log('📥 Fetching font from Google Fonts...')
@@ -233,22 +387,38 @@ async function main() {
   // Output directory for OG images
   const outputDir = join(rootDir, 'public', 'images', 'og')
 
-  // Generate OG image for each post
+  // Generate OG image for each post (using post's own image)
+  console.log('\n📝 Generating post OG images...')
   for (let i = 0; i < postsData.items.length; i++) {
     const post = postsData.items[i]
     const outputPath = join(outputDir, `post-${i}.png`)
 
-    await generateOgImage(post.title, post.summary, siteName, outputPath, fontData)
+    // Load the post's image as the avatar
+    let postImageDataUri = null
+    if (post.image) {
+      const postImagePath = join(rootDir, 'public', post.image)
+      postImageDataUri = await imageToDataUri(postImagePath, 160)
+      if (!postImageDataUri) {
+        console.warn(`  ⚠ Could not load image for post ${i}, using intro image fallback`)
+        postImageDataUri = introImageDataUri
+      }
+    } else {
+      postImageDataUri = introImageDataUri
+    }
+
+    await generateOgImage(post.title, post.summary, siteName, outputPath, fontData, postImageDataUri)
   }
 
-  // Generate default OG image for the site
+  // Generate default OG image for the site (using intro image as avatar)
+  console.log('\n🌐 Generating site default OG image...')
   const defaultOutputPath = join(outputDir, 'default.png')
   await generateOgImage(
-    'Ελένη Παπαδοπούλου',
-    'Συγγραφέας, επιμελήτρια και σύμβουλος εκδόσεων. Συμβουλές για συγγραφείς, υπηρεσίες επιμέλειας και εργογραφία.',
+    'Ελένη Παπαδοπούλου - Συγγραφέας, Επιμελήτρια & Σύμβουλος Εκδόσεων',
+    'Συμβουλές για συγγραφείς, υπηρεσίες επιμέλειας και εργογραφία. Αξιολόγηση, μετάφραση, επιμέλεια και διόρθωση βιβλίων.',
     siteName,
     defaultOutputPath,
-    fontData
+    fontData,
+    introImageDataUri
   )
 
   console.log('\n✅ OG image generation complete!')

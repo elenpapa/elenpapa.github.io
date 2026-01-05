@@ -9,11 +9,12 @@
   "scripts": {
     "dev": "vite",
     "dev-host": "npm run dev -- --host",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "build": "npm run generate-og && run-p type-check \"build-only {@}\" --",
     "build:ssg": "cross-env VITE_SSG=true vite-ssg build",
     "preview": "vite preview",
     "serve": "node server.js",
     "build-only": "cross-env VITE_SSG=true vite-ssg build",
+    "generate-og": "node scripts/generate-og-images.js",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix --cache",
     "format": "prettier --write \"**/*.{ts,tsx,js,vue,css,scss,md,json,yml,yaml}\"",
@@ -36,6 +37,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@tsconfig/node22": "^22.0.2",
     "@types/node": "^22.18.11",
     "@vitejs/plugin-vue": "^6.0.1",
@@ -51,6 +53,8 @@
     "npm-run-all2": "^8.0.4",
     "prettier": "3.6.2",
     "rollup-plugin-visualizer": "^6.0.5",
+    "satori": "^0.18.3",
+    "satori-html": "^0.3.2",
     "sharp": "^0.34.5",
     "svgo": "^4.0.0",
     "typescript": "~5.9.0",

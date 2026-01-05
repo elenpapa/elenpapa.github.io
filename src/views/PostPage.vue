@@ -23,15 +23,12 @@ const postImageSrc = computed(() => post.value?.image || '')
 
 // SEO: Use site configuration for base URL
 const siteUrl = computed(() => siteData.value?.seo.siteUrl || '')
-const defaultImage = computed(() => siteData.value?.seo.defaultImage || '/images/intro.png')
 const siteName = computed(() => siteData.value?.seo.siteName || 'Ελένη Παπαδοπούλου')
 
 const canonicalUrl = computed(() => `${siteUrl.value}/posts/${postId.value}`)
-const absoluteImageUrl = computed(() => {
-  const imagePath = postImageSrc.value || defaultImage.value
-  // If image starts with /, make it absolute
-  return imagePath.startsWith('/') ? `${siteUrl.value}${imagePath}` : imagePath
-})
+
+// Use generated OG images for social sharing (beautiful templates with title + description)
+const ogImageUrl = computed(() => `${siteUrl.value}/images/og/post-${postId.value}.png`)
 
 // Dynamic head meta tags for SEO and social sharing
 useHead(
@@ -53,7 +50,7 @@ useHead(
         property: 'og:description',
         content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Ελένη Παπαδοπούλου',
       },
-      { property: 'og:image', content: absoluteImageUrl.value },
+      { property: 'og:image', content: ogImageUrl.value },
       { property: 'og:image:width', content: '1200' },
       { property: 'og:image:height', content: '630' },
       { property: 'og:url', content: canonicalUrl.value },
@@ -67,7 +64,7 @@ useHead(
         name: 'twitter:description',
         content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Ελένη Παπαδοπούλου',
       },
-      { name: 'twitter:image', content: absoluteImageUrl.value },
+      { name: 'twitter:image', content: ogImageUrl.value },
     ],
     link: [{ rel: 'canonical', href: canonicalUrl.value }],
   })),

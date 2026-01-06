@@ -18,6 +18,51 @@ const SiteContentSchema = z.object({
     defaultImage: z.string(),
     siteName: z.string(),
     locale: z.string(),
+    author: z.string().optional(),
+    pages: z
+      .object({
+        home: z
+          .object({
+            title: z.string(),
+            description: z.string(),
+            image: z.string(),
+            path: z.string(),
+          })
+          .optional(),
+        timeline: z
+          .object({
+            title: z.string(),
+            description: z.string(),
+            image: z.string(),
+            path: z.string(),
+          })
+          .optional(),
+        book: z
+          .object({
+            title: z.string(),
+            description: z.string(),
+            image: z.string(),
+            path: z.string(),
+          })
+          .optional(),
+        moonlight: z
+          .object({
+            title: z.string(),
+            description: z.string(),
+            image: z.string(),
+            path: z.string(),
+          })
+          .optional(),
+        paintedBooks: z
+          .object({
+            title: z.string(),
+            description: z.string(),
+            image: z.string(),
+            path: z.string(),
+          })
+          .optional(),
+      })
+      .optional(),
   }),
   logo: z.object({
     src: z.string(),

@@ -1,6 +1,28 @@
 <script setup lang="ts">
 import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { content, type MoonlightContent } from '@/services/content'
+import { usePageSeo } from '@/composables/usePageSeo'
+
+// SEO: Set up meta tags and Book schema for Moonlight Tales
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { siteUrl } = usePageSeo({
+  pageKey: 'moonlight',
+  path: '/moonlight',
+  type: 'website',
+  structuredData: [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Book',
+      name: 'Moonlight Tales',
+      author: {
+        '@type': 'Person',
+        name: 'Έλενα Παπαδοπούλου',
+      },
+      inLanguage: 'el',
+      description: 'Moonlight Tales: Μια συλλογή ιστοριών που εξερευνά το μυστήριο και τη μαγεία',
+    },
+  ],
+})
 
 const data = ref<MoonlightContent | null>(null)
 

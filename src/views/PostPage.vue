@@ -22,8 +22,11 @@ const post = computed(() => {
 
 const postImageSrc = computed(() => post.value?.image || '')
 
-// Fetch HTML content from the file path
+// Fetch HTML content from the file path (client-side only)
 const fetchPostContent = async () => {
+  // Skip during SSG - relative URLs don't work without a browser origin
+  // Use import.meta.env.SSR which is reliable in Vite SSG
+  if (import.meta.env.SSR) return
   if (!post.value?.contentHtml) return
   try {
     const response = await fetch(post.value.contentHtml)
@@ -37,7 +40,7 @@ const fetchPostContent = async () => {
 
 // SEO: Use site configuration for base URL
 const siteUrl = computed(() => siteData.value?.seo.siteUrl || '')
-const siteName = computed(() => siteData.value?.seo.siteName || 'Ελένη Παπαδοπούλου')
+const siteName = computed(() => siteData.value?.seo.siteName || 'Έλενα Παπαδοπούλου')
 
 const canonicalUrl = computed(() => `${siteUrl.value}/posts/${postId.value}`)
 
@@ -52,17 +55,17 @@ useHead(
       // Basic SEO
       {
         name: 'description',
-        content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Ελένη Παπαδοπούλου',
+        content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Έλενα Παπαδοπούλου',
       },
       { name: 'robots', content: 'index, follow' },
-      { name: 'author', content: 'Ελένη Παπαδοπούλου' },
+      { name: 'author', content: 'Έλενα Παπαδοπούλου' },
 
       // Open Graph (Facebook, LinkedIn, etc.)
       { property: 'og:type', content: 'article' },
       { property: 'og:title', content: post.value?.title || 'Άρθρο' },
       {
         property: 'og:description',
-        content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Ελένη Παπαδοπούλου',
+        content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Έλενα Παπαδοπούλου',
       },
       { property: 'og:image', content: ogImageUrl.value },
       { property: 'og:image:width', content: '1200' },
@@ -76,7 +79,7 @@ useHead(
       { name: 'twitter:title', content: post.value?.title || 'Άρθρο' },
       {
         name: 'twitter:description',
-        content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Ελένη Παπαδοπούλου',
+        content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Έλενα Παπαδοπούλου',
       },
       { name: 'twitter:image', content: ogImageUrl.value },
     ],

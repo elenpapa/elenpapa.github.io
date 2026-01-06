@@ -346,7 +346,7 @@ async function main() {
   // Load site data for branding
   const sitePath = join(rootDir, 'public', 'content', 'site.json')
   const siteData = JSON.parse(await readFile(sitePath, 'utf-8'))
-  const siteName = siteData.seo?.siteName || 'Ελένη Παπαδοπούλου'
+  const siteName = siteData.seo?.siteName || 'Έλενα Παπαδοπούλου'
 
   // Load home data for intro image (used for non-post pages)
   const homePath = join(rootDir, 'public', 'content', 'home.json')
@@ -413,10 +413,68 @@ async function main() {
   console.log('\n🌐 Generating site default OG image...')
   const defaultOutputPath = join(outputDir, 'default.png')
   await generateOgImage(
-    'Ελένη Παπαδοπούλου - Συγγραφέας, Επιμελήτρια & Σύμβουλος Εκδόσεων',
+    'Έλενα Παπαδοπούλου - Συγγραφέας, Επιμελήτρια & Σύμβουλος Εκδόσεων',
     'Συμβουλές για συγγραφείς, υπηρεσίες επιμέλειας και εργογραφία. Αξιολόγηση, μετάφραση, επιμέλεια και διόρθωση βιβλίων.',
     siteName,
     defaultOutputPath,
+    fontData,
+    introImageDataUri
+  )
+
+  // Generate OG images for main pages
+  console.log('\n📄 Generating page-specific OG images...')
+  
+  // Home page
+  const homeOgPath = join(outputDir, 'home.png')
+  await generateOgImage(
+    'Έλενα Παπαδοπούλου - Συγγραφέας & Επιμελήτρια',
+    'Υπηρεσίες επιμέλειας κειμένων, αξιολόγησης χειρογράφων και συμβουλευτικής για συγγραφείς. Επαγγελματική καθοδήγηση προς έκδοση.',
+    siteName,
+    homeOgPath,
+    fontData,
+    introImageDataUri
+  )
+
+  // Timeline page
+  const timelineOgPath = join(outputDir, 'timeline.png')
+  await generateOgImage(
+    'Εργογραφία - Έλενα Παπαδοπούλου',
+    'Η πλήρης εργογραφία της Έλενας Παπαδοπούλου: βιβλία, μεταφράσεις, επιμέλειες και συνεργασίες με εκδοτικούς οίκους.',
+    siteName,
+    timelineOgPath,
+    fontData,
+    introImageDataUri
+  )
+
+  // Book page
+  const bookOgPath = join(outputDir, 'book.png')
+  await generateOgImage(
+    'Ένα μόνο γράμμα - Έλενα Παπαδοπούλου',
+    'Ανακαλύψτε το βιβλίο \'Ένα μόνο γράμμα\' της Έλενας Παπαδοπούλου. Διαθέσιμο στα μεγαλύτερα βιβλιοπωλεία.',
+    siteName,
+    bookOgPath,
+    fontData,
+    introImageDataUri
+  )
+
+  // Moonlight page
+  const moonlightOgPath = join(outputDir, 'moonlight.png')
+  await generateOgImage(
+    'Moonlight Tales - Έλενα Παπαδοπούλου',
+    'Moonlight Tales: Μια συλλογή ιστοριών από την Έλενα Παπαδοπούλου που εξερευνά το μυστήριο και τη μαγεία.',
+    siteName,
+    moonlightOgPath,
+    fontData,
+    introImageDataUri
+  )
+
+  // Painted Books page
+  const paintedBooksOgPath = join(outputDir, 'painted-books.png')
+  await generateOgImage(
+    'Ζωγραφισμένα Βιβλία - Έλενα Παπαδοπούλου',
+    'Ανακαλύψτε τα ζωγραφισμένα βιβλία: μια μοναδική συλλογή όπου η τέχνη συναντά τη λογοτεχνία.',
+    siteName,
+    paintedBooksOgPath,
     fontData,
     introImageDataUri
   )

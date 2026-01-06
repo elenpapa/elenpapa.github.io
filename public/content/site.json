@@ -2,8 +2,41 @@
   "seo": {
     "siteUrl": "https://elenpapa.github.io",
     "defaultImage": "/images/intro.png",
-    "siteName": "Ελένη Παπαδοπούλου",
-    "locale": "el_GR"
+    "siteName": "Έλενα Παπαδοπούλου",
+    "locale": "el_GR",
+    "author": "Έλενα Παπαδοπούλου",
+    "pages": {
+      "home": {
+        "title": "Έλενα Παπαδοπούλου - Συγγραφέας & Επιμελήτρια",
+        "description": "Υπηρεσίες επιμέλειας κειμένων, αξιολόγησης χειρογράφων και συμβουλευτικής για συγγραφείς. Επαγγελματική καθοδήγηση προς έκδοση.",
+        "image": "/images/og/home.png",
+        "path": "/"
+      },
+      "timeline": {
+        "title": "Εργογραφία - Έλενα Παπαδοπούλου",
+        "description": "Η πλήρης εργογραφία της Έλενας Παπαδοπούλου: βιβλία, μεταφράσεις, επιμέλειες και συνεργασίες με εκδοτικούς οίκους.",
+        "image": "/images/og/timeline.png",
+        "path": "/timeline"
+      },
+      "book": {
+        "title": "Ένα μόνο γράμμα - Έλενα Παπαδοπούλου",
+        "description": "Ανακαλύψτε το βιβλίο 'Ένα μόνο γράμμα' της Έλενας Παπαδοπούλου. Διαθέσιμο στα μεγαλύτερα βιβλιοπωλεία.",
+        "image": "/images/og/book.png",
+        "path": "/book"
+      },
+      "moonlight": {
+        "title": "Moonlight Tales - Έλενα Παπαδοπούλου",
+        "description": "Moonlight Tales: Μια συλλογή ιστοριών από την Έλενα Παπαδοπούλου που εξερευνά το μυστήριο και τη μαγεία.",
+        "image": "/images/og/moonlight.png",
+        "path": "/moonlight"
+      },
+      "paintedBooks": {
+        "title": "Ζωγραφισμένα Βιβλία - Έλενα Παπαδοπούλου",
+        "description": "Ανακαλύψτε τα ζωγραφισμένα βιβλία: μια μοναδική συλλογή όπου η τέχνη συναντά τη λογοτεχνία.",
+        "image": "/images/og/painted-books.png",
+        "path": "/painted-books"
+      }
+    }
   },
   "logo": {
     "src": "/logo.png",

@@ -18,8 +18,9 @@ const getPublisherLogoSrc = (logoSrc: string | undefined) => logoSrc || ''
 const getPublisherLogoAlt = (logoAlt: string | undefined) => logoAlt || ''
 
 // Generate srcset for publisher logos (displayed at 60-120px)
+// Skip srcset for SVG files - they're vector and scale perfectly
 const getPublisherLogoSrcset = (logoSrc: string | undefined) => {
-  if (!logoSrc) return ''
+  if (!logoSrc || logoSrc.endsWith('.svg')) return ''
   const basePath = logoSrc.replace(/\.[^.]+$/, '')
   const encodedPath = encodeURI(basePath)
   return `${encodedPath}-120w.webp 120w, ${encodedPath}-240w.webp 240w`

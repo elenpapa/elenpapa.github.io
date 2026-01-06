@@ -48,6 +48,10 @@ h1.title {
   -webkit-text-fill-color: transparent;
   padding: 0;
   background-color: transparent;
+  /* Prevent CLS from font loading by reserving space */
+  min-height: 1.1em;
+  /* Use size-adjust to match fallback font metrics */
+  font-size-adjust: 0.52;
 }
 
 .subtitle {

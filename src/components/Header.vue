@@ -137,15 +137,17 @@ const onKeyDown = (e: KeyboardEvent) => {
   >
     <div class="container bar">
       <a href="#home" class="brand" @click="close" aria-label="Home">
-        <img
-          v-if="site?.logo"
-          ref="logoEl"
-          :src="logoSrc"
-          :alt="logoAlt"
-          width="40"
-          height="40"
-          fetchpriority="high"
-        />
+        <picture v-if="site?.logo">
+          <source :srcset="logoSrc.replace('.png', '.webp')" type="image/webp" />
+          <img
+            ref="logoEl"
+            :src="logoSrc"
+            :alt="logoAlt"
+            width="40"
+            height="40"
+            fetchpriority="high"
+          />
+        </picture>
       </a>
       <nav class="nav" aria-label="Primary navigation" ref="menuRef">
         <button

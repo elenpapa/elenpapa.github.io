@@ -72,6 +72,14 @@ const getImageLoading = (idx: number): 'eager' | 'lazy' => {
 
 const posts = computed(() => data.value?.items ?? [])
 const getPostImageSrc = (imageSrc: string | undefined) => imageSrc || ''
+
+// Generate srcset for responsive carousel images
+const getPostImageSrcset = (imageSrc: string | undefined) => {
+  if (!imageSrc) return ''
+  const basePath = imageSrc.replace(/\.[^.]+$/, '')
+  const encodedPath = encodeURI(basePath)
+  return `${encodedPath}-400w.webp 400w, ${encodedPath}-800w.webp 800w`
+}
 </script>
 
 <template>
@@ -131,6 +139,8 @@ const getPostImageSrc = (imageSrc: string | undefined) => imageSrc || ''
               <div class="image-wrapper">
                 <img
                   :src="getPostImageSrc(post.image)"
+                  :srcset="getPostImageSrcset(post.image)"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 317px"
                   :alt="post.title"
                   :loading="getImageLoading(idx)"
                   :fetchpriority="getImagePriority(idx)"

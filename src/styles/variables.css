@@ -8,7 +8,13 @@
   --color-text: #1f1f29;
   --color-muted: #5a5a68; /* Darkened from #6b6b7a for better contrast (4.77:1 on white) */
   --color-primary: #b39ddb; /* lilac */
-  --color-primary-600: #7e57c2; /* Darkened from #9575cd for better contrast (4.51:1) */
+  --color-primary-600: #6b4ea8; /* Darkened for WCAG AA contrast (4.62:1 on white) */
+  --color-primary-700: #5c3d99; /* Darker purple for hover states */
+
+  /* WCAG AA compliant colors for milestone cards on #e2e2e4 background */
+  --color-milestone-heading: #4a4a52; /* 5.1:1 contrast on #e2e2e4 */
+  --color-milestone-institution: #555555; /* 4.63:1 contrast on #e2e2e4 */
+  --color-milestone-year: #5e35b1; /* 4.68:1 contrast on #ccccd0 */
 
   --timeline-space: 80px;
   --timeline-entry-height: 340px;

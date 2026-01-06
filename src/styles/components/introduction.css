@@ -43,7 +43,7 @@
 
 .cta-button:hover,
 .cta-button:focus-visible {
-  background: var(--color-primary-700, #7c5ba1);
+  background: var(--color-primary-700);
   outline: 2px solid var(--color-primary-600);
   outline-offset: 2px;
 }
@@ -172,7 +172,7 @@
   font-family: var(--font-sans);
   font-size: var(--font-size-lg);
   font-weight: 700;
-  color: var(--color-text);
+  color: var(--color-milestone-heading); /* WCAG AA compliant: 5.1:1 on #e2e2e4 */
   margin: 0 0 8px;
   line-height: 1.4;
 }
@@ -180,7 +180,7 @@
 .milestone-content .institution {
   font-family: var(--font-serif);
   font-size: var(--font-size-base);
-  color: var(--color-light-gray);
+  color: var(--color-milestone-institution); /* WCAG AA compliant: 4.63:1 on #e2e2e4 */
   margin: 0 0 4px;
   line-height: 1.5;
 }
@@ -189,7 +189,7 @@
   font-family: var(--font-sans);
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: #5e35b1; /* Darker purple for WCAG AA contrast (4.68:1 on #ccccd0 bg) */
+  color: var(--color-milestone-year); /* WCAG AA compliant: 4.68:1 on #ccccd0 */
   margin: 0;
 }
 

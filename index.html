@@ -18,6 +18,38 @@
     <!-- Preconnect to external resources for performance -->
     <link rel="preconnect" href="https://www.instagram.com" crossorigin />
 
+    <!-- Preload critical fonts to prevent CLS from font loading -->
+    <link
+      rel="preload"
+      href="/assets/eb-garamond-greek-700-normal-ruzFsrp0.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/assets/eb-garamond-greek-400-normal-Bd9qxgO7.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/assets/eb-garamond-greek-600-normal-CyqIHpYl.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!-- Preload LCP hero image -->
+    <link
+      rel="preload"
+      href="/images/hero.webp"
+      as="image"
+      type="image/webp"
+      fetchpriority="high"
+    />
+
     <!-- Default Open Graph tags (will be overridden by page-specific tags) -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Έλενα Παπαδοπούλου" />

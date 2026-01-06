@@ -16,6 +16,15 @@ const heading = computed(() => data.value?.heading ?? 'Services')
 const services = computed(() => data.value?.items ?? [])
 const getServiceImageSrc = (imageSrc: string | undefined) => imageSrc || ''
 const getServiceImageAlt = (imageAlt: string | undefined) => imageAlt || ''
+
+// Generate srcset for responsive images
+const getServiceImageSrcset = (imageSrc: string | undefined) => {
+  if (!imageSrc) return ''
+  // Extract base name without extension and encode for URLs with spaces
+  const basePath = imageSrc.replace(/\.[^.]+$/, '')
+  const encodedPath = encodeURI(basePath)
+  return `${encodedPath}-300w.webp 300w, ${encodedPath}-600w.webp 600w`
+}
 </script>
 
 <template>
@@ -38,6 +47,8 @@ const getServiceImageAlt = (imageAlt: string | undefined) => imageAlt || ''
               v-if="srv.image"
               class="thumb"
               :src="getServiceImageSrc(srv.image.src)"
+              :srcset="getServiceImageSrcset(srv.image.src)"
+              sizes="(max-width: 768px) 100vw, 300px"
               :alt="getServiceImageAlt(srv.image.alt)"
               loading="lazy"
               decoding="async"

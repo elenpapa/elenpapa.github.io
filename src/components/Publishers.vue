@@ -16,6 +16,14 @@ const description = computed(() => data.value?.description ?? '')
 const publishers = computed(() => data.value?.items ?? [])
 const getPublisherLogoSrc = (logoSrc: string | undefined) => logoSrc || ''
 const getPublisherLogoAlt = (logoAlt: string | undefined) => logoAlt || ''
+
+// Generate srcset for publisher logos (displayed at 60-120px)
+const getPublisherLogoSrcset = (logoSrc: string | undefined) => {
+  if (!logoSrc) return ''
+  const basePath = logoSrc.replace(/\.[^.]+$/, '')
+  const encodedPath = encodeURI(basePath)
+  return `${encodedPath}-120w.webp 120w, ${encodedPath}-240w.webp 240w`
+}
 </script>
 
 <template>
@@ -35,6 +43,8 @@ const getPublisherLogoAlt = (logoAlt: string | undefined) => logoAlt || ''
           <div v-if="publisher.logo" class="publisher-logo">
             <img
               :src="getPublisherLogoSrc(publisher.logo.src)"
+              :srcset="getPublisherLogoSrcset(publisher.logo.src)"
+              sizes="(max-width: 768px) 80px, 120px"
               :alt="getPublisherLogoAlt(publisher.logo.alt)"
               loading="lazy"
               decoding="async"

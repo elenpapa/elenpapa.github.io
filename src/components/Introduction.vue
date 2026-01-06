@@ -10,6 +10,23 @@ const introImageAlt = computed(() => home.value?.intro.image.alt || 'Intro image
 // Helper for milestone icons
 const getMilestoneIconSrc = (iconSrc: string | undefined) => iconSrc || ''
 
+// Generate srcset for milestone icons (displayed at 98px)
+const getMilestoneIconSrcset = (iconSrc: string | undefined) => {
+  if (!iconSrc) return ''
+  const basePath = iconSrc.replace(/\.[^.]+$/, '')
+  const encodedPath = encodeURI(basePath)
+  return `${encodedPath}-100w.webp 100w, ${encodedPath}-200w.webp 200w`
+}
+
+// Generate srcset for intro image (displayed at ~400px)
+const getIntroImageSrcset = computed(() => {
+  const src = introImageSrc.value
+  if (!src) return ''
+  const basePath = src.replace(/\.[^.]+$/, '')
+  const encodedPath = encodeURI(basePath)
+  return `${encodedPath}-400w.webp 400w, ${encodedPath}-800w.webp 800w`
+})
+
 // Placeholder items to prevent CLS during initial load
 const placeholderEducation = [
   { degree: '', institution: '', year: '', icon: '' },
@@ -44,6 +61,8 @@ onMounted(fetchData)
         <img
           v-if="home"
           :src="introImageSrc"
+          :srcset="getIntroImageSrcset"
+          sizes="(max-width: 768px) 100vw, 400px"
           :alt="introImageAlt"
           loading="lazy"
           decoding="async"
@@ -67,6 +86,8 @@ onMounted(fetchData)
               <img
                 v-if="milestone.icon"
                 :src="getMilestoneIconSrc(milestone.icon)"
+                :srcset="getMilestoneIconSrcset(milestone.icon)"
+                sizes="98px"
                 :alt="milestone.degree + ' icon'"
                 class="bubble-svg"
                 loading="eager"

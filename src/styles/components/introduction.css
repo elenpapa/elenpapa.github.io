@@ -1,6 +1,8 @@
 .intro-section {
   background: var(--color-bg);
   padding-bottom: 100px;
+  /* Reserve minimum height to prevent CLS from async content loading */
+  min-height: 1000px;
 }
 
 .intro {
@@ -187,7 +189,7 @@
   font-family: var(--font-sans);
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: var(--color-primary-600, #9575cd);
+  color: #5e35b1; /* Darker purple for WCAG AA contrast (4.68:1 on #ccccd0 bg) */
   margin: 0;
 }
 
@@ -215,5 +217,30 @@
 
   .education-milestones {
     margin-top: 60px;
+  }
+}
+
+/* Loading skeleton state for CLS prevention */
+.milestone-card--loading {
+  opacity: 0.4;
+}
+
+.milestone-card--loading .bubble::before {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface) 25%,
+    rgba(179, 157, 219, 0.1) 50%,
+    var(--color-surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }

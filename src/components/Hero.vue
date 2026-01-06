@@ -33,7 +33,11 @@ onMounted(fetchData)
       <div class="container inner">
         <h1 class="title">{{ heroTitle }}</h1>
         <p class="subtitle">{{ heroSubtitle }}</p>
-        <button class="cta" @click="scrollToContact" aria-label="Scroll to contact form">
+        <button
+          class="cta"
+          @click="scrollToContact"
+          aria-label="Ας συνεργαστούμε - επικοινωνήστε μαζί μου"
+        >
           Ας συνεργαστούμε
         </button>
       </div>

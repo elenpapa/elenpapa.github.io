@@ -3,14 +3,28 @@ import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { content, type HomeContent } from '@/services/content'
 
 const home = ref<HomeContent | null>(null)
+const isLoading = ref(true)
 const introImageSrc = computed(() => home.value?.intro.image.src || '')
 const introImageAlt = computed(() => home.value?.intro.image.alt || 'Intro image')
 
 // Helper for milestone icons
 const getMilestoneIconSrc = (iconSrc: string | undefined) => iconSrc || ''
 
+// Placeholder items to prevent CLS during initial load
+const placeholderEducation = [
+  { degree: '', institution: '', year: '', icon: '' },
+  { degree: '', institution: '', year: '', icon: '' },
+  { degree: '', institution: '', year: '', icon: '' },
+  { degree: '', institution: '', year: '', icon: '' },
+]
+
+const displayedEducation = computed(
+  () => home.value?.education || (isLoading.value ? placeholderEducation : []),
+)
+
 const fetchData = async () => {
   home.value = await content.getHome()
+  isLoading.value = false
 }
 
 onServerPrefetch(fetchData)
@@ -43,13 +57,15 @@ onMounted(fetchData)
     <div class="container education-milestones">
       <div class="milestone-grid">
         <div
-          v-for="(milestone, index) in home?.education || []"
+          v-for="(milestone, index) in displayedEducation"
           :key="milestone.degree + '-' + (milestone.year ?? index)"
           class="milestone-card"
+          :class="{ 'milestone-card--loading': isLoading }"
         >
           <div class="bubble">
             <div class="bubble-icon">
               <img
+                v-if="milestone.icon"
                 :src="getMilestoneIconSrc(milestone.icon)"
                 :alt="milestone.degree + ' icon'"
                 class="bubble-svg"

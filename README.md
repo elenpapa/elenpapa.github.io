@@ -1,4 +1,4 @@
-# .
+--# .
 
 This template should help get you started developing with Vue 3 in Vite.
 
@@ -45,4 +45,29 @@ npm run build
 
 ```sh
 npm run lint
+```
+
+### Optimize Images
+
+```sh
+npm run optimize-images -- --help
+```
+
+Runs `scripts/optimize-images.js`, which centralizes all the helpers that previously lived across multiple files. You can pass flags to target a single file, folder, or everything.
+
+- `-f, --file <path>`: optimize one file (`public/images/...`).
+- `-d, --folder <name>`: process a folder such as `services`, `posts/webp`, `publishers`, `common`, `books`, `moonlight`, `painted-books`, or the project `root` (for `hero.png`, `intro.png`, etc.).
+- `-a, --all`: shrink every configured folder in one go.
+- `-t, --type <type>`: choose `webp`, `responsive`, or `all` (default `all`).
+- `--force`: regenerate even if the target already exists.
+- `-q, --quality <num>`: override the default quality (1-100).
+- `--dry-run`: preview the changes without writing files.
+
+Examples:
+
+```sh
+npm run optimize-images -- -f "services/Service 1.png"
+npm run optimize-images -- -d services --dry-run
+npm run optimize-images -- -d "posts/webp" -t responsive
+npm run optimize-images:all
 ```

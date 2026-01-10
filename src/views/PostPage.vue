@@ -17,7 +17,10 @@ const postId = computed(() => {
 
 const post = computed(() => {
   if (!data.value?.items || isNaN(postId.value)) return null
-  return data.value.items[postId.value]
+  const foundPost = data.value.items[postId.value]
+  // Hide devOnly posts in production
+  if (foundPost?.devOnly && import.meta.env.PROD) return null
+  return foundPost
 })
 
 const postImageSrc = computed(() => post.value?.image || '')

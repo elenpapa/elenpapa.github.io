@@ -146,6 +146,7 @@ const PostItemSchema = z.object({
   url: z.string(),
   summary: z.string(),
   contentHtml: z.string(),
+  devOnly: z.boolean().optional(),
 })
 
 const PostsContentSchema = z.object({

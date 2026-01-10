@@ -68,7 +68,7 @@ export function useHeaderAnimation({ headerEl, logoEl, linksEl }: UseHeaderAnima
         brandImg,
         {
           duration: 0.4,
-          height: 67,
+          height: 90,
           padding: 0,
           ease: 'power2.out',
         },

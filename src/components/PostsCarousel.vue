@@ -70,7 +70,12 @@ const getImageLoading = (idx: number): 'eager' | 'lazy' => {
   return idx < 3 ? 'eager' : 'lazy'
 }
 
-const posts = computed(() => data.value?.items ?? [])
+const posts = computed(() => {
+  const items = data.value?.items ?? []
+  // Filter out devOnly posts in production
+  const isProd = import.meta.env.PROD
+  return items.filter((post) => !isProd || !post.devOnly)
+})
 const getPostImageSrc = (imageSrc: string | undefined) => imageSrc || ''
 
 // Generate srcset for responsive carousel images

@@ -16,6 +16,8 @@
     "build-only": "cross-env VITE_SSG=true vite-ssg build",
     "generate-og": "node scripts/generate-og-images.js",
     "generate-sitemap": "node scripts/generate-sitemap.js",
+    "optimize-images": "node scripts/optimize-images.js",
+    "optimize-images:all": "node scripts/optimize-images.js --all",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix --cache",
     "format": "prettier --write \"**/*.{ts,tsx,js,vue,css,scss,md,json,yml,yaml}\"",

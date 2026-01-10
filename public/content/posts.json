@@ -17,10 +17,10 @@
       "contentHtml": "/content/posts/1.html"
     },
     {
-      "title": "Χαρακτήρες με βάθος: κίνητρα, αδυναμίες, τόξο",
+      "title": "Τι είναι αφηγητής;",
       "image": "/images/posts/webp/Article (2).webp",
       "url": "#",
-      "summary": "Οι αναγνώστες ερωτεύονται ανθρώπους, όχι πλοκές. Χτίσε χαρακτήρες που αλλάζουν, σφάλλουν και διεκδικούν.",
+      "summary": "Ο αφηγητής είναι ένα από τα πιο βασικά συστατικά μιας ιστορίας – κι όμως, συχνά οι συγγραφείς δεν αντιλαμβάνονται πόσο σημαντικός είναι στην πραγματικότητα.",
       "contentHtml": "/content/posts/2.html"
     },
     {
@@ -28,49 +28,56 @@
       "image": "/images/posts/webp/Article (3).webp",
       "url": "#",
       "summary": "Απλός οδηγός για πράξη Α (υπόσχεση), Β (σύγκρουση), Γ (λύση) και τα βασικά σημεία καμπής.",
-      "contentHtml": "/content/posts/3.html"
+      "contentHtml": "/content/posts/3.html",
+      "devOnly": true
     },
     {
       "title": "Συχνά λάθη νέων συγγραφέων (και πώς διορθώνονται)",
       "image": "/images/posts/webp/Article (4).webp",
       "url": "#",
       "summary": "Από υπερβολικό exposition μέχρι αδύνατες σκηνές: μικρές διορθώσεις που κάνουν μεγάλη διαφορά.",
-      "contentHtml": "/content/posts/4.html"
+      "contentHtml": "/content/posts/4.html",
+      "devOnly": true
     },
     {
       "title": "Επιμέλεια και διορθώσεις: σχέδιο σε 4 περάσματα",
       "image": "/images/posts/webp/Article (5).webp",
       "url": "#",
       "summary": "Ένα πρακτικό workflow από τη μακροδομή μέχρι την τελική στίξη, για πιο καθαρό κείμενο.",
-      "contentHtml": "/content/posts/5.html"
+      "contentHtml": "/content/posts/5.html",
+      "devOnly": true
     },
     {
       "title": "Επαφή με εκδοτικό: το σωστό συνοδευτικό e‑mail",
       "image": "/images/posts/webp/Article (6).webp",
       "url": "#",
       "summary": "Σύντομο, επαγγελματικό, στοχευμένο. Τι να περιλαμβάνει ένα query και τι να αποφύγεις.",
-      "contentHtml": "/content/posts/6.html"
+      "contentHtml": "/content/posts/6.html",
+      "devOnly": true
     },
     {
       "title": "Αυτοέκδοση ή παραδοσιακή; Κριτήρια επιλογής",
       "image": "/images/posts/webp/Article (7).webp",
       "url": "#",
       "summary": "Έλεγχος, δικαιώματα, διανομή, κόστος: μια ρεαλιστική ματιά στα υπέρ και τα κατά.",
-      "contentHtml": "/content/posts/7.html"
+      "contentHtml": "/content/posts/7.html",
+      "devOnly": true
     },
     {
       "title": "Μάρκετινγκ για συγγραφείς χωρίς να νιώθεις πωλητής",
       "image": "/images/posts/webp/Article (8).webp",
       "url": "#",
       "summary": "Χτίσε κοινότητα πριν την κυκλοφορία: newsletter, πρόβες εξωφύλλου, κεφάλαια-δείγματα.",
-      "contentHtml": "/content/posts/8.html"
+      "contentHtml": "/content/posts/8.html",
+      "devOnly": true
     },
     {
       "title": "Writer's block: 7 πρακτικοί τρόποι να ξεμπλοκάρεις",
       "image": "/images/posts/webp/Article (9).webp",
       "url": "#",
       "summary": "Από χρονόμετρο 20′ μέχρι freewriting και αλλαγή σκηνής: εργαλεία που δουλεύουν.",
-      "contentHtml": "/content/posts/9.html"
+      "contentHtml": "/content/posts/9.html",
+      "devOnly": true
     }
   ]
 }

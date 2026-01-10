@@ -158,24 +158,8 @@ const PostsContentSchema = z.object({
 const ContactContentSchema = z.object({
   title: z.string(),
   description: z.string(),
-  fields: z.object({
-    name: z.object({
-      label: z.string(),
-      placeholder: z.string().optional(),
-    }),
-    email: z.object({
-      label: z.string(),
-      placeholder: z.string().optional(),
-    }),
-    message: z.object({
-      label: z.string(),
-      placeholder: z.string().optional(),
-    }),
-  }),
-  submit: z.object({
-    label: z.string(),
-  }),
-  mailto: z.string().optional(),
+  mailto: z.string(),
+  emailLabel: z.string().optional(),
 })
 
 const BookEventSchema = z.object({

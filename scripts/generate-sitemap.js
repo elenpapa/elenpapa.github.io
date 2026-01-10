@@ -1,7 +1,7 @@
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-const siteUrl = 'https://elenpapa.github.io'
+const siteUrl = 'https://editopia.gr'
 
 // Define all routes with their SEO priority and change frequency
 const routes = [

@@ -38,7 +38,7 @@ const sharp = (await import('sharp')).default
 
 const FOLDER_CONFIGS = {
   services: {
-    extensions: ['.png', '.jpg', '.jpeg'],
+    extensions: ['.png', '.jpg', '.jpeg', '.jfif'],
     webp: { quality: 85, maxWidth: 600 },
     responsive: { sizes: [300, 600], quality: 80 },
   },
@@ -54,33 +54,33 @@ const FOLDER_CONFIGS = {
     responsive: { sizes: [400, 800], quality: 80, pattern: /^Article.*\.webp$/i },
   },
   publishers: {
-    extensions: ['.png', '.jpg', '.jpeg'],
+    extensions: ['.png', '.jpg', '.jpeg', '.jfif'],
     webp: { quality: 85, maxWidth: 240 },
     responsive: { sizes: [120, 240], quality: 85, skipSvg: true },
   },
   common: {
-    extensions: ['.png', '.jpg', '.jpeg'],
+    extensions: ['.png', '.jpg', '.jpeg', '.jfif'],
     webp: { quality: 90, maxWidth: 300 },
     responsive: { sizes: [100, 200], quality: 85, pattern: /^icon-.*\.(png|webp)$/i },
   },
   books: {
-    extensions: ['.png', '.jpg', '.jpeg'],
+    extensions: ['.png', '.jpg', '.jpeg', '.jfif'],
     webp: { quality: 85, maxWidth: 400 },
     responsive: null,
   },
   moonlight: {
-    extensions: ['.png', '.jpg', '.jpeg'],
+    extensions: ['.png', '.jpg', '.jpeg', '.jfif'],
     webp: { quality: 85, maxWidth: 800 },
     responsive: null,
   },
   'painted-books': {
-    extensions: ['.png', '.jpg', '.jpeg'],
+    extensions: ['.png', '.jpg', '.jpeg', '.jfif'],
     webp: { quality: 85, maxWidth: 800 },
     responsive: null,
   },
   root: {
     // For files directly in public/images/
-    extensions: ['.png', '.jpg', '.jpeg'],
+    extensions: ['.png', '.jpg', '.jpeg', '.jfif'],
     webp: { quality: 85, maxWidth: 1920 },
     responsive: { sizes: [400, 800], quality: 85, pattern: /^intro\.(png|webp)$/i },
   },

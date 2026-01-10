@@ -2,105 +2,186 @@
   "hero": {
     "title": "Χρωματιστές άκρες (Σόκορα) βιβλίων",
     "subtitle": "Θυμάστε που σας έλεγα ότι ενίοτε ζωγραφίζω πάνω ή μέσα σε βιβλία;",
-    "description": "Όλο και πιο συχνά και οι εκδοτικοί στην Ελλάδα επιλέγουν να κυκλοφορήσουν συλλεκτικές εκδόσεις βιβλίων με ζωγραφισμένες σελίδες. Επειδή, όμως, δεν βγαίνουν έτσι όλα τα βιβλία, πήρα την κατάσταση στα χέρια μου. Παρακάτω θα βρείτε μερικά από τα βιβλία που έχω ζωγραφίσει μέχρι σήμερα.",
+    "description": "Όλο και πιο συχνά, οι εκδοτικοί στην Ελλάδα επιλέγουν να κυκλοφορήσουν συλλεκτικές εκδόσεις βιβλίων με ζωγραφισμένες σελίδες. Επειδή, όμως, δεν βγαίνουν έτσι όλα τα βιβλία, πήρα την κατάσταση στα χέρια μου. Παρακάτω θα βρείτε μερικά από τα βιβλία που έχω ζωγραφίσει μέχρι σήμερα.",
     "media": {
-      "src": "/images/painted-books/hero-painted-book.png",
+      "src": "/images/painted-books/book-8.webp",
       "alt": "Ζωγραφισμένες άκρες βιβλίου με λεπτομέρεια"
     }
   },
   "gallery": {
-    "heading": "Τα έργα μου",
-    "itemsPerPage": 6,
+    "heading": "Βιβλία με χρωματιστές άκρες - sprayed edges",
+    "itemsPerPage": 3,
     "items": [
       {
         "id": "1",
-        "title": "Το Όνομα του Ρόδου",
-        "author": "Umberto Eco",
+        "title": "The Love Hypothesis",
+        "author": "Ali Hazelwood",
         "media": {
-          "src": "/images/painted-books/book-1.jpg",
-          "alt": "Ζωγραφισμένες άκρες Όνομα του Ρόδου"
+          "src": "/images/painted-books/book-7.webp",
+          "alt": "Ζωγραφισμένες άκρες The Love Hypothesis"
         }
       },
       {
         "id": "2",
-        "title": "Περηφάνια και Προκατάληψη",
-        "author": "Jane Austen",
+        "title": "Αντίπαλο Δέος",
+        "author": "Rebecca Ross",
         "media": {
-          "src": "/images/painted-books/book-2.jpg",
-          "alt": "Ζωγραφισμένες άκρες Περηφάνια και Προκατάληψη"
+          "src": "/images/painted-books/book-11.webp",
+          "alt": "Ζωγραφισμένες άκρες Αντίπαλο Δέος"
         }
       },
       {
         "id": "3",
-        "title": "Ο Άρχοντας των Δαχτυλιδιών",
-        "author": "J.R.R. Tolkien",
+        "title": "Η Φίνλεϊ Ντόνοβαν τζογάρει",
+        "author": "Elle Cosimano",
         "media": {
-          "src": "/images/painted-books/book-3.jpg",
-          "alt": "Ζωγραφισμένες άκρες Άρχοντας των Δαχτυλιδιών"
+          "src": "/images/painted-books/book-12.webp",
+          "alt": "Ζωγραφισμένες άκρες Η Φίνλεϊ Ντόνοβαν τζογάρει"
         }
       },
       {
         "id": "4",
-        "title": "Η Χειρωνακτική του Ερασιτέχνη",
-        "author": "Donna Tartt",
+        "title": "Όπου κι αν είσαι",
+        "author": "Ιωάννα Γκανέτσα",
         "media": {
-          "src": "/images/painted-books/book-4.jpg",
-          "alt": "Ζωγραφισμένες άκρες Χειρωνακτική"
+          "src": "/images/painted-books/book-18.webp",
+          "alt": "Ζωγραφισμένες άκρες Όπου κι αν είσαι"
         }
       },
       {
         "id": "5",
-        "title": "Εκατό Χρόνια Μοναξιά",
-        "author": "Gabriel García Márquez",
+        "title": "Έρωτας με την τρίτη ματιά",
+        "author": "Γιώργος Αγγελίδης",
         "media": {
-          "src": "/images/painted-books/book-5.jpg",
-          "alt": "Ζωγραφισμένες άκρες Εκατό Χρόνια Μοναξιά"
+          "src": "/images/painted-books/book-2.webp",
+          "alt": "Ζωγραφισμένες άκρες Έρωτας με την τρίτη ματιά"
         }
       },
       {
         "id": "6",
-        "title": "Η Αθώωση",
-        "author": "Tana French",
+        "title": "Και εγένετο φως",
+        "author": "Στέφανος Αλεξιάδης",
         "media": {
-          "src": "/images/painted-books/book-6.jpg",
-          "alt": "Ζωγραφισμένες άκρες Αθώωση"
+          "src": "/images/painted-books/book-9.webp",
+          "alt": "Ζωγραφισμένες άκρες Και εγένετο φως"
         }
       },
       {
         "id": "7",
-        "title": "Η Αθώωση",
-        "author": "Tana French",
+        "title": "Solitaire",
+        "author": "Alice Oseman",
         "media": {
-          "src": "/images/painted-books/book-6.jpg",
-          "alt": "Ζωγραφισμένες άκρες Αθώωση"
+          "src": "/images/painted-books/book-5.webp",
+          "alt": "Ζωγραφισμένες άκρες Solitaire"
         }
       },
       {
         "id": "8",
-        "title": "Η Αθώωση",
-        "author": "Tana French",
+        "title": "Loveless",
+        "author": "Alice Oseman",
         "media": {
-          "src": "/images/painted-books/book-6.jpg",
-          "alt": "Ζωγραφισμένες άκρες Αθώωση"
+          "src": "/images/painted-books/book-16.webp",
+          "alt": "Ζωγραφισμένες άκρες Loveless"
         }
       },
       {
         "id": "9",
-        "title": "Η Αθώωση",
-        "author": "Tana French",
+        "title": "Nick and Charlie",
+        "author": "Alice Oseman",
         "media": {
-          "src": "/images/painted-books/book-6.jpg",
-          "alt": "Ζωγραφισμένες άκρες Αθώωση"
+          "src": "/images/painted-books/book-10.webp",
+          "alt": "Ζωγραφισμένες άκρες Nick and Charlie"
+        }
+      },
+      {
+        "id": "10",
+        "title": "Γιορτινά Φονικά Αινίγματα",
+        "author": "G. T. Karber",
+        "media": {
+          "src": "/images/painted-books/book-19.webp",
+          "alt": "Ζωγραφισμένες άκρες Γιορτινά Φονικά Αινίγματα"
+        }
+      },
+      {
+        "id": "11",
+        "title": "Φονικά Αινίγματα Τόμοι 2,3",
+        "author": "G. T. Karber",
+        "media": {
+          "src": "/images/painted-books/book-4.webp",
+          "alt": "Ζωγραφισμένες άκρες Φονικά Αινίγματα Τόμοι 2,3"
+        }
+      },
+      {
+        "id": "12",
+        "title": "Wonder",
+        "author": "R. J. Palacio",
+        "media": {
+          "src": "/images/painted-books/book-15.webp",
+          "alt": "Ζωγραφισμένες άκρες Wonder"
+        }
+      },
+      {
+        "id": "13",
+        "title": "Όσα αφήσαμε πίσω μας",
+        "author": "Lucy Score",
+        "media": {
+          "src": "/images/painted-books/book-14.webp",
+          "alt": "Ζωγραφισμένες άκρες Όσα αφήσαμε πίσω μας"
+        }
+      },
+      {
+        "id": "14",
+        "title": "Dreamland Billionaires 1,2,3",
+        "author": "Lauren Asher",
+        "media": {
+          "src": "/images/painted-books/book-17.webp",
+          "alt": "Ζωγραφισμένες άκρες Dreamland Billionaires 1,2,3"
+        }
+      },
+      {
+        "id": "15",
+        "title": "Όσα ποτέ δεν ξεπεράσαμε",
+        "author": "Lucy Score",
+        "media": {
+          "src": "/images/painted-books/book-13.webp",
+          "alt": "Ζωγραφισμένες άκρες Όσα ποτέ δεν ξεπεράσαμε"
+        }
+      },
+      {
+        "id": "16",
+        "title": "There once was a myth",
+        "author": "Συλλογή Διηγημάτων - Moonlight Tales",
+        "media": {
+          "src": "/images/painted-books/book-1.webp",
+          "alt": "Ζωγραφισμένες άκρες There once was a myth"
+        }
+      },
+      {
+        "id": "17",
+        "title": "And they lived happily ever after?",
+        "author": "Συλλογή Διηγημάτων - Moonlight Tales",
+        "media": {
+          "src": "/images/painted-books/book-3.webp",
+          "alt": "Ζωγραφισμένες άκρες And they lived happily ever after?"
+        }
+      },
+      {
+        "id": "18",
+        "title": "The path not taken",
+        "author": "Συλλογή Διηγημάτων - Moonlight Tales",
+        "media": {
+          "src": "/images/painted-books/book-6.webp",
+          "alt": "Ζωγραφισμένες άκρες The path not taken"
         }
       }
     ]
   },
   "cta": {
-    "heading": "Ενδιαφέρεστε για ένα custom βιβλίο;",
-    "body": "Επικοινωνήστε μαζί μου",
+    "heading": "Ενδιαφέρεσσαι για ένα custom βιβλίο;",
+    "body": "Επικοινώνησε μαζί μου.",
     "buttons": [
       {
-        "label": "Στείλτε μήνυμα",
+        "label": "Στείλε μου μήνυμα",
         "href": "/#contact",
         "variant": "primary"
       }

@@ -1,4 +1,4 @@
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref } from 'vue'
 import { useHead } from '@unhead/vue'
 import { content, type SiteContent } from '@/services/content'
 
@@ -19,8 +19,9 @@ interface PageSeoOptions {
 export function usePageSeo(options: PageSeoOptions = {}) {
   const siteData = ref<SiteContent | null>(null)
 
-  onMounted(async () => {
-    siteData.value = await content.getSite()
+  // Load site data immediately (not in onMounted) so SEO tags are set correctly
+  content.getSite().then((data) => {
+    siteData.value = data
   })
 
   const pageConfig = computed(() => {

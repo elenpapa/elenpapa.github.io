@@ -40,7 +40,7 @@ export function usePageSeo(options: PageSeoOptions = {}) {
     () =>
       options.description ||
       pageConfig.value?.description ||
-      'Υπηρεσίες επιμέλειας και συμβουλευτικής για συγγραφείς',
+      'Επιμέλεια & διόρθωση κειμένων, μετάφραση βιβλίων και συμβουλευτική για συγγραφείς',
   )
   const pageImage = computed(
     () =>

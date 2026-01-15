@@ -130,6 +130,7 @@ Updated: 2025-11-16
 - Smooth scrolling enabled globally with `prefers-reduced-motion` support
 - All animations respect accessibility preferences
 - Content validation happens at runtime with helpful error messages
+- **SEO (Jan 2026)**: Updated home page title/meta description and key headings to include primary service keywords (επιμέλεια, διόρθωση, μετάφραση, βιβλία) for better keyword distribution across important tags.
 - Bundle visualizer available at `dist/stats.html` after build
 
 ## Lighthouse Targets (Ready for Testing)

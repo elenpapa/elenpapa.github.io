@@ -71,3 +71,6 @@ npm run optimize-images -- -d services --dry-run
 npm run optimize-images -- -d "posts/webp" -t responsive
 npm run optimize-images:all
 ```
+
+keywords:
+επιμέλεια, διόρθωση, μετάφραση, βιβλία, έκδοση

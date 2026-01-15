@@ -5,6 +5,12 @@
   command = "npm run build"
   publish = "dist"
 
+# Security headers (served only over HTTPS on Netlify)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
 # Cache headers for static assets
 # Vite adds content hashes to filenames, so long cache is safe
 [[headers]]

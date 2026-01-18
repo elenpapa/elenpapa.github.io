@@ -122,6 +122,9 @@ h1.title {
   .hero {
     min-height: 500px;
   }
+  h1.title {
+    font-size: var(--font-size-4xl);
+  }
 
   .inner {
     padding: 60px 20px 100px;

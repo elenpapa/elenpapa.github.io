@@ -16,7 +16,7 @@ const isSSGBuild = process.env.VITE_SSG === 'true'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // Base URL for GitHub Pages (user page at elenpapa.github.io)
+  // Base URL for GitHub Pages / custom domain
   base: '/',
   plugins: [
     vue(),

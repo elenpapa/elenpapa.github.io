@@ -110,21 +110,21 @@ This will create the new page-specific OG images in `public/images/og/`
 
 Test each URL:
 
-- `https://elenpapa.github.io/`
-- `https://elenpapa.github.io/timeline`
-- `https://elenpapa.github.io/book`
-- `https://elenpapa.github.io/moonlight`
-- `https://elenpapa.github.io/painted-books`
-- `https://elenpapa.github.io/posts/0` (sample post)
+- `https://editopia.gr/`
+- `https://editopia.gr/timeline`
+- `https://editopia.gr/book`
+- `https://editopia.gr/moonlight`
+- `https://editopia.gr/painted-books`
+- `https://editopia.gr/posts/0` (sample post)
 
 #### 4. **Google Search Console Setup**
 
 After deploying:
 
 1. Go to https://search.google.com/search-console
-2. Add property: `https://elenpapa.github.io`
+2. Add property: `https://editopia.gr`
 3. Verify ownership (DNS or HTML file method)
-4. Submit sitemap: `https://elenpapa.github.io/sitemap.xml`
+4. Submit sitemap: `https://editopia.gr/sitemap.xml`
 5. Monitor indexing status
 
 #### 5. **Content Review & Optimization**

@@ -18,7 +18,7 @@ usePageSeo({
       '@context': 'https://schema.org',
       '@type': 'WebSite',
       name: 'Έλενα Παπαδοπούλου',
-      url: 'https://elenpapa.github.io',
+      url: 'https://editopia.gr',
       description:
         'Επιμέλεια & διόρθωση κειμένων, μετάφραση βιβλίων και αξιολόγηση χειρογράφων. Συμβουλευτική για συγγραφείς.',
       inLanguage: 'el',
@@ -28,7 +28,7 @@ usePageSeo({
       '@context': 'https://schema.org',
       '@type': 'Person',
       name: 'Έλενα Παπαδοπούλου',
-      url: 'https://elenpapa.github.io',
+      url: 'https://editopia.gr',
       jobTitle: 'Συγγραφέας, Επιμελήτρια & Σύμβουλος Εκδόσεων',
       description:
         'Συγγραφέας και επαγγελματίας επιμελήτρια: επιμέλεια & διόρθωση κειμένων, μετάφραση βιβλίων και αξιολόγηση χειρογράφων.',

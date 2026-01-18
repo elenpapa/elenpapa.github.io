@@ -2,6 +2,7 @@
 import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { content, type PaintedBooksContent } from '@/services/content'
 import { usePageSeo } from '@/composables/usePageSeo'
+import { trackEvent } from '@/utils/analytics'
 
 // SEO: Set up meta tags and CreativeWork schema for Painted Books
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -47,15 +48,35 @@ const paginatedItems = computed(() => {
 
 const goToFirst = () => {
   currentPage.value = 1
+  trackEvent('gallery_pagination', { location: 'painted_books', action: 'first', page: 1 })
 }
 const goToLast = () => {
   currentPage.value = totalPages.value
+  trackEvent('gallery_pagination', {
+    location: 'painted_books',
+    action: 'last',
+    page: totalPages.value,
+  })
 }
 const goToPrev = () => {
-  if (currentPage.value > 1) currentPage.value--
+  if (currentPage.value > 1) {
+    currentPage.value--
+    trackEvent('gallery_pagination', {
+      location: 'painted_books',
+      action: 'prev',
+      page: currentPage.value,
+    })
+  }
 }
 const goToNext = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+    trackEvent('gallery_pagination', {
+      location: 'painted_books',
+      action: 'next',
+      page: currentPage.value,
+    })
+  }
 }
 
 // Fallback image handling
@@ -73,6 +94,10 @@ const fetchData = async () => {
 
 onServerPrefetch(fetchData)
 onMounted(fetchData)
+
+const trackCtaClick = (label: string, href: string) => {
+  trackEvent('cta_click', { location: 'painted_books', label, href })
+}
 </script>
 
 <template>
@@ -185,6 +210,7 @@ onMounted(fetchData)
               :class="button.variant === 'ghost' ? 'ghost-button' : 'primary-button'"
               target="_blank"
               rel="noreferrer noopener"
+              @click="trackCtaClick(button.label, button.href)"
             >
               {{ button.label }}
             </a>
@@ -192,6 +218,7 @@ onMounted(fetchData)
               v-else
               :to="button.href"
               :class="button.variant === 'ghost' ? 'ghost-button' : 'primary-button'"
+              @click="trackCtaClick(button.label, button.href)"
             >
               {{ button.label }}
             </RouterLink>

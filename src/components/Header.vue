@@ -3,6 +3,7 @@ import { computed, onMounted, onServerPrefetch, onUnmounted, nextTick, ref, watc
 import { useFocusTrap } from '@vueuse/integrations/useFocusTrap'
 import { content, type SiteContent } from '@/services/content'
 import { useHeaderAnimation } from '@/composables/useHeaderAnimation'
+import { trackEvent } from '@/utils/analytics'
 
 const site = ref<SiteContent | null>(null)
 const open = ref(false)
@@ -107,9 +108,18 @@ onUnmounted(() => {
 
 function toggle() {
   open.value = !open.value
+  trackEvent('nav_toggle', { state: open.value ? 'open' : 'closed' })
 }
 function close() {
   open.value = false
+}
+
+const trackNavClick = (label: string, href: string) => {
+  trackEvent('nav_click', { label, href, location: 'header' })
+}
+
+const trackBrandClick = () => {
+  trackEvent('nav_click', { label: 'home', href: '#home', location: 'header' })
 }
 
 // Close expansion with Escape (desktop) or close mobile menu
@@ -136,7 +146,7 @@ const onKeyDown = (e: KeyboardEvent) => {
     @focusout="onFocusOut"
   >
     <div class="container bar">
-      <a href="#home" class="brand" @click="close" aria-label="Home">
+      <a href="#home" class="brand" @click="trackBrandClick(); close()" aria-label="Home">
         <picture v-if="site?.logo">
           <source :srcset="logoSrc.replace('.png', '.webp')" type="image/webp" />
           <img
@@ -169,12 +179,14 @@ const onKeyDown = (e: KeyboardEvent) => {
             <RouterLink
               v-if="item.href.startsWith('/')"
               :to="item.href"
-              @click="close"
+              @click="trackNavClick(item.label, item.href); close()"
               class="nav-link"
             >
               {{ item.label }}
             </RouterLink>
-            <a v-else :href="item.href" @click="close">{{ item.label }}</a>
+            <a v-else :href="item.href" @click="trackNavClick(item.label, item.href); close()">
+              {{ item.label }}
+            </a>
           </li>
         </ul>
       </nav>

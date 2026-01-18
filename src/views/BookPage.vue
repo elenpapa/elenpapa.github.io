@@ -2,6 +2,7 @@
 import { ref, onMounted, onServerPrefetch, computed, nextTick } from 'vue'
 import { content, type BookContent } from '@/services/content'
 import { usePageSeo } from '@/composables/usePageSeo'
+import { trackEvent } from '@/utils/analytics'
 
 // SEO: Set up meta tags and Book schema for the book page
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -82,6 +83,10 @@ onMounted(async () => {
   await nextTick()
   await ensureInstagramEmbedsReady()
 })
+
+const trackOutboundClick = (label: string, href: string, location: string) => {
+  trackEvent('outbound_click', { location, label, href })
+}
 </script>
 
 <template>
@@ -123,6 +128,7 @@ onMounted(async () => {
               :href="hero?.goodreadsUrl"
               target="_blank"
               rel="noreferrer noopener"
+              @click="trackOutboundClick(hero.goodreadsLabel, hero.goodreadsUrl, 'book_hero')"
             >
               {{ hero.goodreadsLabel }}
             </a>
@@ -132,6 +138,7 @@ onMounted(async () => {
               :href="hero?.moonlighttalesUrl"
               target="_blank"
               rel="noreferrer noopener"
+              @click="trackOutboundClick(hero.moonlighttalesLabel, hero.moonlighttalesUrl, 'book_hero')"
             >
               {{ hero.moonlighttalesLabel }}
             </a>
@@ -178,9 +185,13 @@ onMounted(async () => {
         <div class="preview-body">
           <p class="preview-excerpt">{{ preview.excerpt }}</p>
           <p v-if="preview.note && preview.previewUrl" class="preview-note">
-            <a :href="preview.previewUrl" target="_blank" rel="noopener noreferrer">{{
-              preview.note
-            }}</a>
+            <a
+              :href="preview.previewUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              @click="trackOutboundClick(preview.note, preview.previewUrl, 'book_preview')"
+              >{{ preview.note }}</a
+            >
           </p>
           <p v-else-if="preview.note" class="preview-note">{{ preview.note }}</p>
         </div>

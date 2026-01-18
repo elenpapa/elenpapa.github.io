@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { content, type SiteContent } from '@/services/content'
+import { trackEvent } from '@/utils/analytics'
 
 const site = ref<SiteContent | null>(null)
 const socials = computed(() => site.value?.socials ?? [])
@@ -12,6 +13,10 @@ const fetchData = async () => {
 
 onServerPrefetch(fetchData)
 onMounted(fetchData)
+
+const trackSocialClick = (label: string, href: string) => {
+  trackEvent('social_click', { location: 'footer', label, href })
+}
 </script>
 
 <template>
@@ -25,6 +30,7 @@ onMounted(fetchData)
           target="_blank"
           rel="noopener noreferrer nofollow"
           :aria-label="s.label"
+          @click="trackSocialClick(s.label, s.href)"
         >
           <img
             :src="getSocialIconSrc(s.icon)"

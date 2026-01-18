@@ -2,6 +2,7 @@
 import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { content, type MoonlightContent } from '@/services/content'
 import { usePageSeo } from '@/composables/usePageSeo'
+import { trackEvent } from '@/utils/analytics'
 
 // SEO: Set up meta tags and Book schema for Moonlight Tales
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -43,6 +44,10 @@ const fetchData = async () => {
 
 onServerPrefetch(fetchData)
 onMounted(fetchData)
+
+const trackMoonlightLink = (label: string, href: string, location: string) => {
+  trackEvent('outbound_click', { location, label, href })
+}
 </script>
 
 <template>
@@ -115,6 +120,7 @@ onMounted(fetchData)
               rel="noopener noreferrer nofollow"
               class="pillar-link"
               :aria-label="`Δείτε περισσότερα για τον/την ${pillar.firstName} ${pillar.lastName}`"
+              @click="trackMoonlightLink(`${pillar.firstName} ${pillar.lastName}`, pillar.href, 'moonlight_mission')"
             >
               <div class="pillar-image">
                 <img
@@ -185,6 +191,7 @@ onMounted(fetchData)
             rel="noopener noreferrer nofollow"
             class="instagram-highlight-link"
             :aria-label="`Δείτε τα ${bookJournal.instagramHighlight.label} στο Instagram`"
+            @click="trackMoonlightLink(bookJournal.instagramHighlight.label, bookJournal.instagramHighlight.href, 'moonlight_book_journal')"
           >
             <div class="highlight-bubble">
               <img
@@ -250,6 +257,7 @@ onMounted(fetchData)
             rel="noopener noreferrer nofollow"
             :aria-label="s.label"
             class="social-link"
+            @click="trackMoonlightLink(s.label, s.href, 'moonlight_cta_socials')"
           >
             <img
               :src="getSocialIconSrc(s.icon)"

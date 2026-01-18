@@ -3,6 +3,7 @@ import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { content, type PostsContent, type SiteContent } from '@/services/content'
+import { trackEvent } from '@/utils/analytics'
 
 const route = useRoute()
 const router = useRouter()
@@ -108,6 +109,7 @@ onMounted(async () => {
 })
 
 const goBack = () => {
+  trackEvent('post_back_click', { location: 'post', id: postId.value })
   router.back()
 }
 </script>

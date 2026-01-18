@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onServerPrefetch } from 'vue'
 import { content, type ContactContent } from '@/services/content'
+import { trackEvent } from '@/utils/analytics'
 
 const data = ref<ContactContent | null>(null)
 
@@ -10,6 +11,13 @@ const fetchData = async () => {
 
 onServerPrefetch(fetchData)
 onMounted(fetchData)
+
+const trackContactClick = (mailto: string | undefined) => {
+  trackEvent('contact_email_click', {
+    location: 'contact',
+    href: mailto || '',
+  })
+}
 </script>
 
 <template>
@@ -19,7 +27,7 @@ onMounted(fetchData)
       <p class="desc">{{ data?.description }}</p>
 
       <div v-if="data?.mailto" class="contact-action">
-        <a :href="data.mailto" class="contact-link">
+        <a :href="data.mailto" class="contact-link" @click="trackContactClick(data?.mailto)">
           {{ data.emailLabel || data.mailto.replace('mailto:', '') }}
         </a>
       </div>

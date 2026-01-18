@@ -1,8 +1,10 @@
 import { ViteSSG } from 'vite-ssg'
+import { nextTick } from 'vue'
 import { routes } from './router'
 import App from './App.vue'
 import './styles/base.css'
 import reveal from './directives/reveal'
+import { trackPageView } from './utils/analytics'
 
 const HASH_SCROLL_MAX_ATTEMPTS = 40
 const HASH_SCROLL_RETRY_DELAY = 40
@@ -85,9 +87,25 @@ export const createApp = ViteSSG(
       return { top: 0 }
     },
   },
-  ({ app }) => {
+  ({ app, router, isClient }) => {
     // Register reveal directive for both SSR and client
     // The directive has getSSRProps for server rendering
     app.directive('reveal', reveal)
+    if (isClient) {
+      router.isReady().then(() => {
+        trackPageView({
+          page_name: String(router.currentRoute.value.name ?? ''),
+          page_path: router.currentRoute.value.fullPath,
+        })
+      })
+      router.afterEach((to) => {
+        nextTick(() => {
+          trackPageView({
+            page_name: String(to.name ?? ''),
+            page_path: to.fullPath,
+          })
+        })
+      })
+    }
   },
 )

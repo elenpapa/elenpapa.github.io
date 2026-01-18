@@ -5,6 +5,7 @@ import { Swiper, SwiperSlide } from 'swiper/vue'
 import type { Swiper as SwiperType } from 'swiper/types'
 import { A11y } from 'swiper/modules'
 import { content, type PostsContent } from '@/services/content'
+import { trackEvent } from '@/utils/analytics'
 import 'swiper/css'
 
 const data = ref<PostsContent | null>(null)
@@ -54,10 +55,16 @@ watch(
 
 const scrollPrev = () => {
   swiperInstance.value?.slidePrev()
+  trackEvent('carousel_nav_click', { location: 'posts', direction: 'prev' })
 }
 
 const scrollNext = () => {
   swiperInstance.value?.slideNext()
+  trackEvent('carousel_nav_click', { location: 'posts', direction: 'next' })
+}
+
+const trackPostClick = (idx: number, title: string) => {
+  trackEvent('post_card_click', { location: 'posts', index: idx, title })
 }
 
 const getImagePriority = (idx: number): 'high' | 'low' => {
@@ -140,7 +147,11 @@ const getPostImageSrcset = (imageSrc: string | undefined) => {
             class="carousel__slide"
             :aria-label="`Read post ${idx + 1} of ${posts.length}: ${post.title}`"
           >
-            <RouterLink :to="`/posts/${idx}`" class="slide-link">
+            <RouterLink
+              :to="`/posts/${idx}`"
+              class="slide-link"
+              @click="trackPostClick(idx, post.title)"
+            >
               <div class="image-wrapper">
                 <img
                   :src="getPostImageSrc(post.image)"

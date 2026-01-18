@@ -347,6 +347,7 @@ async function main() {
   const sitePath = join(rootDir, 'public', 'content', 'site.json')
   const siteData = JSON.parse(await readFile(sitePath, 'utf-8'))
   const siteName = siteData.seo?.siteName || 'Έλενα Παπαδοπούλου'
+  const pagesMeta = siteData.seo?.pages ?? {}
 
   // Load home data for intro image (used for non-post pages)
   const homePath = join(rootDir, 'public', 'content', 'home.json')
@@ -424,60 +425,58 @@ async function main() {
   // Generate OG images for main pages
   console.log('\n📄 Generating page-specific OG images...')
   
-  // Home page
-  const homeOgPath = join(outputDir, 'home.png')
-  await generateOgImage(
-    'Έλενα Παπαδοπούλου - Συγγραφέας & Επιμελήτρια',
-    'Υπηρεσίες επιμέλειας κειμένων, αξιολόγησης χειρογράφων και συμβουλευτικής για συγγραφείς. Επαγγελματική καθοδήγηση προς έκδοση.',
-    siteName,
-    homeOgPath,
-    fontData,
-    introImageDataUri
-  )
+  const getPageMeta = (pageKey, fallbackTitle, fallbackDescription) => {
+    const page = pagesMeta[pageKey]
+    return {
+      title: page?.title || fallbackTitle,
+      description: page?.description || fallbackDescription,
+    }
+  }
 
-  // Timeline page
-  const timelineOgPath = join(outputDir, 'timeline.png')
-  await generateOgImage(
-    'Εργογραφία - Έλενα Παπαδοπούλου',
-    'Η πλήρης εργογραφία της Έλενας Παπαδοπούλου: βιβλία, μεταφράσεις, επιμέλειες και συνεργασίες με εκδοτικούς οίκους.',
-    siteName,
-    timelineOgPath,
-    fontData,
-    introImageDataUri
-  )
+  const pageDefinitions = [
+    {
+      key: 'home',
+      filename: 'home.png',
+      fallbackTitle: 'Έλενα Παπαδοπούλου - Συγγραφέας & Επιμελήτρια',
+      fallbackDescription:
+        'Υπηρεσίες επιμέλειας κειμένων, αξιολόγησης χειρογράφων και συμβουλευτικής για συγγραφείς. Επαγγελματική καθοδήγηση προς έκδοση.',
+    },
+    {
+      key: 'timeline',
+      filename: 'timeline.png',
+      fallbackTitle: 'Εργογραφία - Έλενα Παπαδοπούλου',
+      fallbackDescription:
+        'Η πλήρης εργογραφία της Έλενας Παπαδοπούλου: βιβλία, μεταφράσεις, επιμέλειες και συνεργασίες με εκδοτικούς οίκους.',
+    },
+    {
+      key: 'book',
+      filename: 'book.png',
+      fallbackTitle: 'Ένα μόνο γράμμα - Έλενα Παπαδοπούλου',
+      fallbackDescription:
+        "Ανακαλύψτε το βιβλίο 'Ένα μόνο γράμμα' της Έλενας Παπαδοπούλου. Διαθέσιμο στα μεγαλύτερα βιβλιοπωλεία.",
+    },
+    {
+      key: 'moonlight',
+      filename: 'moonlight.png',
+      fallbackTitle: 'Moonlight Tales - Έλενα Παπαδοπούλου',
+      fallbackDescription:
+        'Moonlight Tales: Μια συλλογή ιστοριών από την Έλενα Παπαδοπούλου που εξερευνά το μυστήριο και τη μαγεία.',
+    },
+    {
+      key: 'paintedBooks',
+      filename: 'painted-books.png',
+      fallbackTitle: 'Ζωγραφισμένα Βιβλία - Έλενα Παπαδοπούλου',
+      fallbackDescription:
+        'Ανακαλύψτε τα ζωγραφισμένα βιβλία: μια μοναδική συλλογή όπου η τέχνη συναντά τη λογοτεχνία.',
+    },
+  ]
 
-  // Book page
-  const bookOgPath = join(outputDir, 'book.png')
-  await generateOgImage(
-    'Ένα μόνο γράμμα - Έλενα Παπαδοπούλου',
-    'Ανακαλύψτε το βιβλίο \'Ένα μόνο γράμμα\' της Έλενας Παπαδοπούλου. Διαθέσιμο στα μεγαλύτερα βιβλιοπωλεία.',
-    siteName,
-    bookOgPath,
-    fontData,
-    introImageDataUri
-  )
+  for (const page of pageDefinitions) {
+    const { title, description } = getPageMeta(page.key, page.fallbackTitle, page.fallbackDescription)
+    const pageOgPath = join(outputDir, page.filename)
 
-  // Moonlight page
-  const moonlightOgPath = join(outputDir, 'moonlight.png')
-  await generateOgImage(
-    'Moonlight Tales - Έλενα Παπαδοπούλου',
-    'Moonlight Tales: Μια συλλογή ιστοριών από την Έλενα Παπαδοπούλου που εξερευνά το μυστήριο και τη μαγεία.',
-    siteName,
-    moonlightOgPath,
-    fontData,
-    introImageDataUri
-  )
-
-  // Painted Books page
-  const paintedBooksOgPath = join(outputDir, 'painted-books.png')
-  await generateOgImage(
-    'Ζωγραφισμένα Βιβλία - Έλενα Παπαδοπούλου',
-    'Ανακαλύψτε τα ζωγραφισμένα βιβλία: μια μοναδική συλλογή όπου η τέχνη συναντά τη λογοτεχνία.',
-    siteName,
-    paintedBooksOgPath,
-    fontData,
-    introImageDataUri
-  )
+    await generateOgImage(title, description, siteName, pageOgPath, fontData, introImageDataUri)
+  }
 
   console.log('\n✅ OG image generation complete!')
 }

@@ -3,6 +3,7 @@ import { ref, onMounted, onServerPrefetch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { content, type PostsContent, type SiteContent } from '@/services/content'
+import PostsCarousel from '@/components/PostsCarousel.vue'
 import { trackEvent } from '@/utils/analytics'
 
 const route = useRoute()
@@ -136,6 +137,8 @@ const goBack = () => {
 
       <div class="post-content" v-html="postContentHtml"></div>
     </article>
+
+    <PostsCarousel v-if="post" :exclude-id="postId" :with-diagonal="false" />
   </main>
 </template>
 

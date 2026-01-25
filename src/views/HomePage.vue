@@ -49,7 +49,7 @@ usePageSeo({
     <Hero />
     <Introduction />
     <Services />
-    <PostsCarousel />
+    <PostsCarousel :with-diagonal="true" />
     <Publishers />
     <ContactForm />
   </main>

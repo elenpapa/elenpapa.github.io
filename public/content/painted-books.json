@@ -173,6 +173,33 @@
           "src": "/images/painted-books/book-6.webp",
           "alt": "Ζωγραφισμένες άκρες The path not taken"
         }
+      },
+      {
+        "id": "19",
+        "title": "Πριν λυθούν τα μάγια",
+        "author": "Liz Braswell",
+        "media": {
+          "src": "/images/painted-books/book-20.webp",
+          "alt": "Ζωγραφισμένες άκρες The path not taken"
+        }
+      },
+      {
+        "id": "20",
+        "title": "Επτά χρόνια μακριά",
+        "author": "Ashley Poston",
+        "media": {
+          "src": "/images/painted-books/book-21.webp",
+          "alt": "Ζωγραφισμένες άκρες The path not taken"
+        }
+      },
+      {
+        "id": "21",
+        "title": "Οι νεκροί ρομαντικοί",
+        "author": "Ashley Poston",
+        "media": {
+          "src": "/images/painted-books/book-22.webp",
+          "alt": "Ζωγραφισμένες άκρες The path not taken"
+        }
       }
     ]
   },

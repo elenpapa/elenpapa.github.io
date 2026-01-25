@@ -8,7 +8,13 @@ import { content, type PostsContent } from '@/services/content'
 import { trackEvent } from '@/utils/analytics'
 import 'swiper/css'
 
+const props = defineProps<{
+  excludeId?: number
+  withDiagonal?: boolean
+}>()
+
 const data = ref<PostsContent | null>(null)
+const hasDiagonal = computed(() => props.withDiagonal ?? true)
 const heading = computed(() => data.value?.heading ?? 'Featured Posts')
 const description = computed(() => data.value?.description ?? '')
 const canScrollPrev = ref(false)
@@ -81,7 +87,13 @@ const posts = computed(() => {
   const items = data.value?.items ?? []
   // Filter out devOnly posts in production
   const isProd = import.meta.env.PROD
-  return items.filter((post) => !isProd || !post.devOnly)
+  const excludedIndex = Number.isFinite(props.excludeId ?? NaN) ? props.excludeId : null
+  return items
+    .map((post, index) => ({ post, index }))
+    .filter(
+      ({ post, index }) =>
+        (!isProd || !post.devOnly) && (excludedIndex === null || index !== excludedIndex),
+    )
 })
 const getPostImageSrc = (imageSrc: string | undefined) => imageSrc || ''
 
@@ -98,7 +110,8 @@ const getPostImageSrcset = (imageSrc: string | undefined) => {
   <section
     id="posts"
     aria-labelledby="posts-title"
-    class="posts-section diagonal--both-ltr-rtl diagonal-padding--both"
+    class="posts-section"
+    :class="{ 'diagonal--both-ltr-rtl diagonal-padding--both': hasDiagonal }"
   >
     <div class="container">
       <header class="posts-header" v-reveal>
@@ -142,22 +155,22 @@ const getPostImageSrcset = (imageSrc: string | undefined) => {
           @fromEdge="handleStateChange"
         >
           <SwiperSlide
-            v-for="(post, idx) in posts"
-            :key="idx"
+            v-for="(entry, idx) in posts"
+            :key="entry.index"
             class="carousel__slide"
-            :aria-label="`Read post ${idx + 1} of ${posts.length}: ${post.title}`"
+            :aria-label="`Read post ${idx + 1} of ${posts.length}: ${entry.post.title}`"
           >
             <RouterLink
-              :to="`/posts/${idx}`"
+              :to="`/posts/${entry.index}`"
               class="slide-link"
-              @click="trackPostClick(idx, post.title)"
+              @click="trackPostClick(entry.index, entry.post.title)"
             >
               <div class="image-wrapper">
                 <img
-                  :src="getPostImageSrc(post.image)"
-                  :srcset="getPostImageSrcset(post.image)"
+                  :src="getPostImageSrc(entry.post.image)"
+                  :srcset="getPostImageSrcset(entry.post.image)"
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 317px"
-                  :alt="post.title"
+                  :alt="entry.post.title"
                   :loading="getImageLoading(idx)"
                   :fetchpriority="getImagePriority(idx)"
                   decoding="async"
@@ -166,9 +179,9 @@ const getPostImageSrcset = (imageSrc: string | undefined) => {
                 />
               </div>
               <h3>
-                {{ post.title }}
+                {{ entry.post.title }}
               </h3>
-              <p v-if="post.summary" class="summary">{{ post.summary }}</p>
+              <p v-if="entry.post.summary" class="summary">{{ entry.post.summary }}</p>
             </RouterLink>
           </SwiperSlide>
         </Swiper>

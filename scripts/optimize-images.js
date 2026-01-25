@@ -431,7 +431,13 @@ async function main() {
   }
 
   if (options.file) {
-    await processFile(options.file, options)
+    const filePath = join(BASE_DIR, options.file)
+    if (existsSync(filePath) && statSync(filePath).isDirectory()) {
+      console.log(`\nℹ️ "${options.file}" is a folder; running folder optimization instead.`)
+      await processFolder(options.file, options)
+    } else {
+      await processFile(options.file, options)
+    }
   } else if (options.folder) {
     await processFolder(options.folder, options)
   } else if (options.all) {

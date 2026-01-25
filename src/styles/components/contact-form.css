@@ -35,6 +35,11 @@
 }
 
 .contact-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 6px 12px;
   font-family: var(--font-sans);
   font-size: clamp(1.1rem, 2.5vw, 1.35rem);
   font-weight: 600;

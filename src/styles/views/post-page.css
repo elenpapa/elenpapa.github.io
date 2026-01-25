@@ -14,9 +14,10 @@
   background: transparent;
   border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: var(--radius-md);
-  padding: 8px 16px;
+  padding: 10px 18px;
+  min-height: 44px;
   font-family: var(--font-sans);
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-base);
   font-weight: 500;
   color: var(--color-text);
   cursor: pointer;

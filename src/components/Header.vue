@@ -122,6 +122,16 @@ const trackBrandClick = () => {
   trackEvent('nav_click', { label: 'home', href: '#home', location: 'header' })
 }
 
+const handleBrandClick = () => {
+  trackBrandClick()
+  close()
+}
+
+const handleNavItemClick = (label: string, href: string) => {
+  trackNavClick(label, href)
+  close()
+}
+
 // Close expansion with Escape (desktop) or close mobile menu
 const onKeyDown = (e: KeyboardEvent) => {
   if (e.key === 'Escape') {
@@ -146,7 +156,7 @@ const onKeyDown = (e: KeyboardEvent) => {
     @focusout="onFocusOut"
   >
     <div class="container bar">
-      <a href="#home" class="brand" @click="trackBrandClick(); close()" aria-label="Home">
+      <a href="#home" class="brand" @click="handleBrandClick()" aria-label="Home">
         <picture v-if="site?.logo">
           <source :srcset="logoSrc.replace('.png', '.webp')" type="image/webp" />
           <img
@@ -179,12 +189,12 @@ const onKeyDown = (e: KeyboardEvent) => {
             <RouterLink
               v-if="item.href.startsWith('/')"
               :to="item.href"
-              @click="trackNavClick(item.label, item.href); close()"
+              @click="handleNavItemClick(item.label, item.href)"
               class="nav-link"
             >
               {{ item.label }}
             </RouterLink>
-            <a v-else :href="item.href" @click="trackNavClick(item.label, item.href); close()">
+            <a v-else :href="item.href" @click="handleNavItemClick(item.label, item.href)">
               {{ item.label }}
             </a>
           </li>

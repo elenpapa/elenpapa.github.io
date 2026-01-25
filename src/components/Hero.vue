@@ -36,7 +36,7 @@ onMounted(fetchData)
         <h1 class="title">{{ heroTitle }}</h1>
         <p class="subtitle">{{ heroSubtitle }}</p>
         <button
-          class="cta"
+          class="cta-button"
           @click="scrollToContact"
           aria-label="Ας συνεργαστούμε - επικοινωνήστε μαζί μου"
         >

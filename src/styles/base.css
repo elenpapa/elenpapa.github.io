@@ -1,5 +1,6 @@
 @import './fonts.css';
 @import './variables.css';
+@import './components/common.css';
 
 * {
   box-sizing: border-box;
@@ -74,7 +75,7 @@ section {
   left: -9999px;
   top: 8px;
   background: var(--color-primary);
-  color: #1a1433;
+  color: var(--color-on-primary);
   padding: 8px 12px;
   border-radius: var(--radius-sm);
   z-index: 100;

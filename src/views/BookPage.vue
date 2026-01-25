@@ -124,7 +124,7 @@ const trackOutboundClick = (label: string, href: string, location: string) => {
           <div class="hero-actions">
             <a
               v-if="hero?.goodreadsUrl && hero?.goodreadsLabel"
-              class="primary-button"
+              class="cta-button"
               :href="hero?.goodreadsUrl"
               target="_blank"
               rel="noreferrer noopener"
@@ -134,11 +134,13 @@ const trackOutboundClick = (label: string, href: string, location: string) => {
             </a>
             <a
               v-if="hero?.moonlighttalesUrl && hero?.moonlighttalesLabel"
-              class="primary-button"
+              class="cta-button"
               :href="hero?.moonlighttalesUrl"
               target="_blank"
               rel="noreferrer noopener"
-              @click="trackOutboundClick(hero.moonlighttalesLabel, hero.moonlighttalesUrl, 'book_hero')"
+              @click="
+                trackOutboundClick(hero.moonlighttalesLabel, hero.moonlighttalesUrl, 'book_hero')
+              "
             >
               {{ hero.moonlighttalesLabel }}
             </a>

@@ -10,6 +10,7 @@
   --color-primary: #b39ddb; /* lilac */
   --color-primary-600: #6b4ea8; /* Darkened for WCAG AA contrast (4.62:1 on white) */
   --color-primary-700: #5c3d99; /* Darker purple for hover states */
+  --color-on-primary: #ffffff;
 
   /* WCAG AA compliant colors for milestone cards on #e2e2e4 background */
   --color-milestone-heading: #4a4a52; /* 5.1:1 contrast on #e2e2e4 */

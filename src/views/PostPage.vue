@@ -26,17 +26,30 @@ const post = computed(() => {
 })
 
 const postImageSrc = computed(() => post.value?.image || '')
+const getPostImageSrcset = (imageSrc: string | undefined) => {
+  if (!imageSrc) return ''
+  const basePath = imageSrc.replace(/\.[^.]+$/, '')
+  const encodedPath = encodeURI(basePath)
+  return `${encodedPath}-400w.webp 400w, ${encodedPath}-800w.webp 800w`
+}
 
-// Fetch HTML content from the file path (client-side only)
+// Fetch HTML content from the file path (SSR reads from disk, client uses fetch)
 const fetchPostContent = async () => {
-  // Skip during SSG - relative URLs don't work without a browser origin
-  // Use import.meta.env.SSR which is reliable in Vite SSG
-  if (import.meta.env.SSR) return
   if (!post.value?.contentHtml) {
     postContentHtml.value = ''
     return
   }
+  if (!import.meta.env.SSR && postContentHtml.value) return
   try {
+    if (import.meta.env.SSR) {
+      const fs = await import('node:fs/promises')
+      const path = await import('node:path')
+      const contentPath = post.value.contentHtml.replace(/^\//, '')
+      const filePath = path.join(process.cwd(), 'public', contentPath)
+      postContentHtml.value = await fs.readFile(filePath, 'utf-8')
+      return
+    }
+
     const response = await fetch(post.value.contentHtml)
     if (response.ok) {
       postContentHtml.value = await response.text()
@@ -78,6 +91,7 @@ useHead(
       { property: 'og:image', content: ogImageUrl.value },
       { property: 'og:image:width', content: '1200' },
       { property: 'og:image:height', content: '630' },
+      { property: 'og:image:alt', content: post.value?.title || 'Άρθρο' },
       { property: 'og:url', content: canonicalUrl.value },
       { property: 'og:site_name', content: siteName.value },
       { property: 'og:locale', content: siteData.value?.seo.locale || 'el_GR' },
@@ -90,6 +104,7 @@ useHead(
         content: post.value?.summary || 'Συμβουλές για συγγραφείς από την Έλενα Παπαδοπούλου',
       },
       { name: 'twitter:image', content: ogImageUrl.value },
+      { name: 'twitter:image:alt', content: post.value?.title || 'Άρθρο' },
     ],
     link: [{ rel: 'canonical', href: canonicalUrl.value }],
   })),
@@ -138,6 +153,8 @@ const goBack = () => {
         <div class="image-wrapper">
           <img
             :src="postImageSrc"
+            :srcset="getPostImageSrcset(postImageSrc)"
+            sizes="(max-width: 768px) 100vw, 800px"
             :alt="post.title"
             loading="eager"
             decoding="async"

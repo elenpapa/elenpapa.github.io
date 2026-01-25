@@ -74,6 +74,7 @@ export function usePageSeo(options: PageSeoOptions = {}) {
         { property: 'og:image', content: fullImageUrl.value },
         { property: 'og:image:width', content: '1200' },
         { property: 'og:image:height', content: '630' },
+        { property: 'og:image:alt', content: pageTitle.value },
         { property: 'og:url', content: canonicalUrl.value },
         { property: 'og:site_name', content: siteName.value },
         { property: 'og:locale', content: locale.value },
@@ -83,6 +84,7 @@ export function usePageSeo(options: PageSeoOptions = {}) {
         { name: 'twitter:title', content: pageTitle.value },
         { name: 'twitter:description', content: pageDescription.value },
         { name: 'twitter:image', content: fullImageUrl.value },
+        { name: 'twitter:image:alt', content: pageTitle.value },
       ]
 
       const headConfig: {

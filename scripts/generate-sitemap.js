@@ -1,10 +1,9 @@
-import { writeFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-const siteUrl = 'https://editopia.gr'
+const DEFAULT_SITE_URL = 'https://editopia.gr'
 
-// Define all routes with their SEO priority and change frequency
-const routes = [
+const baseRoutes = [
   // Main pages (highest priority)
   { path: '/', priority: 1.0, changefreq: 'monthly' },
   { path: '/timeline', priority: 0.9, changefreq: 'monthly' },
@@ -13,17 +12,42 @@ const routes = [
   // Secondary pages
   { path: '/moonlight', priority: 0.8, changefreq: 'monthly' },
   { path: '/painted-books', priority: 0.8, changefreq: 'monthly' },
-
-  // Blog posts (lower priority, updated more frequently)
-  ...Array.from({ length: 10 }, (_, i) => ({
-    path: `/posts/${i}`,
-    priority: 0.6,
-    changefreq: 'monthly',
-  })),
 ]
 
+const getPostRoutes = async () => {
+  const postsPath = join(process.cwd(), 'public', 'content', 'posts.json')
+  try {
+    const raw = await readFile(postsPath, 'utf-8')
+    const data = JSON.parse(raw)
+    const items = Array.isArray(data?.items) ? data.items : []
+    return items
+      .map((post, index) => ({ post, index }))
+      .filter(({ post }) => !post?.devOnly)
+      .map(({ index }) => ({
+        path: `/posts/${index}`,
+        priority: 0.6,
+        changefreq: 'monthly',
+      }))
+  } catch (error) {
+    console.warn('⚠️  Could not read posts.json for sitemap generation:', error)
+    return []
+  }
+}
+
+const getSiteUrl = async () => {
+  const sitePath = join(process.cwd(), 'public', 'content', 'site.json')
+  try {
+    const raw = await readFile(sitePath, 'utf-8')
+    const data = JSON.parse(raw)
+    return data?.seo?.siteUrl || DEFAULT_SITE_URL
+  } catch (error) {
+    console.warn('⚠️  Could not read site.json for sitemap generation:', error)
+    return DEFAULT_SITE_URL
+  }
+}
+
 // Generate XML sitemap
-const generateSitemap = () => {
+const generateSitemap = (siteUrl, routes) => {
   const lastmod = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
 
   const urlEntries = routes
@@ -45,13 +69,16 @@ ${urlEntries}
 
 // Write sitemap to public directory
 const writeSitemap = async () => {
-  const xml = generateSitemap()
+  const postRoutes = await getPostRoutes()
+  const allRoutes = [...baseRoutes, ...postRoutes]
+  const siteUrl = await getSiteUrl()
+  const xml = generateSitemap(siteUrl, allRoutes)
   const outputPath = join(process.cwd(), 'public/sitemap.xml')
 
   try {
     await writeFile(outputPath, xml, 'utf-8')
     console.log('✅ Sitemap generated successfully at public/sitemap.xml')
-    console.log(`   Total URLs: ${routes.length}`)
+    console.log(`   Total URLs: ${allRoutes.length}`)
   } catch (error) {
     console.error('❌ Failed to generate sitemap:', error)
     process.exit(1)

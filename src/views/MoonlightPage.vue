@@ -75,6 +75,9 @@ const trackMoonlightLink = (label: string, href: string, location: string) => {
                 :alt="hero.media.primary.alt"
                 loading="eager"
                 decoding="async"
+                fetchpriority="high"
+                width="2850"
+                height="1921"
               />
             </div>
             <div v-if="hero.media.secondary" class="media-secondary">
@@ -83,6 +86,8 @@ const trackMoonlightLink = (label: string, href: string, location: string) => {
                 :alt="hero.media.secondary.alt"
                 loading="lazy"
                 decoding="async"
+                width="235"
+                height="241"
               />
             </div>
           </div>
@@ -178,6 +183,8 @@ const trackMoonlightLink = (label: string, href: string, location: string) => {
             :alt="bookJournal.image.alt"
             loading="lazy"
             decoding="async"
+            width="1476"
+            height="2000"
           />
         </div>
         <div class="book-journal-content">

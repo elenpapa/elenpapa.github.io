@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onServerPrefetch, computed, nextTick } from 'vue'
+import { useHead } from '@unhead/vue'
 import { content, type BookContent } from '@/services/content'
 import { usePageSeo } from '@/composables/usePageSeo'
 import { trackEvent } from '@/utils/analytics'
@@ -65,6 +66,21 @@ const about = computed(() => data.value?.about)
 const eventsSection = computed(() => data.value?.eventsSection)
 const events = computed(() => data.value?.events || [])
 const preview = computed(() => data.value?.preview)
+const hasInstagramEmbeds = computed(() =>
+  Boolean(data.value?.events?.some((event) => event.instagramEmbedHtml)),
+)
+
+useHead(
+  computed(() => {
+    if (!hasInstagramEmbeds.value) return {}
+    return {
+      link: [
+        { rel: 'preconnect', href: 'https://www.instagram.com', crossorigin: 'anonymous' },
+        { rel: 'dns-prefetch', href: 'https://www.instagram.com' },
+      ],
+    }
+  }),
+)
 
 const fetchData = async () => {
   data.value = await content.getBook()
@@ -75,10 +91,7 @@ onServerPrefetch(fetchData)
 onMounted(async () => {
   await fetchData()
 
-  const hasInstagramEmbeds = (data.value?.events || []).some((event) =>
-    Boolean(event.instagramEmbedHtml),
-  )
-  if (!hasInstagramEmbeds) return
+  if (!hasInstagramEmbeds.value) return
 
   await nextTick()
   await ensureInstagramEmbedsReady()

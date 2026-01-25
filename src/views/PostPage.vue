@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onServerPrefetch, computed } from 'vue'
+import { ref, onMounted, onServerPrefetch, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useHead } from '@unhead/vue'
 import { content, type PostsContent, type SiteContent } from '@/services/content'
@@ -32,7 +32,10 @@ const fetchPostContent = async () => {
   // Skip during SSG - relative URLs don't work without a browser origin
   // Use import.meta.env.SSR which is reliable in Vite SSG
   if (import.meta.env.SSR) return
-  if (!post.value?.contentHtml) return
+  if (!post.value?.contentHtml) {
+    postContentHtml.value = ''
+    return
+  }
   try {
     const response = await fetch(post.value.contentHtml)
     if (response.ok) {
@@ -108,6 +111,17 @@ onMounted(async () => {
     router.push('/')
   }
 })
+
+watch(
+  () => postId.value,
+  async () => {
+    postContentHtml.value = ''
+    await fetchData()
+    if (!post.value) {
+      router.push('/')
+    }
+  },
+)
 
 const goBack = () => {
   trackEvent('post_back_click', { location: 'post', id: postId.value })

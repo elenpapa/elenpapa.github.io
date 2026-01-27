@@ -49,6 +49,21 @@ const revealDirective: ObjectDirective<HTMLElement, RevealOptions | undefined> =
 
     observer.observe(el)
     observerMap.set(el, observer)
+
+    // Mobile Safari can occasionally miss the initial intersection on route changes.
+    // Force-reveal if the element is already in the viewport after mount.
+    globalThis.requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect()
+      const viewportHeight = globalThis.innerHeight || document.documentElement.clientHeight
+      const viewportWidth = globalThis.innerWidth || document.documentElement.clientWidth
+      const isVisible =
+        rect.bottom >= 0 && rect.right >= 0 && rect.top <= viewportHeight && rect.left <= viewportWidth
+
+      if (isVisible) {
+        el.classList.add('reveal--shown')
+        if (once) observer.unobserve(el)
+      }
+    })
   },
 
   unmounted(el) {

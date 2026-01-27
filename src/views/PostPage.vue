@@ -140,13 +140,13 @@ watch(
 
 const goBack = () => {
   trackEvent('post_back_click', { location: 'post', id: postId.value })
-  router.back()
+  router.push('/')
 }
 </script>
 
 <template>
   <main id="content" role="main" class="post-page">
-    <article v-if="post" class="container" v-reveal>
+    <article v-if="post" class="container">
       <button @click="goBack" class="back-button" aria-label="Go back">← Πίσω</button>
 
       <div class="post-header">

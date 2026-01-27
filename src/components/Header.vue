@@ -119,7 +119,7 @@ const trackNavClick = (label: string, href: string) => {
 }
 
 const trackBrandClick = () => {
-  trackEvent('nav_click', { label: 'home', href: '#home', location: 'header' })
+  trackEvent('nav_click', { label: 'home', href: '/', location: 'header' })
 }
 
 const handleBrandClick = () => {
@@ -156,7 +156,7 @@ const onKeyDown = (e: KeyboardEvent) => {
     @focusout="onFocusOut"
   >
     <div class="container bar">
-      <a href="#home" class="brand" @click="handleBrandClick()" aria-label="Home">
+      <RouterLink to="/" class="brand" @click="handleBrandClick()" aria-label="Home">
         <picture v-if="site?.logo">
           <source :srcset="logoSrc.replace('.png', '.webp')" type="image/webp" />
           <img
@@ -168,7 +168,7 @@ const onKeyDown = (e: KeyboardEvent) => {
             fetchpriority="high"
           />
         </picture>
-      </a>
+      </RouterLink>
       <nav class="nav" aria-label="Primary navigation" ref="menuRef">
         <button
           class="hamburger"

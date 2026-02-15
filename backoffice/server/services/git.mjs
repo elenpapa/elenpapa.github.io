@@ -21,8 +21,9 @@ function withGitLock(operation) {
 }
 
 async function runGit(args, { allowFailure = false } = {}) {
+  const effectiveArgs = ['-c', 'core.quotepath=false', ...args]
   try {
-    const { stdout, stderr } = await execFileAsync('git', args, {
+    const { stdout, stderr } = await execFileAsync('git', effectiveArgs, {
       cwd: paths.projectRoot,
       maxBuffer: 1024 * 1024 * 4,
       timeout: GIT_COMMAND_TIMEOUT_MS,
@@ -35,8 +36,67 @@ async function runGit(args, { allowFailure = false } = {}) {
     if (allowFailure) {
       return { stdout, stderr, code }
     }
-    throw new Error(stderr || stdout || `Git command failed: git ${args.join(' ')}`)
+    throw new Error(stderr || stdout || `Git command failed: git ${effectiveArgs.join(' ')}`)
   }
+}
+
+/**
+ * Why this exists:
+ * `git status --porcelain` can return quoted paths (spaces/unicode), and for
+ * some repos even octal-escaped UTF-8 bytes. We decode that format once so all
+ * later git commands receive valid, real repository paths.
+ */
+function decodePorcelainQuotedPath(pathValue) {
+  const value = String(pathValue ?? '').trim()
+  if (!(value.startsWith('"') && value.endsWith('"') && value.length >= 2)) {
+    return value
+  }
+
+  const inner = value.slice(1, -1)
+  const bytes = []
+  for (let index = 0; index < inner.length; index += 1) {
+    const char = inner[index]
+    if (char !== '\\') {
+      bytes.push(...Buffer.from(char, 'utf8'))
+      continue
+    }
+
+    const next = inner[index + 1]
+    if (!next) {
+      bytes.push('\\'.charCodeAt(0))
+      continue
+    }
+
+    if (/[0-7]/.test(next)) {
+      let octal = next
+      let consumed = 1
+      for (let offset = 2; offset <= 3; offset += 1) {
+        const candidate = inner[index + offset]
+        if (!candidate || !/[0-7]/.test(candidate)) break
+        octal += candidate
+        consumed += 1
+      }
+      bytes.push(Number.parseInt(octal, 8))
+      index += consumed
+      continue
+    }
+
+    const escapeMap = {
+      '"': '"',
+      '\\': '\\',
+      n: '\n',
+      r: '\r',
+      t: '\t',
+      b: '\b',
+      f: '\f',
+      v: '\v',
+    }
+    const decoded = escapeMap[next] ?? next
+    bytes.push(...Buffer.from(decoded, 'utf8'))
+    index += 1
+  }
+
+  return Buffer.from(bytes).toString('utf8')
 }
 
 function parsePorcelainLine(rawLine) {
@@ -66,7 +126,7 @@ function parsePorcelainLine(rawLine) {
   const normalizedPath = rawPath.includes(' -> ') ? rawPath.split(' -> ').at(-1) : rawPath
   return {
     code,
-    path: normalizedPath.replace(/\\/g, '/'),
+    path: decodePorcelainQuotedPath(normalizedPath).replace(/\\/g, '/'),
     raw: normalizedLine,
   }
 }

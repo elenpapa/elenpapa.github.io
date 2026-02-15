@@ -6,6 +6,7 @@ import type { Swiper as SwiperType } from 'swiper/types'
 import { A11y } from 'swiper/modules'
 import { content, type PostsContent } from '@/services/content'
 import { trackEvent } from '@/utils/analytics'
+import { resolveResponsiveSrcset } from '@/utils/responsive-srcset'
 import 'swiper/css'
 
 const props = defineProps<{
@@ -96,14 +97,47 @@ const posts = computed(() => {
     )
 })
 const getPostImageSrc = (imageSrc: string | undefined) => imageSrc || ''
+const postImageSrcsetByImage = ref<Record<string, string>>({})
 
-// Generate srcset for responsive carousel images
+/**
+ * Why this exists:
+ * Only existing responsive files should be emitted in `srcset`, otherwise the
+ * browser may pick a missing candidate and render a broken image.
+ */
+const ensurePostImageSrcset = (imageSrc: string | undefined) => {
+  if (!imageSrc || postImageSrcsetByImage.value[imageSrc] !== undefined) return
+  postImageSrcsetByImage.value[imageSrc] = ''
+  void resolveResponsiveSrcset(imageSrc, [400, 800]).then((resolvedSrcset) => {
+    postImageSrcsetByImage.value[imageSrc] = resolvedSrcset
+  })
+}
+
 const getPostImageSrcset = (imageSrc: string | undefined) => {
   if (!imageSrc) return ''
-  const basePath = imageSrc.replace(/\.[^.]+$/, '')
-  const encodedPath = encodeURI(basePath)
-  return `${encodedPath}-400w.webp 400w, ${encodedPath}-800w.webp 800w`
+  return postImageSrcsetByImage.value[imageSrc] || ''
 }
+
+/**
+ * Why this exists:
+ * Some uploads may not have all responsive variants (e.g. missing 800w file).
+ * If the browser selects a missing srcset candidate, we fall back to base src.
+ */
+const handleResponsiveImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  if (!img || img.dataset.srcsetFallbackApplied === 'true') return
+  img.dataset.srcsetFallbackApplied = 'true'
+  img.removeAttribute('srcset')
+  // Re-assign src so the browser retries using base image only.
+  img.src = img.getAttribute('src') || ''
+}
+
+watch(
+  posts,
+  (entries) => {
+    entries.forEach(({ post }) => ensurePostImageSrcset(post.image))
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -176,6 +210,7 @@ const getPostImageSrcset = (imageSrc: string | undefined) => {
                   decoding="async"
                   width="400"
                   height="220"
+                  @error="handleResponsiveImageError"
                 />
               </div>
               <h3>

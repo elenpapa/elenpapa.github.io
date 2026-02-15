@@ -5,6 +5,7 @@ import { useHead } from '@unhead/vue'
 import { content, type PostsContent, type SiteContent } from '@/services/content'
 import PostsCarousel from '@/components/PostsCarousel.vue'
 import { trackEvent } from '@/utils/analytics'
+import { resolveResponsiveSrcset } from '@/utils/responsive-srcset'
 
 const route = useRoute()
 const router = useRouter()
@@ -26,12 +27,36 @@ const post = computed(() => {
 })
 
 const postImageSrc = computed(() => post.value?.image || '')
-const getPostImageSrcset = (imageSrc: string | undefined) => {
-  if (!imageSrc) return ''
-  const basePath = imageSrc.replace(/\.[^.]+$/, '')
-  const encodedPath = encodeURI(basePath)
-  return `${encodedPath}-400w.webp 400w, ${encodedPath}-800w.webp 800w`
+const postImageSrcset = ref('')
+
+/**
+ * Why this exists:
+ * Uploaded images may occasionally miss one srcset candidate size. If the
+ * browser picks a missing file, fallback to the base src path immediately.
+ */
+const handleResponsiveImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  if (!img || img.dataset.srcsetFallbackApplied === 'true') return
+  img.dataset.srcsetFallbackApplied = 'true'
+  img.removeAttribute('srcset')
+  img.src = img.getAttribute('src') || ''
 }
+
+watch(
+  postImageSrc,
+  (imageSrc) => {
+    if (!imageSrc) {
+      postImageSrcset.value = ''
+      return
+    }
+    void resolveResponsiveSrcset(imageSrc, [400, 800]).then((resolvedSrcset) => {
+      if (postImageSrc.value === imageSrc) {
+        postImageSrcset.value = resolvedSrcset
+      }
+    })
+  },
+  { immediate: true },
+)
 
 // Fetch HTML content from the file path (SSR reads from disk, client uses fetch)
 const fetchPostContent = async () => {
@@ -153,7 +178,7 @@ const goBack = () => {
         <div class="image-wrapper">
           <img
             :src="postImageSrc"
-            :srcset="getPostImageSrcset(postImageSrc)"
+            :srcset="postImageSrcset"
             sizes="(max-width: 768px) 100vw, 800px"
             :alt="post.title"
             loading="eager"
@@ -161,6 +186,7 @@ const goBack = () => {
             fetchpriority="high"
             width="800"
             height="440"
+            @error="handleResponsiveImageError"
           />
         </div>
         <h1>{{ post.title }}</h1>

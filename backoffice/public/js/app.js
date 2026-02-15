@@ -56,10 +56,24 @@ export function createBackofficeApp(elements) {
   }
 
   function markSessionPath(repoPath) {
-    if (!repoPath) return
-    state.sessionTouchedPaths.add(repoPath)
+    if (!repoPath || typeof repoPath !== 'string') return
+    const normalized = repoPath.replace(/\\/g, '/')
+    if (!isManagedContentPath(normalized)) return
+    state.sessionTouchedPaths.add(normalized)
     state.hasSessionChanges = true
     syncToolbarState()
+  }
+
+  function isManagedContentPath(repoPath) {
+    return repoPath.startsWith('public/content/') || repoPath.startsWith('public/images/')
+  }
+
+  function seedSessionPathsFromGitStatus(status) {
+    if (!status || !Array.isArray(status.changes)) return
+    status.changes.forEach((entry) => {
+      if (!entry || typeof entry.path !== 'string') return
+      markSessionPath(entry.path)
+    })
   }
 
   function renderReviewPreview(preview) {
@@ -259,6 +273,7 @@ export function createBackofficeApp(elements) {
     try {
       const status = await fetchGitStatus()
       state.gitStatus = status
+      seedSessionPathsFromGitStatus(status)
       renderGitStatus()
       if (
         reloadActiveOnPull &&

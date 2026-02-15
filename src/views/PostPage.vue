@@ -49,9 +49,10 @@ watch(
       postImageSrcset.value = ''
       return
     }
-    void resolveResponsiveSrcset(imageSrc, [400, 800]).then((resolvedSrcset) => {
-      if (postImageSrc.value === imageSrc) {
-        postImageSrcset.value = resolvedSrcset
+    const currentImageSrc = imageSrc
+    void resolveResponsiveSrcset(currentImageSrc, [400, 800]).then((resolvedSrcset) => {
+      if (postImageSrc.value === currentImageSrc) {
+        postImageSrcset.value = resolvedSrcset ?? ''
       }
     })
   },

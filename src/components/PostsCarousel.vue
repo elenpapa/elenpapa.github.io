@@ -106,9 +106,10 @@ const postImageSrcsetByImage = ref<Record<string, string>>({})
  */
 const ensurePostImageSrcset = (imageSrc: string | undefined) => {
   if (!imageSrc || postImageSrcsetByImage.value[imageSrc] !== undefined) return
-  postImageSrcsetByImage.value[imageSrc] = ''
-  void resolveResponsiveSrcset(imageSrc, [400, 800]).then((resolvedSrcset) => {
-    postImageSrcsetByImage.value[imageSrc] = resolvedSrcset
+  const imageKey = imageSrc
+  postImageSrcsetByImage.value[imageKey] = ''
+  void resolveResponsiveSrcset(imageKey, [400, 800]).then((resolvedSrcset) => {
+    postImageSrcsetByImage.value[imageKey] = resolvedSrcset ?? ''
   })
 }
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onServerPrefetch, computed } from 'vue'
+import { ref, onMounted, onServerPrefetch, computed, watch } from 'vue'
 import { content, type PublishersContent } from '@/services/content'
+import { resolveResponsiveSrcset } from '@/utils/responsive-srcset'
 
 const data = ref<PublishersContent | null>(null)
 
@@ -16,15 +17,46 @@ const description = computed(() => data.value?.description ?? '')
 const publishers = computed(() => data.value?.items ?? [])
 const getPublisherLogoSrc = (logoSrc: string | undefined) => logoSrc || ''
 const getPublisherLogoAlt = (logoAlt: string | undefined) => logoAlt || ''
+const publisherLogoSrcsetByImage = ref<Record<string, string>>({})
 
-// Generate srcset for publisher logos (displayed at 60-120px)
-// Skip srcset for SVG files - they're vector and scale perfectly
 const getPublisherLogoSrcset = (logoSrc: string | undefined) => {
   if (!logoSrc || logoSrc.endsWith('.svg')) return ''
-  const basePath = logoSrc.replace(/\.[^.]+$/, '')
-  const encodedPath = encodeURI(basePath)
-  return `${encodedPath}-120w.webp 120w, ${encodedPath}-240w.webp 240w`
+  return publisherLogoSrcsetByImage.value[logoSrc] || ''
 }
+
+const ensurePublisherLogoSrcset = (logoSrc: string | undefined) => {
+  if (
+    !logoSrc ||
+    logoSrc.endsWith('.svg') ||
+    publisherLogoSrcsetByImage.value[logoSrc] !== undefined
+  )
+    return
+  const logoKey = logoSrc
+  publisherLogoSrcsetByImage.value[logoKey] = ''
+  void resolveResponsiveSrcset(logoKey, [120, 240]).then((resolvedSrcset) => {
+    publisherLogoSrcsetByImage.value[logoKey] = resolvedSrcset ?? ''
+  })
+}
+
+/**
+ * Why this exists:
+ * Keep publisher logos rendering even when a generated responsive size is missing.
+ */
+const handleResponsiveImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  if (!img || img.dataset.srcsetFallbackApplied === 'true') return
+  img.dataset.srcsetFallbackApplied = 'true'
+  img.removeAttribute('srcset')
+  img.src = img.getAttribute('src') || ''
+}
+
+watch(
+  publishers,
+  (items) => {
+    items.forEach((publisher) => ensurePublisherLogoSrcset(publisher.logo?.src))
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -51,6 +83,7 @@ const getPublisherLogoSrcset = (logoSrc: string | undefined) => {
               decoding="async"
               width="120"
               height="120"
+              @error="handleResponsiveImageError"
             />
           </div>
           <div class="publisher-info">

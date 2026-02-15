@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onServerPrefetch, computed } from 'vue'
+import { ref, onMounted, onServerPrefetch, computed, watch } from 'vue'
 import { content, type ServicesContent } from '@/services/content'
+import { resolveResponsiveSrcset } from '@/utils/responsive-srcset'
 
 const data = ref<ServicesContent | null>(null)
 
@@ -16,15 +17,41 @@ const heading = computed(() => data.value?.heading ?? 'Services')
 const services = computed(() => data.value?.items ?? [])
 const getServiceImageSrc = (imageSrc: string | undefined) => imageSrc || ''
 const getServiceImageAlt = (imageAlt: string | undefined) => imageAlt || ''
+const serviceImageSrcsetByImage = ref<Record<string, string>>({})
 
-// Generate srcset for responsive images
 const getServiceImageSrcset = (imageSrc: string | undefined) => {
   if (!imageSrc) return ''
-  // Extract base name without extension and encode for URLs with spaces
-  const basePath = imageSrc.replace(/\.[^.]+$/, '')
-  const encodedPath = encodeURI(basePath)
-  return `${encodedPath}-300w.webp 300w, ${encodedPath}-600w.webp 600w`
+  return serviceImageSrcsetByImage.value[imageSrc] || ''
 }
+
+const ensureServiceImageSrcset = (imageSrc: string | undefined) => {
+  if (!imageSrc || serviceImageSrcsetByImage.value[imageSrc] !== undefined) return
+  const imageKey = imageSrc
+  serviceImageSrcsetByImage.value[imageKey] = ''
+  void resolveResponsiveSrcset(imageKey, [300, 600]).then((resolvedSrcset) => {
+    serviceImageSrcsetByImage.value[imageKey] = resolvedSrcset ?? ''
+  })
+}
+
+/**
+ * Why this exists:
+ * Prevent broken thumbnails when one responsive image variant is unavailable.
+ */
+const handleResponsiveImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  if (!img || img.dataset.srcsetFallbackApplied === 'true') return
+  img.dataset.srcsetFallbackApplied = 'true'
+  img.removeAttribute('srcset')
+  img.src = img.getAttribute('src') || ''
+}
+
+watch(
+  services,
+  (items) => {
+    items.forEach((service) => ensureServiceImageSrcset(service.image?.src))
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -54,6 +81,7 @@ const getServiceImageSrcset = (imageSrc: string | undefined) => {
               decoding="async"
               width="300"
               height="200"
+              @error="handleResponsiveImageError"
             />
             <div v-else class="icon" aria-hidden="true">{{ srv.icon ?? '★' }}</div>
           </div>

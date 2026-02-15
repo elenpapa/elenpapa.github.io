@@ -1,31 +1,44 @@
 <script setup lang="ts">
-import { ref, onMounted, onServerPrefetch, computed } from 'vue'
+import { ref, onMounted, onServerPrefetch, computed, watch } from 'vue'
 import { content, type HomeContent } from '@/services/content'
+import { resolveResponsiveSrcset } from '@/utils/responsive-srcset'
 
 const home = ref<HomeContent | null>(null)
 const isLoading = ref(true)
 const introImageSrc = computed(() => home.value?.intro.image.src || '')
 const introImageAlt = computed(() => home.value?.intro.image.alt || 'Intro image')
+const introImageSrcset = ref('')
+const milestoneIconSrcsetByIcon = ref<Record<string, string>>({})
 
 // Helper for milestone icons
 const getMilestoneIconSrc = (iconSrc: string | undefined) => iconSrc || ''
 
-// Generate srcset for milestone icons (displayed at 98px)
-const getMilestoneIconSrcset = (iconSrc: string | undefined) => {
-  if (!iconSrc) return ''
-  const basePath = iconSrc.replace(/\.[^.]+$/, '')
-  const encodedPath = encodeURI(basePath)
-  return `${encodedPath}-100w.webp 100w, ${encodedPath}-200w.webp 200w`
+const ensureMilestoneIconSrcset = (iconSrc: string | undefined) => {
+  if (!iconSrc || milestoneIconSrcsetByIcon.value[iconSrc] !== undefined) return
+  const iconKey = iconSrc
+  milestoneIconSrcsetByIcon.value[iconKey] = ''
+  void resolveResponsiveSrcset(iconKey, [100, 200]).then((resolvedSrcset) => {
+    milestoneIconSrcsetByIcon.value[iconKey] = resolvedSrcset ?? ''
+  })
 }
 
-// Generate srcset for intro image (displayed at ~400px)
-const getIntroImageSrcset = computed(() => {
-  const src = introImageSrc.value
-  if (!src) return ''
-  const basePath = src.replace(/\.[^.]+$/, '')
-  const encodedPath = encodeURI(basePath)
-  return `${encodedPath}-400w.webp 400w, ${encodedPath}-800w.webp 800w`
-})
+const getMilestoneIconSrcset = (iconSrc: string | undefined) => {
+  if (!iconSrc) return ''
+  ensureMilestoneIconSrcset(iconSrc)
+  return milestoneIconSrcsetByIcon.value[iconSrc] || ''
+}
+
+/**
+ * Why this exists:
+ * Avoid broken milestone/intro images when one responsive candidate is missing.
+ */
+const handleResponsiveImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  if (!img || img.dataset.srcsetFallbackApplied === 'true') return
+  img.dataset.srcsetFallbackApplied = 'true'
+  img.removeAttribute('srcset')
+  img.src = img.getAttribute('src') || ''
+}
 
 // Placeholder items to prevent CLS during initial load
 const placeholderEducation = [
@@ -46,6 +59,29 @@ const fetchData = async () => {
 
 onServerPrefetch(fetchData)
 onMounted(fetchData)
+
+watch(
+  introImageSrc,
+  (src) => {
+    if (!src) {
+      introImageSrcset.value = ''
+      return
+    }
+    const currentSrc = src
+    void resolveResponsiveSrcset(currentSrc, [400, 800]).then((resolvedSrcset) => {
+      if (introImageSrc.value === currentSrc) introImageSrcset.value = resolvedSrcset ?? ''
+    })
+  },
+  { immediate: true },
+)
+
+watch(
+  displayedEducation,
+  (education) => {
+    education.forEach((milestone) => ensureMilestoneIconSrcset(milestone.icon))
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -61,13 +97,14 @@ onMounted(fetchData)
         <img
           v-if="home"
           :src="introImageSrc"
-          :srcset="getIntroImageSrcset"
+          :srcset="introImageSrcset"
           sizes="(max-width: 768px) 100vw, 400px"
           :alt="introImageAlt"
           loading="lazy"
           decoding="async"
           width="400"
           height="500"
+          @error="handleResponsiveImageError"
         />
       </div>
     </div>
@@ -95,6 +132,7 @@ onMounted(fetchData)
                 decoding="async"
                 width="98"
                 height="98"
+                @error="handleResponsiveImageError"
               />
             </div>
           </div>

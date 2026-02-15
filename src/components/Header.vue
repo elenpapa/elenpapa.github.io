@@ -4,6 +4,7 @@ import { useFocusTrap } from '@vueuse/integrations/useFocusTrap'
 import { content, type SiteContent } from '@/services/content'
 import { useHeaderAnimation } from '@/composables/useHeaderAnimation'
 import { trackEvent } from '@/utils/analytics'
+import { resolveExistingImageCandidates } from '@/utils/responsive-srcset'
 
 const site = ref<SiteContent | null>(null)
 const open = ref(false)
@@ -29,6 +30,7 @@ const {
 const navItems = computed(() => site.value?.nav ?? [])
 const logoSrc = computed(() => site.value?.logo.src || '')
 const logoAlt = computed(() => site.value?.logo.alt || 'Site logo')
+const logoWebpSrc = ref('')
 
 // Focus trap for mobile menu
 const { activate, deactivate } = useFocusTrap(menuRef, {
@@ -50,6 +52,24 @@ watch(open, (isOpen) => {
     document.body.style.overflow = ''
   }
 })
+
+watch(
+  logoSrc,
+  (src) => {
+    if (!src || src.endsWith('.svg')) {
+      logoWebpSrc.value = ''
+      return
+    }
+    const currentLogoSrc = src
+    const webpCandidate = currentLogoSrc.replace(/\.[^.]+$/, '.webp')
+    void resolveExistingImageCandidates([webpCandidate]).then((existing) => {
+      if (logoSrc.value === currentLogoSrc) {
+        logoWebpSrc.value = existing[0] ?? ''
+      }
+    })
+  },
+  { immediate: true },
+)
 
 const fetchData = async () => {
   site.value = await content.getSite()
@@ -158,7 +178,7 @@ const onKeyDown = (e: KeyboardEvent) => {
     <div class="container bar">
       <RouterLink to="/" class="brand" @click="handleBrandClick()" aria-label="Home">
         <picture v-if="site?.logo">
-          <source :srcset="logoSrc.replace('.png', '.webp')" type="image/webp" />
+          <source v-if="logoWebpSrc" :srcset="logoWebpSrc" type="image/webp" />
           <img
             ref="logoEl"
             :src="logoSrc"

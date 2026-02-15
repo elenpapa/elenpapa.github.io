@@ -30,12 +30,27 @@ export function assertJsonRequest(req) {
 }
 
 export function sendJson(res, statusCode, payload) {
-  res.writeHead(statusCode, { 'content-type': MIME_TYPES['.json'] })
+  /**
+   * Why this exists:
+   * Backoffice is an editing surface, so API responses must never be cached;
+   * stale reads can otherwise make saved JSON changes appear reverted.
+   */
+  res.writeHead(statusCode, {
+    'content-type': MIME_TYPES['.json'],
+    'cache-control': 'no-store, no-cache, must-revalidate, max-age=0',
+    pragma: 'no-cache',
+    expires: '0',
+  })
   res.end(JSON.stringify(payload))
 }
 
 export function sendText(res, statusCode, message) {
-  res.writeHead(statusCode, { 'content-type': 'text/plain; charset=utf-8' })
+  res.writeHead(statusCode, {
+    'content-type': 'text/plain; charset=utf-8',
+    'cache-control': 'no-store, no-cache, must-revalidate, max-age=0',
+    pragma: 'no-cache',
+    expires: '0',
+  })
   res.end(message)
 }
 

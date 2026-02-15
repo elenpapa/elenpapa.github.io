@@ -268,6 +268,43 @@ function shouldKeepOriginalPath({ activeFile, fieldPath }) {
   })
 }
 
+function stripQueryAndHash(value) {
+  return String(value ?? '')
+    .split('#')[0]
+    .split('?')[0]
+}
+
+function isSupportedPublicImagePath(value) {
+  if (typeof value !== 'string' || !value.startsWith('/')) return false
+  if (value.startsWith('/content/')) return false
+  return /\.(png|jpe?g|jfif|webp|svg)$/i.test(stripQueryAndHash(value))
+}
+
+/**
+ * Why this exists:
+ * Deletions must support both `/images/*` and root-level public images such as
+ * `/logo.png`, while still preventing traversal outside `public/`.
+ */
+function resolveSafeImageDeletePath(publicPath) {
+  const cleanPath = stripQueryAndHash(publicPath)
+  if (!isSupportedPublicImagePath(cleanPath)) {
+    throw new Error('Invalid image path for deletion.')
+  }
+  if (cleanPath.startsWith('/images/')) {
+    return getSafeImagePath(cleanPath)
+  }
+
+  const relativePath = cleanPath.replace(/^\/+/, '')
+  const fullPath = path.resolve(paths.publicDir, relativePath)
+  if (!fullPath.startsWith(`${paths.publicDir}${path.sep}`) && fullPath !== paths.publicDir) {
+    throw new Error('Invalid image path.')
+  }
+  if (fullPath.startsWith(`${paths.contentDir}${path.sep}`) || fullPath === paths.contentDir) {
+    throw new Error('Cannot delete content files as images.')
+  }
+  return fullPath
+}
+
 export async function uploadImage(body) {
   const activeFile = String(body.activeFile ?? '')
   const fieldPath = String(body.fieldPath ?? '')
@@ -313,17 +350,14 @@ export async function uploadImage(body) {
 }
 
 export async function deleteImageWithVariants(publicPath) {
-  if (!publicPath || typeof publicPath !== 'string' || !publicPath.startsWith('/images/')) return
-
-  const targetPath = getSafeImagePath(publicPath)
+  if (!isSupportedPublicImagePath(publicPath)) return
+  const targetPath = resolveSafeImageDeletePath(publicPath)
   const directory = path.dirname(targetPath)
   const basename = path.parse(targetPath).name
-  const ext = path.extname(targetPath)
-  const candidates = new Set([
-    targetPath,
-    path.join(directory, `${basename}.webp`),
-    path.join(directory, `${basename}${ext}`),
-  ])
+  const candidates = new Set([targetPath])
+  ALLOWED_IMAGE_EXTENSIONS.forEach((ext) => {
+    candidates.add(path.join(directory, `${basename}${ext}`))
+  })
 
   try {
     const filesInDir = await readdir(directory)

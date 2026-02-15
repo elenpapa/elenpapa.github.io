@@ -45,13 +45,32 @@ export function makeTemplateFromArray({ arrayValue, nodePath, activeFile, templa
 
 export function isLikelyImageField(fieldKey, value) {
   if (typeof value !== 'string') return false
-  if (value.startsWith('/images/')) return true
+  if (isManagedImagePublicPath(value)) return true
   return /(src|cover|image|thumbnail)/i.test(fieldKey || '')
+}
+
+function stripQueryAndHash(value) {
+  return String(value ?? '')
+    .split('#')[0]
+    .split('?')[0]
+}
+
+/**
+ * Why this exists:
+ * Backoffice image replacement/deletion should support both `/images/...` and
+ * root-level public images such as `/logo.png`.
+ */
+export function isManagedImagePublicPath(value) {
+  if (typeof value !== 'string') return false
+  if (!value.startsWith('/')) return false
+  if (value.startsWith('/content/')) return false
+  const cleanPath = stripQueryAndHash(value)
+  return /\.(png|jpe?g|jfif|webp|svg)$/i.test(cleanPath)
 }
 
 export function collectImagePaths(value, output = []) {
   const valueType = getValueType(value)
-  if (valueType === 'string' && value.startsWith('/images/')) {
+  if (valueType === 'string' && isManagedImagePublicPath(value)) {
     output.push(value)
     return output
   }
@@ -70,6 +89,10 @@ export function collectImagePaths(value, output = []) {
 }
 
 export function toRepoPathFromPublicImagePath(publicPath) {
-  if (typeof publicPath !== 'string' || !publicPath.startsWith('/images/')) return ''
-  return `public${publicPath}`.replace(/\\/g, '/')
+  if (!isManagedImagePublicPath(publicPath)) return ''
+  return `public${stripQueryAndHash(publicPath)}`.replace(/\\/g, '/')
+}
+
+export function areValuesEqual(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right)
 }

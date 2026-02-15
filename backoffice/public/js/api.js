@@ -16,7 +16,11 @@ export async function apiRequest(url, options = {}) {
   let response
 
   try {
-    response = await fetch(url, { ...options, signal: controller.signal })
+    response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      cache: 'no-store',
+    })
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') {
       throw new Error('Request timed out. Please try again.')

@@ -15,7 +15,7 @@ import {
 } from './api.js'
 import { getFileUsageLabel } from './constants.js'
 import { createState, isSectionCollapsed, setSectionCollapsed } from './state.js'
-import { cloneValue, toRepoPathFromPublicImagePath } from './utils.js'
+import { areValuesEqual, cloneValue, toRepoPathFromPublicImagePath } from './utils.js'
 import { renderContentEditor } from './views/content-editor.js'
 import { renderImagesLibrary } from './views/images-library.js'
 
@@ -107,7 +107,7 @@ export function createBackofficeApp(elements) {
   }
 
   function isManagedContentPath(repoPath) {
-    return repoPath.startsWith('public/content/') || repoPath.startsWith('public/images/')
+    return repoPath.startsWith('public/')
   }
 
   function seedSessionPathsFromGitStatus(status) {
@@ -313,13 +313,27 @@ export function createBackofficeApp(elements) {
     if (!state.activeFile) return
 
     const deletedImagesSnapshot = Array.from(state.deletedImages)
+    const draftSnapshot = cloneValue(state.draftValue)
     await saveFileContent({
       filePath: state.activeFile,
-      content: state.draftValue,
+      content: draftSnapshot,
       deletedImages: deletedImagesSnapshot,
     })
 
-    state.originalValue = cloneValue(state.draftValue)
+    /**
+     * Why this exists:
+     * We verify persisted JSON immediately after save to avoid silent mismatch
+     * cases where the UI draft diverges from what is actually stored on disk.
+     */
+    const persistedContent = await fetchFileContent(state.activeFile)
+    if (!areValuesEqual(persistedContent, draftSnapshot)) {
+      throw new Error(
+        'Save verification failed: file content on disk differs from the editor state.',
+      )
+    }
+
+    state.originalValue = cloneValue(draftSnapshot)
+    state.draftValue = cloneValue(draftSnapshot)
     state.deletedImages.clear()
     markSessionPath(`public/content/${state.activeFile}`)
     deletedImagesSnapshot.forEach((publicPath) =>

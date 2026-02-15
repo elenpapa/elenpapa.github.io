@@ -7,6 +7,7 @@ import { TEMPLATE_OVERRIDES } from '../constants.js'
 import {
   collectImagePaths,
   getValueType,
+  isManagedImagePublicPath,
   isLikelyImageField,
   makeTemplateFromArray,
 } from '../utils.js'
@@ -219,7 +220,7 @@ function renderNode(value, onReplace, context) {
               fieldPath: pathSegments.join('.'),
               previousImagePath: input.value,
             })
-            if (input.value.startsWith('/images/') && input.value !== imagePath) {
+            if (isManagedImagePublicPath(input.value) && input.value !== imagePath) {
               onMarkImageForDeletion(input.value)
             }
             input.value = imagePath

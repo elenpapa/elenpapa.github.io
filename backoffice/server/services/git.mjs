@@ -11,7 +11,7 @@ import { paths } from '../config.mjs'
 const execFileAsync = promisify(execFile)
 const MAIN_BRANCH = 'main'
 const GIT_COMMAND_TIMEOUT_MS = 15_000
-const MANAGED_PATH_PREFIXES = ['public/content/', 'public/images/']
+const MANAGED_PATH_PREFIXES = ['public/']
 let gitOperationQueue = Promise.resolve()
 
 function withGitLock(operation) {

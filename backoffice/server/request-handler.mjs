@@ -32,7 +32,9 @@ function extractDeletedImages(body) {
     const unique = new Set()
     body.deletedImages.forEach((item) => {
       if (typeof item !== 'string') return
-      if (!item.startsWith('/images/')) return
+      if (!item.startsWith('/')) return
+      if (item.startsWith('/content/')) return
+      if (!/\.(png|jpe?g|jfif|webp|svg)(?:[?#].*)?$/i.test(item)) return
       unique.add(item)
     })
     return Array.from(unique)

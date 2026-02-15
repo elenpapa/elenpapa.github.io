@@ -29,13 +29,34 @@ async function runGit(args, { allowFailure = false } = {}) {
 }
 
 function parsePorcelainLine(rawLine) {
-  const code = rawLine.slice(0, 2)
-  const rawPath = rawLine.slice(3).trim()
+  const normalizedLine = String(rawLine ?? '').trimEnd()
+  let code = '??'
+  let rawPath = ''
+
+  /**
+   * Why this parsing exists:
+   * Git porcelain output can vary between one or two status columns depending
+   * on repository state/config, so path extraction must be resilient.
+   */
+  if (normalizedLine.length >= 3 && normalizedLine[2] === ' ') {
+    code = normalizedLine.slice(0, 2)
+    rawPath = normalizedLine.slice(3).trim()
+  } else {
+    const fallbackMatch = normalizedLine.match(/^(\S+)\s+(.*)$/)
+    if (fallbackMatch) {
+      code = fallbackMatch[1].padEnd(2, ' ').slice(0, 2)
+      rawPath = fallbackMatch[2].trim()
+    } else {
+      code = normalizedLine.slice(0, 2).padEnd(2, ' ')
+      rawPath = normalizedLine.slice(2).trim()
+    }
+  }
+
   const normalizedPath = rawPath.includes(' -> ') ? rawPath.split(' -> ').at(-1) : rawPath
   return {
     code,
     path: normalizedPath.replace(/\\/g, '/'),
-    raw: rawLine,
+    raw: normalizedLine,
   }
 }
 
@@ -80,6 +101,10 @@ function normalizeSessionPaths(sessionPaths) {
     unique.add(trimmed.replace(/\\/g, '/'))
   })
   return Array.from(unique)
+}
+
+function isManagedContentPath(repoPath) {
+  return repoPath.startsWith('public/content/') || repoPath.startsWith('public/images/')
 }
 
 function buildAutoBranchName(date = new Date()) {
@@ -202,7 +227,8 @@ export async function createReviewBranchAndPush(sessionPathsInput) {
 
   const allChanges = await getPorcelainStatus()
   const sessionSet = new Set(sessionPaths)
-  const unrelatedChanges = allChanges.filter((entry) => !sessionSet.has(entry.path))
+  const managedChanges = allChanges.filter((entry) => isManagedContentPath(entry.path))
+  const unrelatedChanges = managedChanges.filter((entry) => !sessionSet.has(entry.path))
 
   if (unrelatedChanges.length > 0) {
     const sample = unrelatedChanges.slice(0, 8).map((entry) => entry.path)

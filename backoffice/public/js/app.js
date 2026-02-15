@@ -77,6 +77,8 @@ export function createBackofficeApp(elements) {
   }
 
   function renderReviewPreview(preview) {
+    elements.reviewErrorText.hidden = true
+    elements.reviewErrorText.textContent = ''
     elements.reviewSummary.textContent = preview.summary || 'No diff summary available.'
     elements.reviewChangesList.innerHTML = ''
 
@@ -104,6 +106,12 @@ export function createBackofficeApp(elements) {
 
   function closeModal(modal) {
     modal.hidden = true
+  }
+
+  function setReviewError(errorMessage) {
+    const message = errorMessage || 'Unknown review flow error.'
+    elements.reviewErrorText.textContent = message
+    elements.reviewErrorText.hidden = false
   }
 
   function syncDirtyState() {
@@ -304,12 +312,18 @@ export function createBackofficeApp(elements) {
     setGitBusy(true)
     try {
       reviewCanFinalize = false
+      elements.reviewErrorText.hidden = true
+      elements.reviewErrorText.textContent = ''
       const preview = await fetchGitPreview(sessionPaths)
       renderReviewPreview(preview)
       openModal(elements.reviewModal)
       setStatus('Review preview loaded. Finalize to create and push a branch.', 'ok')
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : 'Unable to build review preview.', 'error')
+      const message = error instanceof Error ? error.message : 'Unable to build review preview.'
+      setReviewError(message)
+      setStatus(message, 'error')
+      console.error('Review preview error:', error)
+      openModal(elements.reviewModal)
     } finally {
       setGitBusy(false)
     }
@@ -335,7 +349,10 @@ export function createBackofficeApp(elements) {
       await refreshGitStatus({ reloadActiveOnPull: false })
       setStatus(`Review branch created: ${result.branchName}`, 'ok')
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : 'Finalize flow failed.', 'error')
+      const message = error instanceof Error ? error.message : 'Finalize flow failed.'
+      setReviewError(message)
+      setStatus(message, 'error')
+      console.error('Finalize review flow error:', error)
     } finally {
       setGitBusy(false)
     }
@@ -462,7 +479,14 @@ export function createBackofficeApp(elements) {
     })
 
     elements.openReviewFlow.addEventListener('click', async () => {
-      await openReviewFlow()
+      try {
+        await openReviewFlow()
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unexpected review flow error.'
+        setReviewError(message)
+        setStatus(message, 'error')
+        console.error('Open review flow fatal error:', error)
+      }
     })
 
     elements.cancelReviewFlow.addEventListener('click', () => {
@@ -472,7 +496,14 @@ export function createBackofficeApp(elements) {
     })
 
     elements.finalizeReviewFlow.addEventListener('click', async () => {
-      await finalizeReviewFlow()
+      try {
+        await finalizeReviewFlow()
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unexpected finalize flow error.'
+        setReviewError(message)
+        setStatus(message, 'error')
+        console.error('Finalize review flow fatal error:', error)
+      }
     })
 
     elements.copyBranchName.addEventListener('click', async () => {

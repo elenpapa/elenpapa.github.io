@@ -20,6 +20,7 @@ export function getElements() {
     refreshGitStatus: document.querySelector('#refresh-git-status'),
     openReviewFlow: document.querySelector('#open-review-flow'),
     reviewModal: document.querySelector('#review-modal'),
+    reviewErrorText: document.querySelector('#review-error-text'),
     reviewSummary: document.querySelector('#review-summary'),
     reviewChangesList: document.querySelector('#review-changes-list'),
     cancelReviewFlow: document.querySelector('#cancel-review-flow'),

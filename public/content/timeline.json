@@ -1,6 +1,34 @@
 {
   "items": [
     {
+      "year": 2020,
+      "title": "Ματωμένες Πύλες",
+      "cover": "/images/books/bloody-gates.png",
+      "blurb": "Μυθιστόρημα φαντασίας",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2021,
+      "title": "Storm",
+      "cover": "/images/books/Storm.png",
+      "blurb": "Μυθιστόρημα φαντασίας",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2021,
+      "title": "Αύρα",
+      "cover": "/images/books/aura.png",
+      "blurb": "Μυθιστόρημα φαντασίας",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2021,
+      "title": "Εξόριστοι",
+      "cover": "/images/books/eksoristoi.png",
+      "blurb": "Κοινωνικό Μυθιστόρημα",
+      "actions": "Διόρθωση"
+    },
+    {
       "year": 2021,
       "title": "Ηλιαχτίδα",
       "cover": "/images/books/Ηλιαχτίδα.jpg",
@@ -20,6 +48,13 @@
       "cover": "/images/books/Once Upon A Horror Time.jpg",
       "blurb": "Συλλογή Διηγημάτων",
       "actions": "Επιμέλεια"
+    },
+    {
+      "year": 2022,
+      "title": "Ο Οίκος των Δράκων",
+      "cover": "/images/books/houseofdragon.png",
+      "blurb": "Μυθιστόρημα φαντασίας",
+      "actions": "Διόρθωση"
     },
     {
       "year": 2022,
@@ -149,6 +184,13 @@
     },
     {
       "year": 2025,
+      "title": "52",
+      "cover": "/images/books/52.jpg",
+      "blurb": "Κοινωνικό Μυθιστόρημα",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2025,
       "title": "Χάλκινο Κλειδί",
       "cover": "/images/books/Χάλκινο Κλειδί.jpeg",
       "blurb": "Εφηβικό μυθιστόρημα",
@@ -198,7 +240,7 @@
     },
     {
       "year": 2026,
-      "title": "The 50 most mysterious places ever",
+      "title": "50 μυστηριώδη μέρη του κόσμου",
       "cover": "/images/books/The 50 most mysterious places ever.jpg",
       "blurb": "Βιβλίο για παιδιά",
       "actions": "Επιμέλεια μετάφρασης"
@@ -216,6 +258,13 @@
       "cover": "/images/books/bad romance.jpg",
       "blurb": "Ρομαντικό μυθιστόρημα",
       "actions": "Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Υπόθεση Πολέτη",
+      "cover": "/images/books/casepoleti.jpg",
+      "blurb": "Μυθιστόρημα μυστηρίου",
+      "actions": "Επιμέλεια-Διόρθωση"
     }
   ]
 }

@@ -180,7 +180,7 @@
         "author": "Liz Braswell",
         "media": {
           "src": "/images/painted-books/book-20.webp",
-          "alt": "Ζωγραφισμένες άκρες The path not taken"
+          "alt": "Ζωγραφισμένες άκρες Πριν λυθούν τα μάγια"
         }
       },
       {
@@ -189,7 +189,7 @@
         "author": "Ashley Poston",
         "media": {
           "src": "/images/painted-books/book-21.webp",
-          "alt": "Ζωγραφισμένες άκρες The path not taken"
+          "alt": "Ζωγραφισμένες άκρες Επτά χρόνια μακριά"
         }
       },
       {
@@ -198,7 +198,16 @@
         "author": "Ashley Poston",
         "media": {
           "src": "/images/painted-books/book-22.webp",
-          "alt": "Ζωγραφισμένες άκρες The path not taken"
+          "alt": "Ζωγραφισμένες άκρες Οι νεκροί ρομαντικοί"
+        }
+      },
+      {
+        "id": "22",
+        "title": "Ο Μπλε Κλήρος",
+        "author": "Sophie Mackintosh",
+        "media": {
+          "src": "/images/painted-books/book-23.webp",
+          "alt": "Ζωγραφισμένες άκρες Ο Μπλε Κλήρος"
         }
       }
     ]

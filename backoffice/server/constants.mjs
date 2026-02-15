@@ -9,7 +9,7 @@ export const IMAGE_FOLDER_BY_FILE = {
   'home.json': 'root',
   'moonlight.json': 'moonlight',
   'painted-books.json': 'painted-books',
-  'posts.json': 'posts',
+  'posts.json': 'posts/webp',
   'publishers.json': 'publishers',
   'services.json': 'services',
   'site.json': 'root',

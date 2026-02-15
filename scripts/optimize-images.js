@@ -43,15 +43,14 @@ const FOLDER_CONFIGS = {
     responsive: { sizes: [300, 600], quality: 80 },
   },
   posts: {
-    subdir: 'webp', // posts images are in posts/webp/
-    extensions: ['.png'],
+    extensions: ['.png', '.jpg', '.jpeg', '.jfif', '.webp'],
     webp: { quality: 85, maxWidth: 800 },
-    responsive: null, // handled separately due to subdir structure
+    responsive: { sizes: [400, 800], quality: 80 },
   },
   'posts/webp': {
-    extensions: ['.webp'],
-    webp: null, // already webp
-    responsive: { sizes: [400, 800], quality: 80, pattern: /^Article.*\.webp$/i },
+    extensions: ['.png', '.jpg', '.jpeg', '.jfif', '.webp'],
+    webp: { quality: 85, maxWidth: 800 },
+    responsive: { sizes: [400, 800], quality: 80 },
   },
   publishers: {
     extensions: ['.png', '.jpg', '.jpeg', '.jfif'],
@@ -61,7 +60,7 @@ const FOLDER_CONFIGS = {
   common: {
     extensions: ['.png', '.jpg', '.jpeg', '.jfif'],
     webp: { quality: 90, maxWidth: 300 },
-    responsive: { sizes: [100, 200], quality: 85, pattern: /^icon-.*\.(png|webp)$/i },
+    responsive: { sizes: [100, 200], quality: 85 },
   },
   books: {
     extensions: ['.png', '.jpg', '.jpeg', '.jfif'],
@@ -82,7 +81,7 @@ const FOLDER_CONFIGS = {
     // For files directly in public/images/
     extensions: ['.png', '.jpg', '.jpeg', '.jfif'],
     webp: { quality: 85, maxWidth: 1920 },
-    responsive: { sizes: [400, 800], quality: 85, pattern: /^intro\.(png|webp)$/i },
+    responsive: { sizes: [400, 800], quality: 85 },
   },
 }
 
@@ -319,10 +318,7 @@ async function processFile(filePath, options) {
   }
 
   // Generate responsive variants
-  if (
-    (options.type === 'all' || options.type === 'responsive') &&
-    config.responsive
-  ) {
+  if ((options.type === 'all' || options.type === 'responsive') && config.responsive) {
     // Check pattern if specified
     const basename = parse(filePath).base
     if (!config.responsive.pattern || config.responsive.pattern.test(basename)) {
@@ -330,7 +326,11 @@ async function processFile(filePath, options) {
       const webpPath = join(BASE_DIR, dir, `${name}.webp`)
       const sourceForResponsive = existsSync(webpPath) ? webpPath : fullPath
 
-      const results = await generateResponsiveVariants(sourceForResponsive, config.responsive, options)
+      const results = await generateResponsiveVariants(
+        sourceForResponsive,
+        config.responsive,
+        options,
+      )
       stats.responsive = results
 
       for (const r of results) {

@@ -16,6 +16,13 @@ const execFileAsync = promisify(execFile)
 const IMAGE_INDEX_CONCURRENCY = 10
 const OPTIMIZER_TIMEOUT_MS = 120_000
 const MAX_UPLOAD_BYTES = 12 * 1024 * 1024
+const ORIGINAL_PATH_RULES = [
+  { file: 'site.json', pattern: /^logo\.src$/ },
+  { file: 'site.json', pattern: /^seo\./ },
+]
+const FOLDER_OVERRIDE_RULES = [
+  { file: 'site.json', pattern: /^seo\.pages\.[^.]+\.image$/, folder: 'og' },
+]
 
 /**
  * Why this exists:
@@ -180,6 +187,44 @@ function getImageFolderForFile(activeFile) {
   return folder
 }
 
+function isRuleMatch({ rules, fileName, fieldPath }) {
+  return rules.some((rule) => rule.file === fileName && rule.pattern.test(fieldPath))
+}
+
+function resolveFolderFromPreviousPath(previousImagePath) {
+  if (typeof previousImagePath !== 'string' || !previousImagePath.startsWith('/images/')) {
+    return ''
+  }
+
+  const relativePath = previousImagePath.replace(/^\/images\//, '')
+  const normalizedPath = path.posix.normalize(relativePath)
+  if (!normalizedPath || normalizedPath.startsWith('../') || normalizedPath.includes('/../')) {
+    return ''
+  }
+
+  const directory = path.posix.dirname(normalizedPath)
+  return directory === '.' ? 'root' : directory
+}
+
+/**
+ * Why this exists:
+ * Image destinations are mostly inferred from the active JSON file, but a few
+ * fields (for example SEO OpenGraph images) need explicit folder overrides.
+ */
+function resolveUploadFolder({ activeFile, fieldPath, previousImagePath }) {
+  const fileName = path.basename(activeFile || '')
+  const normalizedFieldPath = String(fieldPath ?? '').trim()
+  const previousFolder = resolveFolderFromPreviousPath(previousImagePath)
+  if (previousFolder) return previousFolder
+
+  const matchingOverride = FOLDER_OVERRIDE_RULES.find(
+    (rule) => rule.file === fileName && rule.pattern.test(normalizedFieldPath),
+  )
+  if (matchingOverride) return matchingOverride.folder
+
+  return getImageFolderForFile(activeFile)
+}
+
 function getRelativeOptimizerPath(absoluteImagePath) {
   return path.relative(paths.imagesDir, absoluteImagePath).split(path.sep).join('/')
 }
@@ -194,11 +239,42 @@ async function runOptimizerForImage(absoluteImagePath) {
   })
 }
 
+function toWebpPublicPath(publicPath) {
+  const parsed = path.posix.parse(publicPath)
+  return path.posix.join(parsed.dir, `${parsed.name}.webp`)
+}
+
+async function hasImageAtPublicPath(publicPath) {
+  try {
+    await stat(getSafeImagePath(publicPath))
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Why this exists:
+ * Some JSON fields must keep original files (SEO/logo compatibility), while
+ * most content images should reference optimized `.webp` outputs by default.
+ */
+function shouldKeepOriginalPath({ activeFile, fieldPath }) {
+  const fileName = path.basename(activeFile || '')
+  const normalizedFieldPath = String(fieldPath ?? '').trim()
+  return isRuleMatch({
+    rules: ORIGINAL_PATH_RULES,
+    fileName,
+    fieldPath: normalizedFieldPath,
+  })
+}
+
 export async function uploadImage(body) {
   const activeFile = String(body.activeFile ?? '')
+  const fieldPath = String(body.fieldPath ?? '')
+  const previousImagePath = String(body.previousImagePath ?? '')
   const originalName = String(body.fileName ?? '')
   const fileDataBase64 = String(body.fileDataBase64 ?? '')
-  const folder = getImageFolderForFile(activeFile)
+  const folder = resolveUploadFolder({ activeFile, fieldPath, previousImagePath })
   const safeFileName = sanitizeFileName(originalName)
   const uniqueName = `${path.parse(safeFileName).name}-${Date.now()}${path.parse(safeFileName).ext}`
   const outputDir = folder === 'root' ? paths.imagesDir : path.join(paths.imagesDir, folder)
@@ -221,6 +297,16 @@ export async function uploadImage(body) {
   } catch {
     await unlink(outputPath).catch(() => {})
     throw new Error('Image uploaded, but optimization failed.')
+  }
+
+  const keepOriginalPath = shouldKeepOriginalPath({ activeFile, fieldPath })
+  if (keepOriginalPath || publicImagePath.endsWith('.svg') || publicImagePath.endsWith('.webp')) {
+    return { imagePath: publicImagePath }
+  }
+
+  const optimizedPublicPath = toWebpPublicPath(publicImagePath)
+  if (await hasImageAtPublicPath(optimizedPublicPath)) {
+    return { imagePath: optimizedPublicPath }
   }
 
   return { imagePath: publicImagePath }

@@ -19,6 +19,16 @@
   box-sizing: border-box;
 }
 
+/*
+ * Why this exists:
+ * Some panels (for example `.images-root`) define their own display mode
+ * in CSS, which can override HTML's default `[hidden]` behavior.
+ * This guard guarantees mode switches fully hide inactive sections.
+ */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -50,6 +60,37 @@ body {
   line-height: 1.4;
 }
 
+.mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.mode-switch button.is-active {
+  border-color: var(--accent);
+  background: #fff4e7;
+}
+
+.images-tools {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.images-tools label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.images-tools input {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
 .file-list {
   margin: 14px 0 0;
   padding: 0;
@@ -71,6 +112,20 @@ body {
   border-radius: 8px;
   padding: 10px;
   cursor: pointer;
+}
+
+.file-item-title {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.file-item-usage {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
 }
 
 .file-list button:hover {
@@ -161,6 +216,111 @@ button:disabled {
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
     monospace;
+}
+
+.images-root {
+  display: grid;
+  gap: 18px;
+}
+
+.image-section h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  text-transform: capitalize;
+}
+
+.image-section-toggle {
+  width: 100%;
+  margin: 0 0 10px;
+  border: 1px solid #ddd6c4;
+  background: #f6f1e2;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+.image-section-toggle span:last-child {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: none;
+  font-weight: 400;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.image-card {
+  border: 1px solid #e7e2d2;
+  border-radius: 10px;
+  background: #fcfbf7;
+  overflow: hidden;
+}
+
+.image-preview {
+  width: 100%;
+  height: 160px;
+  object-fit: contain;
+  background: #f3efdf;
+  border-bottom: 1px solid #e2dcc8;
+}
+
+.image-meta {
+  padding: 10px;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.image-meta strong {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-meta code {
+  background: #efe9d8;
+  border-radius: 4px;
+  padding: 2px 6px;
+  display: inline-block;
+  overflow-wrap: anywhere;
+}
+
+.usage-title {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.usage-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.usage-list li {
+  border: 1px solid #e8e3d3;
+  border-radius: 7px;
+  background: #fff;
+  padding: 6px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.usage-list li span {
+  overflow-wrap: anywhere;
+  font-size: 12px;
 }
 
 .node {

@@ -17,6 +17,38 @@ npm run backoffice
 
 Open `http://127.0.0.1:4310`.
 
+## Structure
+
+```text
+backoffice/
+  server.mjs                      # bootstrap only
+  server/
+    config.mjs                    # env + resolved paths
+    constants.mjs                 # MIME/types + folder mappings
+    request-handler.mjs           # API/static routing
+    services/
+      content-files.mjs           # content JSON read/write/list
+      images.mjs                  # image index/upload/cleanup
+      static-files.mjs            # static file serving helper
+    utils/
+      http.mjs                    # JSON/text responses + body parsing
+      path-guards.mjs             # safe filesystem path resolution
+  public/
+    index.html
+    styles.css
+    js/
+      main.js                     # browser entrypoint
+      app.js                      # controller/state orchestration
+      api.js                      # API client
+      constants.js                # templates + file usage references
+      dom.js                      # element lookup
+      state.js                    # state helpers
+      utils.js                    # shared value helpers
+      views/
+        content-editor.js         # recursive JSON editor view
+        images-library.js         # read-only images view
+```
+
 ## Core features implemented
 
 - Lists available content JSON files.
@@ -31,6 +63,10 @@ Open `http://127.0.0.1:4310`.
   - runs `scripts/optimize-images.js --file ...` automatically
   - deletes replaced/removed old image files (including responsive variants) on save
 - Saves pretty-formatted JSON back to disk.
+- Includes a read-only `Images` section:
+  - shows preview, file name, relative path, and size
+  - shows all JSON references (`file -> json path`) where each image is used
+  - includes quick `Open` actions to jump to the related content file editor
 
 ## Next iteration (page-specific UX)
 

@@ -12,7 +12,14 @@ import {
 } from './services/git.mjs'
 import { buildImageIndex, deleteImageWithVariants, uploadImage } from './services/images.mjs'
 import { serveFileFromBaseDir } from './services/static-files.mjs'
-import { sendJson, sendText, readJsonBody } from './utils/http.mjs'
+import {
+  HttpError,
+  assertJsonRequest,
+  isHttpError,
+  readJsonBody,
+  sendJson,
+  sendText,
+} from './utils/http.mjs'
 
 function extractContentPayload(body) {
   const hasContentEnvelope =
@@ -22,9 +29,41 @@ function extractContentPayload(body) {
 
 function extractDeletedImages(body) {
   if (body && typeof body === 'object' && Array.isArray(body.deletedImages)) {
-    return body.deletedImages
+    const unique = new Set()
+    body.deletedImages.forEach((item) => {
+      if (typeof item !== 'string') return
+      if (!item.startsWith('/images/')) return
+      unique.add(item)
+    })
+    return Array.from(unique)
   }
   return []
+}
+
+/**
+ * Why this exists:
+ * Backoffice endpoints mutate repository files and can run on shared networks,
+ * so mutating API calls are restricted to same-origin browser requests.
+ */
+function assertSameOriginForMutation(req, method, pathname) {
+  if (!pathname.startsWith('/api/')) return
+  if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) return
+
+  const originHeader = String(req.headers.origin ?? '').trim()
+  if (!originHeader) return
+  const hostHeader = String(req.headers.host ?? '').trim()
+  if (!hostHeader) return
+
+  let originHost = ''
+  try {
+    originHost = new URL(originHeader).host
+  } catch {
+    throw new HttpError(403, 'Invalid request origin.')
+  }
+
+  if (originHost !== hostHeader) {
+    throw new HttpError(403, 'Cross-origin mutation requests are blocked.')
+  }
 }
 
 export async function handleRequest(req, res) {
@@ -38,6 +77,8 @@ export async function handleRequest(req, res) {
   const method = req.method.toUpperCase()
 
   try {
+    assertSameOriginForMutation(req, method, pathname)
+
     if (method === 'GET' && pathname === '/api/files') {
       const files = await listJsonFiles(paths.contentDir)
       sendJson(res, 200, { files })
@@ -67,6 +108,7 @@ export async function handleRequest(req, res) {
       }
 
       if (method === 'PUT') {
+        assertJsonRequest(req)
         const body = await readJsonBody(req, BODY_LIMIT_BYTES)
         const nextContent = extractContentPayload(body)
         const deletedImages = extractDeletedImages(body)
@@ -78,6 +120,7 @@ export async function handleRequest(req, res) {
     }
 
     if (method === 'POST' && pathname === '/api/upload-image') {
+      assertJsonRequest(req)
       const body = await readJsonBody(req, BODY_LIMIT_BYTES)
       const uploaded = await uploadImage(body)
       sendJson(res, 200, uploaded)
@@ -85,6 +128,7 @@ export async function handleRequest(req, res) {
     }
 
     if (method === 'POST' && pathname === '/api/git/preview') {
+      assertJsonRequest(req)
       const body = await readJsonBody(req, BODY_LIMIT_BYTES)
       const preview = await getSessionChangePreview(body.sessionPaths)
       sendJson(res, 200, { preview })
@@ -92,6 +136,7 @@ export async function handleRequest(req, res) {
     }
 
     if (method === 'POST' && pathname === '/api/git/finalize') {
+      assertJsonRequest(req)
       const body = await readJsonBody(req, BODY_LIMIT_BYTES)
       const result = await createReviewBranchAndPush(body.sessionPaths)
       sendJson(res, 200, { result })
@@ -113,6 +158,11 @@ export async function handleRequest(req, res) {
     if (!servedFromBackoffice) sendText(res, 404, 'Not found.')
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected error.'
+    if (isHttpError(error)) {
+      sendJson(res, error.statusCode, { error: message })
+      return
+    }
+    console.error('Backoffice request error:', error)
     sendJson(res, 400, { error: message })
   }
 }

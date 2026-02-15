@@ -9,7 +9,12 @@ export function createState() {
     files: [],
     images: [],
     imageSearchQuery: '',
-    collapsedImageSections: new Set(),
+    /**
+     * Why this exists:
+     * We track expanded sections (not collapsed ones) so default behavior is
+     * collapsed and the stored set only contains explicit user expansions.
+     */
+    expandedImageSections: new Set(),
     activeFile: '',
     originalValue: null,
     draftValue: null,
@@ -23,13 +28,18 @@ export function createState() {
 }
 
 export function isSectionCollapsed(state, sectionName) {
-  return state.collapsedImageSections.has(sectionName)
+  /**
+   * Why this behavior exists:
+   * Image sections should be collapsed by default for scanability, and only
+   * sections explicitly opened by the user stay expanded.
+   */
+  return !state.expandedImageSections.has(sectionName)
 }
 
 export function setSectionCollapsed(state, sectionName, collapsed) {
   if (collapsed) {
-    state.collapsedImageSections.add(sectionName)
+    state.expandedImageSections.delete(sectionName)
   } else {
-    state.collapsedImageSections.delete(sectionName)
+    state.expandedImageSections.add(sectionName)
   }
 }

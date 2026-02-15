@@ -3,8 +3,29 @@
  * Network calls are isolated in one module so endpoint changes and payload
  * evolution do not cascade through view/controller code.
  */
+const API_TIMEOUT_MS = 30_000
+
 export async function apiRequest(url, options = {}) {
-  const response = await fetch(url, options)
+  /**
+   * Why this exists:
+   * Timeouts prevent the UI from getting stuck indefinitely when a network
+   * request or server-side git/image operation hangs unexpectedly.
+   */
+  const controller = new AbortController()
+  const timeoutHandle = setTimeout(() => controller.abort(), API_TIMEOUT_MS)
+  let response
+
+  try {
+    response = await fetch(url, { ...options, signal: controller.signal })
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.')
+    }
+    throw error
+  } finally {
+    clearTimeout(timeoutHandle)
+  }
+
   let payload = {}
 
   try {

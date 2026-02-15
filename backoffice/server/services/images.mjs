@@ -13,6 +13,31 @@ import { listJsonFiles } from './content-files.mjs'
 import { getSafeContentPath, getSafeImagePath } from '../utils/path-guards.mjs'
 
 const execFileAsync = promisify(execFile)
+const IMAGE_INDEX_CONCURRENCY = 10
+const OPTIMIZER_TIMEOUT_MS = 120_000
+const MAX_UPLOAD_BYTES = 12 * 1024 * 1024
+
+/**
+ * Why this exists:
+ * Backoffice indexing can touch many files, so bounded concurrency improves
+ * responsiveness without opening an unbounded number of file descriptors.
+ */
+async function mapWithConcurrency(items, concurrency, mapper) {
+  if (!items.length) return []
+  const safeConcurrency = Math.max(1, Math.min(concurrency, items.length))
+  const results = new Array(items.length)
+  let cursor = 0
+
+  async function worker() {
+    while (cursor < items.length) {
+      const index = cursor++
+      results[index] = await mapper(items[index], index)
+    }
+  }
+
+  await Promise.all(Array.from({ length: safeConcurrency }, () => worker()))
+  return results
+}
 
 export async function listImageFiles(dir = paths.imagesDir, baseDir = dir) {
   const entries = await readdir(dir, { withFileTypes: true })
@@ -82,41 +107,54 @@ export async function buildImageIndex(searchTerm = '') {
   const query = normalizeSearchTerm(searchTerm)
   const files = await listJsonFiles(paths.contentDir)
   const usageByImage = new Map()
-
-  for (const file of files) {
+  const allUsagesByFile = await mapWithConcurrency(files, IMAGE_INDEX_CONCURRENCY, async (file) => {
     const fullPath = getSafeContentPath(file)
-    const rawContent = await readFile(fullPath, 'utf-8')
-    const parsed = JSON.parse(rawContent)
-    const usages = collectImageUsages(parsed, '')
+    try {
+      const rawContent = await readFile(fullPath, 'utf-8')
+      const parsed = JSON.parse(rawContent)
+      return { file, usages: collectImageUsages(parsed, '') }
+    } catch {
+      // Ignore unreadable/invalid files here so one broken JSON does not block image browsing.
+      return { file, usages: [] }
+    }
+  })
+
+  allUsagesByFile.forEach(({ file, usages }) => {
     usages.forEach((usage) => {
       if (!usageByImage.has(usage.imagePath)) {
         usageByImage.set(usage.imagePath, [])
       }
       usageByImage.get(usage.imagePath).push({ file, jsonPath: usage.jsonPath })
     })
-  }
+  })
 
   const imageFiles = await listImageFiles(paths.imagesDir)
-  const images = []
+  const images = await mapWithConcurrency(
+    imageFiles,
+    IMAGE_INDEX_CONCURRENCY,
+    async (relativePath) => {
+      const fullPath = path.join(paths.imagesDir, relativePath)
+      try {
+        const fileStats = await stat(fullPath)
+        const section = relativePath.includes('/') ? relativePath.split('/')[0] : 'root'
+        const publicPath = `/images/${relativePath}`.replace(/\\/g, '/')
+        const image = {
+          section,
+          name: path.basename(relativePath),
+          relativePath,
+          publicPath,
+          bytes: fileStats.size,
+          sizeLabel: formatBytes(fileStats.size),
+          usages: usageByImage.get(publicPath) ?? [],
+        }
+        return imageMatchesQuery(image, query) ? image : null
+      } catch {
+        return null
+      }
+    },
+  )
 
-  for (const relativePath of imageFiles) {
-    const fullPath = path.join(paths.imagesDir, relativePath)
-    const fileStats = await stat(fullPath)
-    const section = relativePath.includes('/') ? relativePath.split('/')[0] : 'root'
-    const publicPath = `/images/${relativePath}`.replace(/\\/g, '/')
-    const image = {
-      section,
-      name: path.basename(relativePath),
-      relativePath,
-      publicPath,
-      bytes: fileStats.size,
-      sizeLabel: formatBytes(fileStats.size),
-      usages: usageByImage.get(publicPath) ?? [],
-    }
-    if (imageMatchesQuery(image, query)) images.push(image)
-  }
-
-  return images
+  return images.filter(Boolean)
 }
 
 function sanitizeFileName(filename) {
@@ -152,6 +190,7 @@ async function runOptimizerForImage(absoluteImagePath) {
   await execFileAsync(process.execPath, [scriptPath, '--file', relativePath], {
     cwd: paths.projectRoot,
     maxBuffer: 1024 * 1024,
+    timeout: OPTIMIZER_TIMEOUT_MS,
   })
 }
 
@@ -171,6 +210,9 @@ export async function uploadImage(body) {
 
   const rawBuffer = Buffer.from(fileDataBase64, 'base64')
   if (!rawBuffer.byteLength) throw new Error('Image payload is empty.')
+  if (rawBuffer.byteLength > MAX_UPLOAD_BYTES) {
+    throw new Error('Image is too large. Maximum upload size is 12 MB.')
+  }
 
   await mkdir(outputDir, { recursive: true })
   await writeFile(outputPath, rawBuffer)

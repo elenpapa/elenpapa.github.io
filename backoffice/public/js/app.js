@@ -23,10 +23,42 @@ export function createBackofficeApp(elements) {
   const state = createState()
   let imageSearchDebounceTimer = null
   let reviewCanFinalize = false
+  const gitBusyByAction = new Map()
+  const DEFAULT_BUTTON_LABELS = {
+    refresh: 'Refresh git',
+    preview: 'Create Review Branch',
+    finalize: 'Finalize & Push',
+  }
 
-  function setGitBusy(nextBusy) {
-    state.gitBusy = nextBusy
+  /**
+   * Why this exists:
+   * Git operations can nest (for example finalize -> refresh status), so we
+   * track busy state per action to keep button states and labels accurate.
+   */
+  function setGitBusy(nextBusy, action = 'general') {
+    const current = gitBusyByAction.get(action) ?? 0
+    if (nextBusy) {
+      gitBusyByAction.set(action, current + 1)
+    } else if (current <= 1) {
+      gitBusyByAction.delete(action)
+    } else {
+      gitBusyByAction.set(action, current - 1)
+    }
+    state.gitBusy = Array.from(gitBusyByAction.values()).some((count) => count > 0)
     syncToolbarState()
+  }
+
+  function isGitActionBusy(action) {
+    return (gitBusyByAction.get(action) ?? 0) > 0
+  }
+
+  async function runGitTask(action, task) {
+    setGitBusy(true, action)
+    try {
+      return await task()
+    } finally {
+      setGitBusy(false, action)
+    }
   }
 
   function setStatus(message, mode = '') {
@@ -112,10 +144,14 @@ export function createBackofficeApp(elements) {
 
   function openModal(modal) {
     modal.hidden = false
+    document.body.classList.add('modal-open')
   }
 
   function closeModal(modal) {
     modal.hidden = true
+    if (elements.reviewModal.hidden && elements.successModal.hidden) {
+      document.body.classList.remove('modal-open')
+    }
   }
 
   function setReviewError(errorMessage) {
@@ -140,6 +176,15 @@ export function createBackofficeApp(elements) {
     elements.refreshGitStatus.disabled = state.gitBusy
     elements.openReviewFlow.disabled = !state.hasSessionChanges || state.dirty || state.gitBusy
     elements.finalizeReviewFlow.disabled = state.gitBusy || !reviewCanFinalize
+    elements.refreshGitStatus.textContent = isGitActionBusy('refresh')
+      ? 'Refreshing...'
+      : DEFAULT_BUTTON_LABELS.refresh
+    elements.openReviewFlow.textContent = isGitActionBusy('preview')
+      ? 'Preparing...'
+      : DEFAULT_BUTTON_LABELS.preview
+    elements.finalizeReviewFlow.textContent = isGitActionBusy('finalize')
+      ? 'Finalizing...'
+      : DEFAULT_BUTTON_LABELS.finalize
   }
 
   function renderFileList() {
@@ -286,8 +331,7 @@ export function createBackofficeApp(elements) {
   }
 
   async function refreshGitStatus({ reloadActiveOnPull = true } = {}) {
-    setGitBusy(true)
-    try {
+    await runGitTask('refresh', async () => {
       const status = await fetchGitStatus()
       state.gitStatus = status
       seedSessionPathsFromGitStatus(status)
@@ -301,9 +345,7 @@ export function createBackofficeApp(elements) {
       ) {
         await openFile(state.activeFile, { force: true })
       }
-    } finally {
-      setGitBusy(false)
-    }
+    })
   }
 
   async function openReviewFlow() {
@@ -318,23 +360,22 @@ export function createBackofficeApp(elements) {
       return
     }
 
-    setGitBusy(true)
     try {
-      reviewCanFinalize = false
-      elements.reviewErrorText.hidden = true
-      elements.reviewErrorText.textContent = ''
-      const preview = await fetchGitPreview(sessionPaths)
-      renderReviewPreview(preview)
-      openModal(elements.reviewModal)
-      setStatus('Review preview loaded. Finalize to create and push a branch.', 'ok')
+      await runGitTask('preview', async () => {
+        reviewCanFinalize = false
+        elements.reviewErrorText.hidden = true
+        elements.reviewErrorText.textContent = ''
+        const preview = await fetchGitPreview(sessionPaths)
+        renderReviewPreview(preview)
+        openModal(elements.reviewModal)
+        setStatus('Review preview loaded. Finalize to create and push a branch.', 'ok')
+      })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to build review preview.'
       setReviewError(message)
       setStatus(message, 'error')
       console.error('Review preview error:', error)
       openModal(elements.reviewModal)
-    } finally {
-      setGitBusy(false)
     }
   }
 
@@ -345,25 +386,24 @@ export function createBackofficeApp(elements) {
       return
     }
 
-    setGitBusy(true)
     try {
-      const result = await finalizeGitReview(sessionPaths)
-      closeModal(elements.reviewModal)
-      reviewCanFinalize = false
-      elements.createdBranchName.textContent = result.branchName
-      openModal(elements.successModal)
-      state.sessionTouchedPaths.clear()
-      state.hasSessionChanges = false
-      syncToolbarState()
-      await refreshGitStatus({ reloadActiveOnPull: false })
-      setStatus(`Review branch created: ${result.branchName}`, 'ok')
+      await runGitTask('finalize', async () => {
+        const result = await finalizeGitReview(sessionPaths)
+        closeModal(elements.reviewModal)
+        reviewCanFinalize = false
+        elements.createdBranchName.textContent = result.branchName
+        openModal(elements.successModal)
+        state.sessionTouchedPaths.clear()
+        state.hasSessionChanges = false
+        syncToolbarState()
+        await refreshGitStatus({ reloadActiveOnPull: false })
+        setStatus(`Review branch created: ${result.branchName}`, 'ok')
+      })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Finalize flow failed.'
       setReviewError(message)
       setStatus(message, 'error')
       console.error('Finalize review flow error:', error)
-    } finally {
-      setGitBusy(false)
     }
   }
 
@@ -529,6 +569,34 @@ export function createBackofficeApp(elements) {
     })
 
     elements.closeSuccessModal.addEventListener('click', () => {
+      closeModal(elements.successModal)
+    })
+
+    /**
+     * Why this exists:
+     * Modal interactions should follow standard UX expectations: escape key and
+     * backdrop click dismiss dialogs when no blocking git action is running.
+     */
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || state.gitBusy) return
+      if (!elements.reviewModal.hidden) {
+        reviewCanFinalize = false
+        syncToolbarState()
+        closeModal(elements.reviewModal)
+      } else if (!elements.successModal.hidden) {
+        closeModal(elements.successModal)
+      }
+    })
+
+    elements.reviewModal.addEventListener('click', (event) => {
+      if (event.target !== elements.reviewModal || state.gitBusy) return
+      reviewCanFinalize = false
+      syncToolbarState()
+      closeModal(elements.reviewModal)
+    })
+
+    elements.successModal.addEventListener('click', (event) => {
+      if (event.target !== elements.successModal || state.gitBusy) return
       closeModal(elements.successModal)
     })
   }

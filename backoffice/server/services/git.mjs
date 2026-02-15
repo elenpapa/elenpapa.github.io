@@ -4,17 +4,28 @@
  * backoffice can enforce a consistent content-review workflow at scale.
  */
 import { execFile } from 'node:child_process'
+import path from 'node:path'
 import { promisify } from 'node:util'
 import { paths } from '../config.mjs'
 
 const execFileAsync = promisify(execFile)
 const MAIN_BRANCH = 'main'
+const GIT_COMMAND_TIMEOUT_MS = 15_000
+const MANAGED_PATH_PREFIXES = ['public/content/', 'public/images/']
+let gitOperationQueue = Promise.resolve()
+
+function withGitLock(operation) {
+  const queued = gitOperationQueue.then(operation, operation)
+  gitOperationQueue = queued.catch(() => {})
+  return queued
+}
 
 async function runGit(args, { allowFailure = false } = {}) {
   try {
     const { stdout, stderr } = await execFileAsync('git', args, {
       cwd: paths.projectRoot,
       maxBuffer: 1024 * 1024 * 4,
+      timeout: GIT_COMMAND_TIMEOUT_MS,
     })
     return { stdout: stdout.trim(), stderr: stderr.trim(), code: 0 }
   } catch (error) {
@@ -96,15 +107,22 @@ function normalizeSessionPaths(sessionPaths) {
   const unique = new Set()
   ;(Array.isArray(sessionPaths) ? sessionPaths : []).forEach((entry) => {
     if (typeof entry !== 'string') return
-    const trimmed = entry.trim()
+    const trimmed = entry.trim().replace(/\\/g, '/').replace(/^\.\//, '')
     if (!trimmed) return
-    unique.add(trimmed.replace(/\\/g, '/'))
+
+    const normalized = path.posix.normalize(trimmed)
+    if (!normalized || normalized === '.') return
+    if (normalized.startsWith('/') || normalized.startsWith('../') || normalized.includes('/../')) {
+      return
+    }
+    if (!isManagedContentPath(normalized)) return
+    unique.add(normalized)
   })
   return Array.from(unique)
 }
 
 function isManagedContentPath(repoPath) {
-  return repoPath.startsWith('public/content/') || repoPath.startsWith('public/images/')
+  return MANAGED_PATH_PREFIXES.some((prefix) => repoPath.startsWith(prefix))
 }
 
 function buildAutoBranchName(date = new Date()) {
@@ -117,7 +135,8 @@ function buildAutoBranchName(date = new Date()) {
     String(date.getMinutes()).padStart(2, '0'),
     String(date.getSeconds()).padStart(2, '0'),
   ].join('')
-  return `codex/ui-backoffice-${stamp}`
+  const randomSuffix = Math.random().toString(36).slice(2, 6)
+  return `codex/ui-backoffice-${stamp}-${randomSuffix}`
 }
 
 function buildAutoCommitMessage(date = new Date()) {
@@ -129,7 +148,7 @@ function buildAutoCommitMessage(date = new Date()) {
   return `ui-backoffice-${dateStamp}`
 }
 
-export async function syncMainWithOrigin() {
+async function syncMainWithOriginUnsafe() {
   const fetchResult = await runGit(['fetch', 'origin', MAIN_BRANCH], { allowFailure: true })
   if (fetchResult.code !== 0) {
     return {
@@ -165,8 +184,12 @@ export async function syncMainWithOrigin() {
   return sync
 }
 
-export async function getGitStatusSummary() {
-  const sync = await syncMainWithOrigin()
+export async function syncMainWithOrigin() {
+  return withGitLock(() => syncMainWithOriginUnsafe())
+}
+
+async function getGitStatusSummaryUnsafe() {
+  const sync = await syncMainWithOriginUnsafe()
   const [currentBranch, statusEntries, mainCounts] = await Promise.all([
     getCurrentBranch(),
     getPorcelainStatus(),
@@ -184,10 +207,14 @@ export async function getGitStatusSummary() {
   }
 }
 
-export async function getSessionChangePreview(sessionPathsInput) {
+export async function getGitStatusSummary() {
+  return withGitLock(() => getGitStatusSummaryUnsafe())
+}
+
+async function getSessionChangePreviewUnsafe(sessionPathsInput) {
   const sessionPaths = normalizeSessionPaths(sessionPathsInput)
   if (!sessionPaths.length) {
-    return { paths: [], entries: [], summary: 'No session paths were provided.' }
+    return { paths: [], entries: [], summary: 'No valid session paths were provided.' }
   }
 
   const entries = await getPorcelainStatus(sessionPaths)
@@ -201,13 +228,17 @@ export async function getSessionChangePreview(sessionPathsInput) {
   }
 }
 
-export async function createReviewBranchAndPush(sessionPathsInput) {
+export async function getSessionChangePreview(sessionPathsInput) {
+  return withGitLock(() => getSessionChangePreviewUnsafe(sessionPathsInput))
+}
+
+async function createReviewBranchAndPushUnsafe(sessionPathsInput) {
   const sessionPaths = normalizeSessionPaths(sessionPathsInput)
   if (!sessionPaths.length) {
-    throw new Error('Cannot create review branch without session changes.')
+    throw new Error('Cannot create review branch without valid managed session changes.')
   }
 
-  const sync = await syncMainWithOrigin()
+  const sync = await syncMainWithOriginUnsafe()
   const mainCountsAfterSync = await getMainAheadBehindCounts()
   if (sync.action === 'error') {
     throw new Error(`Cannot continue review flow: ${sync.details}`)
@@ -237,7 +268,7 @@ export async function createReviewBranchAndPush(sessionPathsInput) {
     )
   }
 
-  const sessionPreview = await getSessionChangePreview(sessionPaths)
+  const sessionPreview = await getSessionChangePreviewUnsafe(sessionPaths)
   if (!sessionPreview.entries.length) {
     throw new Error('No git-tracked changes found for the current backoffice session.')
   }
@@ -273,4 +304,8 @@ export async function createReviewBranchAndPush(sessionPathsInput) {
       await runGit(['checkout', MAIN_BRANCH], { allowFailure: true })
     }
   }
+}
+
+export async function createReviewBranchAndPush(sessionPathsInput) {
+  return withGitLock(() => createReviewBranchAndPushUnsafe(sessionPathsInput))
 }

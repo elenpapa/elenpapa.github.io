@@ -36,6 +36,15 @@ body {
   background: radial-gradient(circle at top right, #f0ead8, var(--bg));
 }
 
+/**
+ * Why this exists:
+ * When a modal is open we lock page scroll so keyboard/mouse focus stays on
+ * the active dialog and users do not accidentally scroll the editor behind it.
+ */
+body.modal-open {
+  overflow: hidden;
+}
+
 .layout {
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
@@ -181,6 +190,13 @@ button {
 
 button:hover:enabled {
   border-color: var(--accent);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 65%, #ffffff);
+  outline-offset: 1px;
 }
 
 button:disabled {

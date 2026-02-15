@@ -38,17 +38,27 @@ export function createBackofficeApp(elements) {
   function formatGitStatusText(status) {
     if (!status) return 'Git status: unavailable.'
 
-    const syncAction = status.sync?.action ?? 'unknown'
-    const syncDetails = status.sync?.details ? ` (${status.sync.details})` : ''
-    const cleanliness = status.worktreeDirty ? `dirty (${status.changeCount})` : 'clean'
+    const syncLabelByAction = {
+      blocked: 'Status: update available from production (needs manual action)',
+      error: 'Status: could not check production updates',
+      pulled: 'Status: latest production updates were applied',
+      'up-to-date': 'Status: up to date with production',
+    }
+    const syncAction = status.sync?.action ?? 'error'
+    const syncLabel = syncLabelByAction[syncAction] || 'Status: unknown'
 
-    return [
-      `Branch: ${status.currentBranch}`,
-      `main ahead: ${status.mainAhead}`,
-      `main behind: ${status.mainBehind}`,
-      `worktree: ${cleanliness}`,
-      `sync: ${syncAction}${syncDetails}`,
-    ].join(' | ')
+    const changesLabel = status.changeCount
+      ? `Current changes done: ${status.changeCount}`
+      : 'Current changes done: none'
+    const deployLabel = status.mainAhead
+      ? `Commits ready to deploy to production: ${status.mainAhead}`
+      : 'Commits ready to deploy to production: none'
+    const incomingLabel = status.mainBehind
+      ? `New production updates available: ${status.mainBehind}`
+      : 'New production updates available: none'
+    const branchLabel = `Editing branch: ${status.currentBranch}`
+
+    return [branchLabel, syncLabel, changesLabel, deployLabel, incomingLabel].join(' | ')
   }
 
   function renderGitStatus() {
@@ -273,7 +283,6 @@ export function createBackofficeApp(elements) {
     syncDirtyState()
     syncToolbarState()
     setStatus('Saved. Commit and push when ready.', 'ok')
-    await refreshGitStatus()
   }
 
   async function refreshGitStatus({ reloadActiveOnPull = true } = {}) {
@@ -456,6 +465,7 @@ export function createBackofficeApp(elements) {
       if (!state.activeFile) return
       try {
         await openFile(state.activeFile, { force: true })
+        await refreshGitStatus({ reloadActiveOnPull: false })
       } catch (error) {
         setStatus(error instanceof Error ? error.message : 'Reload failed.', 'error')
       }
@@ -464,6 +474,7 @@ export function createBackofficeApp(elements) {
     elements.saveFile.addEventListener('click', async () => {
       try {
         await saveActiveFile()
+        await refreshGitStatus({ reloadActiveOnPull: false })
       } catch (error) {
         setStatus(error instanceof Error ? error.message : 'Save failed.', 'error')
       }

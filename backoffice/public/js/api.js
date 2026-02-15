@@ -65,7 +65,7 @@ export async function fetchFileContent(filePath) {
 
 export async function saveFileContent({ filePath, content, deletedImages }) {
   const encodedFile = encodeURIComponent(filePath)
-  await apiRequest(`/api/files/${encodedFile}`, {
+  return apiRequest(`/api/files/${encodedFile}`, {
     method: 'PUT',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({

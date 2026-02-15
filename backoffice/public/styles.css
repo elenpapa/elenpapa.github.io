@@ -485,6 +485,38 @@ button:disabled {
   margin-top: 10px;
 }
 
+/*
+ * Why this exists:
+ * Image uploads run optimizer work on the server, so inline progress feedback
+ * helps editors understand that the action is in progress (not frozen).
+ */
+.upload-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6d5b3e;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f5edda;
+  border: 1px solid #ded1b1;
+}
+
+.upload-spinner {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #ceb98f;
+  border-top-color: #8f6c2d;
+  animation: upload-spin 0.8s linear infinite;
+}
+
+@keyframes upload-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .status-dirty {
   color: var(--accent);
 }

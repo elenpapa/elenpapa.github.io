@@ -314,11 +314,17 @@ export function createBackofficeApp(elements) {
 
     const deletedImagesSnapshot = Array.from(state.deletedImages)
     const draftSnapshot = cloneValue(state.draftValue)
-    await saveFileContent({
+    const saveResult = await saveFileContent({
       filePath: state.activeFile,
       content: draftSnapshot,
       deletedImages: deletedImagesSnapshot,
     })
+    const expectedPersistedContent =
+      saveResult &&
+      typeof saveResult === 'object' &&
+      Object.prototype.hasOwnProperty.call(saveResult, 'content')
+        ? saveResult.content
+        : draftSnapshot
 
     /**
      * Why this exists:
@@ -326,19 +332,30 @@ export function createBackofficeApp(elements) {
      * cases where the UI draft diverges from what is actually stored on disk.
      */
     const persistedContent = await fetchFileContent(state.activeFile)
-    if (!areValuesEqual(persistedContent, draftSnapshot)) {
+    if (!areValuesEqual(persistedContent, expectedPersistedContent)) {
       throw new Error(
         'Save verification failed: file content on disk differs from the editor state.',
       )
     }
 
-    state.originalValue = cloneValue(draftSnapshot)
-    state.draftValue = cloneValue(draftSnapshot)
+    state.originalValue = cloneValue(persistedContent)
+    state.draftValue = cloneValue(persistedContent)
     state.deletedImages.clear()
     markSessionPath(`public/content/${state.activeFile}`)
     deletedImagesSnapshot.forEach((publicPath) =>
       markSessionPath(toRepoPathFromPublicImagePath(publicPath)),
     )
+    if (saveResult && Array.isArray(saveResult.finalizedImages)) {
+      saveResult.finalizedImages.forEach((entry) => {
+        if (!entry || typeof entry !== 'object') return
+        if (typeof entry.from === 'string') {
+          markSessionPath(toRepoPathFromPublicImagePath(entry.from))
+        }
+        if (typeof entry.to === 'string') {
+          markSessionPath(toRepoPathFromPublicImagePath(entry.to))
+        }
+      })
+    }
     syncDirtyState()
     syncToolbarState()
     setStatus('Saved. Commit and push when ready.', 'ok')

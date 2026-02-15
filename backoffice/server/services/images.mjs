@@ -6,7 +6,7 @@
 import { execFile } from 'node:child_process'
 import path from 'node:path'
 import { promisify } from 'node:util'
-import { mkdir, readdir, readFile, stat, unlink, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises'
 import { ALLOWED_IMAGE_EXTENSIONS, IMAGE_FOLDER_BY_FILE } from '../constants.mjs'
 import { paths } from '../config.mjs'
 import { listJsonFiles } from './content-files.mjs'
@@ -16,6 +16,7 @@ const execFileAsync = promisify(execFile)
 const IMAGE_INDEX_CONCURRENCY = 10
 const OPTIMIZER_TIMEOUT_MS = 120_000
 const MAX_UPLOAD_BYTES = 12 * 1024 * 1024
+const TEMP_IMAGE_MARKER = '-temp'
 const ORIGINAL_PATH_RULES = [
   { file: 'site.json', pattern: /^logo\.src$/ },
   { file: 'site.json', pattern: /^seo\./ },
@@ -180,6 +181,16 @@ function sanitizeFileName(filename) {
   return `${safeName || 'upload'}${safeExt}`
 }
 
+/**
+ * Why this exists:
+ * Unsaved uploads must stay identifiable so they can be safely discarded before
+ * git finalize, while still producing unique file names to avoid collisions.
+ */
+function buildTempUploadName(safeFileName) {
+  const parsed = path.parse(safeFileName)
+  return `${parsed.name}-${Date.now()}${TEMP_IMAGE_MARKER}${parsed.ext}`
+}
+
 function getImageFolderForFile(activeFile) {
   const fileName = path.basename(activeFile || '')
   const folder = IMAGE_FOLDER_BY_FILE[fileName]
@@ -229,6 +240,67 @@ function getRelativeOptimizerPath(absoluteImagePath) {
   return path.relative(paths.imagesDir, absoluteImagePath).split(path.sep).join('/')
 }
 
+function stripImageQueryAndHash(value) {
+  return String(value ?? '')
+    .split('#')[0]
+    .split('?')[0]
+}
+
+function parsePublicImagePath(publicPath) {
+  const normalized = stripImageQueryAndHash(publicPath)
+  if (!normalized.startsWith('/images/')) return null
+  const relativePath = normalized.replace(/^\/images\//, '')
+  const parsed = path.posix.parse(relativePath)
+  if (!parsed.base) return null
+  return {
+    normalized,
+    relativePath,
+    dir: parsed.dir,
+    base: parsed.base,
+    name: parsed.name,
+    ext: parsed.ext,
+  }
+}
+
+function hasTempMarkerInBaseName(baseName) {
+  return baseName.includes(TEMP_IMAGE_MARKER)
+}
+
+function removeTempMarker(baseName) {
+  return baseName.replace(TEMP_IMAGE_MARKER, '')
+}
+
+function canonicalizeResponsiveBaseName(baseName) {
+  return baseName.replace(/-\d+w$/i, '')
+}
+
+function getTempBaseKey(publicPath) {
+  const parsed = parsePublicImagePath(publicPath)
+  if (!parsed) return ''
+  const canonicalName = canonicalizeResponsiveBaseName(parsed.name)
+  if (!hasTempMarkerInBaseName(canonicalName)) return ''
+  return `${parsed.dir}/${canonicalName}`
+}
+
+function buildPublicPathFromDirAndName(dir, name, ext = '.webp') {
+  const directory = dir && dir !== '.' ? `${dir}/` : ''
+  return `/images/${directory}${name}${ext}`.replace(/\\/g, '/')
+}
+
+function toPublicPathFromAbsoluteImagePath(absolutePath) {
+  const relativePath = path.relative(paths.publicDir, absolutePath).split(path.sep).join('/')
+  return `/${relativePath}`.replace(/\\/g, '/')
+}
+
+async function pathExists(filePath) {
+  try {
+    await stat(filePath)
+    return true
+  } catch {
+    return false
+  }
+}
+
 async function runOptimizerForImage(absoluteImagePath) {
   const relativePath = getRelativeOptimizerPath(absoluteImagePath)
   const scriptPath = path.join(paths.projectRoot, 'scripts', 'optimize-images.js')
@@ -268,16 +340,10 @@ function shouldKeepOriginalPath({ activeFile, fieldPath }) {
   })
 }
 
-function stripQueryAndHash(value) {
-  return String(value ?? '')
-    .split('#')[0]
-    .split('?')[0]
-}
-
 function isSupportedPublicImagePath(value) {
   if (typeof value !== 'string' || !value.startsWith('/')) return false
   if (value.startsWith('/content/')) return false
-  return /\.(png|jpe?g|jfif|webp|svg)$/i.test(stripQueryAndHash(value))
+  return /\.(png|jpe?g|jfif|webp|svg)$/i.test(stripImageQueryAndHash(value))
 }
 
 /**
@@ -286,7 +352,7 @@ function isSupportedPublicImagePath(value) {
  * `/logo.png`, while still preventing traversal outside `public/`.
  */
 function resolveSafeImageDeletePath(publicPath) {
-  const cleanPath = stripQueryAndHash(publicPath)
+  const cleanPath = stripImageQueryAndHash(publicPath)
   if (!isSupportedPublicImagePath(cleanPath)) {
     throw new Error('Invalid image path for deletion.')
   }
@@ -313,7 +379,7 @@ export async function uploadImage(body) {
   const fileDataBase64 = String(body.fileDataBase64 ?? '')
   const folder = resolveUploadFolder({ activeFile, fieldPath, previousImagePath })
   const safeFileName = sanitizeFileName(originalName)
-  const uniqueName = `${path.parse(safeFileName).name}-${Date.now()}${path.parse(safeFileName).ext}`
+  const uniqueName = buildTempUploadName(safeFileName)
   const outputDir = folder === 'root' ? paths.imagesDir : path.join(paths.imagesDir, folder)
   const outputPath = path.join(outputDir, uniqueName)
   const relativeForPublic = folder === 'root' ? uniqueName : `${folder}/${uniqueName}`
@@ -349,8 +415,172 @@ export async function uploadImage(body) {
   return { imagePath: publicImagePath }
 }
 
+function collectTempImagePathsFromContent(value, output = new Set()) {
+  if (typeof value === 'string') {
+    const parsed = parsePublicImagePath(value)
+    if (parsed && hasTempMarkerInBaseName(parsed.name)) {
+      output.add(parsed.normalized)
+    }
+    return output
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectTempImagePathsFromContent(item, output))
+    return output
+  }
+
+  if (value && typeof value === 'object') {
+    Object.values(value).forEach((item) => collectTempImagePathsFromContent(item, output))
+  }
+
+  return output
+}
+
+function replaceImagePathValues(value, replacements) {
+  if (typeof value === 'string') {
+    return replacements.get(value) ?? value
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => replaceImagePathValues(item, replacements))
+  }
+
+  if (value && typeof value === 'object') {
+    const nextObject = {}
+    Object.entries(value).forEach(([key, item]) => {
+      nextObject[key] = replaceImagePathValues(item, replacements)
+    })
+    return nextObject
+  }
+
+  return value
+}
+
+/**
+ * Why this exists:
+ * Temp uploads must become stable filenames only on explicit JSON save, and
+ * their optimizer variants must be renamed together to keep src/srcset valid.
+ */
+async function finalizeTempImageAtPath(tempPublicPath) {
+  const parsed = parsePublicImagePath(tempPublicPath)
+  if (!parsed || !hasTempMarkerInBaseName(parsed.name)) {
+    return tempPublicPath
+  }
+
+  const tempAbsolutePath = getSafeImagePath(parsed.normalized)
+  if (!(await pathExists(tempAbsolutePath))) {
+    return tempPublicPath
+  }
+
+  const finalBaseName = removeTempMarker(parsed.name)
+  if (!finalBaseName || finalBaseName === parsed.name) {
+    throw new Error(`Invalid temp image name: ${parsed.base}`)
+  }
+
+  const absoluteDirectory = path.dirname(tempAbsolutePath)
+  const directoryEntries = await readdir(absoluteDirectory)
+  const candidateFiles = directoryEntries.filter((fileName) => {
+    const candidateName = path.parse(fileName).name
+    if (candidateName === parsed.name) return true
+    return candidateName.startsWith(`${parsed.name}-`)
+  })
+
+  for (const fileName of candidateFiles) {
+    const fileParsed = path.parse(fileName)
+    const targetName = `${removeTempMarker(fileParsed.name)}${fileParsed.ext}`
+    if (targetName === fileName) continue
+
+    const sourcePath = path.join(absoluteDirectory, fileName)
+    const targetPath = path.join(absoluteDirectory, targetName)
+    if (await pathExists(targetPath)) {
+      throw new Error(`Cannot finalize image because target already exists: ${targetName}`)
+    }
+    await rename(sourcePath, targetPath)
+  }
+
+  return buildPublicPathFromDirAndName(parsed.dir, finalBaseName, parsed.ext)
+}
+
+export async function finalizeTempImagesInContent(content) {
+  const tempPaths = Array.from(collectTempImagePathsFromContent(content))
+  if (!tempPaths.length) {
+    return { content, finalizedImages: [] }
+  }
+
+  const replacements = new Map()
+  const finalizedImages = []
+
+  for (const tempPath of tempPaths) {
+    const finalizedPath = await finalizeTempImageAtPath(tempPath)
+    replacements.set(tempPath, finalizedPath)
+    if (finalizedPath !== tempPath) {
+      finalizedImages.push({ from: tempPath, to: finalizedPath })
+    }
+  }
+
+  return {
+    content: replaceImagePathValues(content, replacements),
+    finalizedImages,
+  }
+}
+
+async function collectReferencedImagePaths() {
+  const files = await listJsonFiles(paths.contentDir)
+  const referenced = new Set()
+
+  await Promise.all(
+    files.map(async (filePath) => {
+      try {
+        const fullPath = getSafeContentPath(filePath)
+        const raw = await readFile(fullPath, 'utf-8')
+        const parsed = JSON.parse(raw)
+        collectImageUsages(parsed, '').forEach((usage) => referenced.add(usage.imagePath))
+      } catch {
+        // Ignore invalid/unreadable files; they are handled by content endpoints.
+      }
+    }),
+  )
+
+  return referenced
+}
+
+/**
+ * Why this exists:
+ * Users can upload and then leave without saving; these temp artifacts should
+ * never be pushed, so finalize flow purges unreferenced `-temp` families.
+ */
+export async function cleanupDanglingTempUploads() {
+  const [imageFiles, referencedPaths] = await Promise.all([
+    listImageFiles(paths.imagesDir),
+    collectReferencedImagePaths(),
+  ])
+
+  const referencedTempKeys = new Set(
+    Array.from(referencedPaths)
+      .map((publicPath) => getTempBaseKey(publicPath))
+      .filter(Boolean),
+  )
+  const candidateTempKeys = new Set(
+    imageFiles.map((relativePath) => getTempBaseKey(`/images/${relativePath}`)).filter(Boolean),
+  )
+
+  const removedPublicPaths = []
+  for (const tempKey of candidateTempKeys) {
+    if (referencedTempKeys.has(tempKey)) continue
+    const lastSlashIndex = tempKey.lastIndexOf('/')
+    const dir = lastSlashIndex >= 0 ? tempKey.slice(0, lastSlashIndex) : '.'
+    const baseName = lastSlashIndex >= 0 ? tempKey.slice(lastSlashIndex + 1) : tempKey
+    if (!baseName) continue
+    const canonicalPublicPath = buildPublicPathFromDirAndName(dir, baseName, '.webp')
+    const removedFamilyPaths = await deleteImageWithVariants(canonicalPublicPath)
+    removedPublicPaths.push(...removedFamilyPaths)
+  }
+
+  return { removedPublicPaths: Array.from(new Set(removedPublicPaths)) }
+}
+
 export async function deleteImageWithVariants(publicPath) {
-  if (!isSupportedPublicImagePath(publicPath)) return
+  if (!isSupportedPublicImagePath(publicPath)) return []
   const targetPath = resolveSafeImageDeletePath(publicPath)
   const directory = path.dirname(targetPath)
   const basename = path.parse(targetPath).name
@@ -372,6 +602,14 @@ export async function deleteImageWithVariants(publicPath) {
     // Directory read errors can be ignored because individual deletes below are idempotent.
   }
 
+  const existingCandidates = await Promise.all(
+    Array.from(candidates).map(async (filePath) => {
+      const exists = await pathExists(filePath)
+      return exists ? filePath : null
+    }),
+  )
+  const existingPaths = existingCandidates.filter(Boolean)
+
   await Promise.all(
     Array.from(candidates).map(async (filePath) => {
       try {
@@ -381,4 +619,6 @@ export async function deleteImageWithVariants(publicPath) {
       }
     }),
   )
+
+  return existingPaths.map((filePath) => toPublicPathFromAbsoluteImagePath(filePath))
 }

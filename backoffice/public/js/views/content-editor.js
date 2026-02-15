@@ -198,9 +198,26 @@ function renderNode(value, onReplace, context) {
       primitiveControls.append(input)
 
       if (isLikelyImageField(fieldKey, value)) {
+        /**
+         * Why this exists:
+         * Upload + optimization can take a few seconds, so each image field gets
+         * a dedicated inline loader to make progress obvious to non-technical users.
+         */
         const uploadButton = document.createElement('button')
         uploadButton.type = 'button'
         uploadButton.textContent = 'Upload image'
+        uploadButton.setAttribute('aria-busy', 'false')
+
+        const uploadProgress = document.createElement('span')
+        uploadProgress.className = 'upload-progress'
+        uploadProgress.hidden = true
+        const uploadSpinner = document.createElement('span')
+        uploadSpinner.className = 'upload-spinner'
+        uploadSpinner.setAttribute('aria-hidden', 'true')
+        const uploadText = document.createElement('span')
+        uploadText.textContent = 'Uploading...'
+        uploadProgress.append(uploadSpinner, uploadText)
+
         const picker = document.createElement('input')
         picker.type = 'file'
         picker.accept = '.png,.jpg,.jpeg,.jfif,.webp,.svg'
@@ -212,6 +229,8 @@ function renderNode(value, onReplace, context) {
           if (!selected) return
 
           uploadButton.disabled = true
+          uploadButton.setAttribute('aria-busy', 'true')
+          uploadProgress.hidden = false
           onStatus('Uploading image and running optimizer...', 'dirty')
 
           try {
@@ -230,11 +249,13 @@ function renderNode(value, onReplace, context) {
             onStatus(error instanceof Error ? error.message : 'Image upload failed.', 'error')
           } finally {
             uploadButton.disabled = false
+            uploadButton.setAttribute('aria-busy', 'false')
+            uploadProgress.hidden = true
             picker.value = ''
           }
         })
 
-        primitiveControls.append(uploadButton, picker)
+        primitiveControls.append(uploadButton, uploadProgress, picker)
       }
     }
 

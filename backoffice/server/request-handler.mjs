@@ -10,7 +10,13 @@ import {
   getGitStatusSummary,
   getSessionChangePreview,
 } from './services/git.mjs'
-import { buildImageIndex, deleteImageWithVariants, uploadImage } from './services/images.mjs'
+import {
+  buildImageIndex,
+  cleanupDanglingTempUploads,
+  deleteImageWithVariants,
+  finalizeTempImagesInContent,
+  uploadImage,
+} from './services/images.mjs'
 import { serveFileFromBaseDir } from './services/static-files.mjs'
 import {
   HttpError,
@@ -112,11 +118,13 @@ export async function handleRequest(req, res) {
       if (method === 'PUT') {
         assertJsonRequest(req)
         const body = await readJsonBody(req, BODY_LIMIT_BYTES)
-        const nextContent = extractContentPayload(body)
+        const payloadContent = extractContentPayload(body)
+        const { content: nextContent, finalizedImages } =
+          await finalizeTempImagesInContent(payloadContent)
         const deletedImages = extractDeletedImages(body)
         await writeContentFile(relativePath, nextContent)
         await Promise.all(deletedImages.map((imagePath) => deleteImageWithVariants(imagePath)))
-        sendJson(res, 200, { ok: true, file: relativePath })
+        sendJson(res, 200, { ok: true, file: relativePath, content: nextContent, finalizedImages })
         return
       }
     }
@@ -140,7 +148,14 @@ export async function handleRequest(req, res) {
     if (method === 'POST' && pathname === '/api/git/finalize') {
       assertJsonRequest(req)
       const body = await readJsonBody(req, BODY_LIMIT_BYTES)
-      const result = await createReviewBranchAndPush(body.sessionPaths)
+      const cleanup = await cleanupDanglingTempUploads()
+      const sessionPaths = [
+        ...(Array.isArray(body.sessionPaths) ? body.sessionPaths : []),
+        ...cleanup.removedPublicPaths
+          .map((publicPath) => `public${publicPath}`)
+          .map((repoPath) => repoPath.replace(/\\/g, '/')),
+      ]
+      const result = await createReviewBranchAndPush(sessionPaths)
       sendJson(res, 200, { result })
       return
     }

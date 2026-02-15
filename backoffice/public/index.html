@@ -1,0 +1,43 @@
+<!--
+  Why this exists:
+  This file provides the backoffice shell UI used to manage JSON website content.
+  It keeps editing focused, approachable, and isolated from the public website.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio Backoffice</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <h1>Backoffice</h1>
+        <p>Edit JSON content files used by the portfolio website.</p>
+        <button id="refresh-files" type="button">Refresh files</button>
+        <ul id="file-list" class="file-list"></ul>
+      </aside>
+
+      <main class="workspace">
+        <header class="toolbar">
+          <div class="toolbar-title">
+            <h2 id="current-file">Choose a file</h2>
+            <p id="status-text">Load a JSON file from the left panel.</p>
+          </div>
+          <div class="toolbar-actions">
+            <button id="reload-file" type="button" disabled>Reload</button>
+            <button id="save-file" type="button" disabled>Save</button>
+          </div>
+        </header>
+
+        <section class="editor-shell">
+          <div id="empty-state" class="empty-state">Select a file to start editing.</div>
+          <div id="editor-root" class="editor-root" hidden></div>
+        </section>
+      </main>
+    </div>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

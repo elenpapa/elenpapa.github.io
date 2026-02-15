@@ -35,6 +35,14 @@ npm install
 npm run dev
 ```
 
+### Backoffice (JSON Content Editor)
+
+```sh
+npm run backoffice
+```
+
+This starts a local UI at `http://127.0.0.1:4310` where you can edit files in `public/content/*.json` with add/edit/delete controls and save changes directly to disk.
+
 ### Type-Check, Compile and Minify for Production
 
 ```sh

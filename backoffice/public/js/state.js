@@ -15,6 +15,10 @@ export function createState() {
     draftValue: null,
     dirty: false,
     deletedImages: new Set(),
+    sessionTouchedPaths: new Set(),
+    hasSessionChanges: false,
+    gitStatus: null,
+    gitBusy: false,
   }
 }
 

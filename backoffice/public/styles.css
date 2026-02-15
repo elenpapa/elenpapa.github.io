@@ -139,6 +139,7 @@ body {
 
 .workspace {
   padding: 18px;
+  padding-bottom: 120px;
 }
 
 .toolbar {
@@ -205,6 +206,58 @@ button:disabled {
   border-radius: 10px;
   min-height: calc(100vh - 140px);
   padding: 16px;
+}
+
+/*
+ * Why this exists:
+ * The persistent session banner keeps save/reload and git review controls
+ * always visible, which is required for consistent publishing workflows.
+ */
+.session-banner {
+  position: fixed;
+  left: 14px;
+  right: 14px;
+  bottom: 12px;
+  z-index: 50;
+  border: 1px solid #d7cfbb;
+  background: #fffaf0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 24px rgba(63, 44, 18, 0.12);
+}
+
+.session-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.git-status {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+#git-status-text {
+  margin: 0;
+  font-size: 12px;
+  color: #4f493f;
+  line-height: 1.4;
+}
+
+#open-review-flow {
+  background: #205f39;
+  color: #fff;
+  border-color: #205f39;
+}
+
+#open-review-flow:hover:enabled {
+  background: #18492c;
+  border-color: #18492c;
 }
 
 .empty-state {
@@ -428,6 +481,80 @@ button:disabled {
   color: #1f6b2f;
 }
 
+/*
+ * Why this exists:
+ * The review and success modals enforce a two-step git publish flow:
+ * preview first, then explicit finalize.
+ */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(20, 15, 7, 0.48);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.modal-panel {
+  width: min(860px, 100%);
+  max-height: 82vh;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #ded7c6;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.modal-panel h3 {
+  margin: 0 0 8px;
+}
+
+.modal-summary {
+  margin: 0;
+  padding: 8px;
+  border: 1px solid #e7e0cf;
+  border-radius: 8px;
+  background: #faf6eb;
+  white-space: pre-wrap;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.review-list {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.review-list li {
+  border: 1px solid #e9e2d3;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 12px;
+  background: #fcfaf3;
+  overflow-wrap: anywhere;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.branch-name {
+  display: block;
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #d5ceb8;
+  background: #f8f3e7;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 980px) {
   .layout {
     grid-template-columns: 1fr;
@@ -444,5 +571,14 @@ button:disabled {
 
   .editor-shell {
     min-height: 420px;
+  }
+
+  .session-banner {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .git-status {
+    grid-template-columns: 1fr;
   }
 }

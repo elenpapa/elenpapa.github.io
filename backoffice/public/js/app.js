@@ -4,26 +4,92 @@
  * and view rendering; isolating it keeps feature modules composable as scope grows.
  */
 import {
+  fetchGitPreview,
+  fetchGitStatus,
   fetchFileContent,
   fetchFiles,
   fetchImages,
+  finalizeGitReview,
   saveFileContent,
   uploadImageAsset,
 } from './api.js'
 import { getFileUsageLabel } from './constants.js'
 import { createState, isSectionCollapsed, setSectionCollapsed } from './state.js'
-import { cloneValue } from './utils.js'
+import { cloneValue, toRepoPathFromPublicImagePath } from './utils.js'
 import { renderContentEditor } from './views/content-editor.js'
 import { renderImagesLibrary } from './views/images-library.js'
 
 export function createBackofficeApp(elements) {
   const state = createState()
   let imageSearchDebounceTimer = null
+  let reviewCanFinalize = false
+
+  function setGitBusy(nextBusy) {
+    state.gitBusy = nextBusy
+    syncToolbarState()
+  }
 
   function setStatus(message, mode = '') {
     elements.statusText.textContent = message
     elements.statusText.className = ''
     if (mode) elements.statusText.classList.add(`status-${mode}`)
+  }
+
+  function formatGitStatusText(status) {
+    if (!status) return 'Git status: unavailable.'
+
+    const syncAction = status.sync?.action ?? 'unknown'
+    const syncDetails = status.sync?.details ? ` (${status.sync.details})` : ''
+    const cleanliness = status.worktreeDirty ? `dirty (${status.changeCount})` : 'clean'
+
+    return [
+      `Branch: ${status.currentBranch}`,
+      `main ahead: ${status.mainAhead}`,
+      `main behind: ${status.mainBehind}`,
+      `worktree: ${cleanliness}`,
+      `sync: ${syncAction}${syncDetails}`,
+    ].join(' | ')
+  }
+
+  function renderGitStatus() {
+    elements.gitStatusText.textContent = formatGitStatusText(state.gitStatus)
+  }
+
+  function markSessionPath(repoPath) {
+    if (!repoPath) return
+    state.sessionTouchedPaths.add(repoPath)
+    state.hasSessionChanges = true
+    syncToolbarState()
+  }
+
+  function renderReviewPreview(preview) {
+    elements.reviewSummary.textContent = preview.summary || 'No diff summary available.'
+    elements.reviewChangesList.innerHTML = ''
+
+    if (!preview.entries.length) {
+      const empty = document.createElement('li')
+      empty.textContent = 'No changes found for this session.'
+      elements.reviewChangesList.append(empty)
+      reviewCanFinalize = false
+      syncToolbarState()
+      return
+    }
+
+    preview.entries.forEach((entry) => {
+      const item = document.createElement('li')
+      item.textContent = `${entry.code} ${entry.path}`
+      elements.reviewChangesList.append(item)
+    })
+    reviewCanFinalize = true
+    syncToolbarState()
+  }
+
+  function openModal(modal) {
+    modal.hidden = false
+  }
+
+  function closeModal(modal) {
+    modal.hidden = true
   }
 
   function syncDirtyState() {
@@ -39,6 +105,9 @@ export function createBackofficeApp(elements) {
     const hasFile = Boolean(state.activeFile)
     elements.reloadFile.disabled = !isContentMode || !hasFile
     elements.saveFile.disabled = !isContentMode || !hasFile || !state.dirty
+    elements.refreshGitStatus.disabled = state.gitBusy
+    elements.openReviewFlow.disabled = !state.hasSessionChanges || state.dirty || state.gitBusy
+    elements.finalizeReviewFlow.disabled = state.gitBusy || !reviewCanFinalize
   }
 
   function renderFileList() {
@@ -100,13 +169,16 @@ export function createBackofficeApp(elements) {
       },
       onStatus: setStatus,
       onMarkImageForDeletion: (imagePath) => state.deletedImages.add(imagePath),
-      uploadImage: ({ file, fieldPath, previousImagePath }) =>
-        uploadImageAsset({
+      uploadImage: async ({ file, fieldPath, previousImagePath }) => {
+        const imagePath = await uploadImageAsset({
           file,
           activeFile: state.activeFile,
           fieldPath,
           previousImagePath,
-        }),
+        })
+        markSessionPath(toRepoPathFromPublicImagePath(imagePath))
+        return imagePath
+      },
     })
   }
 
@@ -163,17 +235,95 @@ export function createBackofficeApp(elements) {
   async function saveActiveFile() {
     if (!state.activeFile) return
 
+    const deletedImagesSnapshot = Array.from(state.deletedImages)
     await saveFileContent({
       filePath: state.activeFile,
       content: state.draftValue,
-      deletedImages: Array.from(state.deletedImages),
+      deletedImages: deletedImagesSnapshot,
     })
 
     state.originalValue = cloneValue(state.draftValue)
     state.deletedImages.clear()
+    markSessionPath(`public/content/${state.activeFile}`)
+    deletedImagesSnapshot.forEach((publicPath) =>
+      markSessionPath(toRepoPathFromPublicImagePath(publicPath)),
+    )
     syncDirtyState()
     syncToolbarState()
     setStatus('Saved. Commit and push when ready.', 'ok')
+    await refreshGitStatus()
+  }
+
+  async function refreshGitStatus({ reloadActiveOnPull = true } = {}) {
+    setGitBusy(true)
+    try {
+      const status = await fetchGitStatus()
+      state.gitStatus = status
+      renderGitStatus()
+      if (
+        reloadActiveOnPull &&
+        status.sync?.action === 'pulled' &&
+        state.activeFile &&
+        !state.dirty &&
+        state.mode === 'content'
+      ) {
+        await openFile(state.activeFile, { force: true })
+      }
+    } finally {
+      setGitBusy(false)
+    }
+  }
+
+  async function openReviewFlow() {
+    if (state.dirty) {
+      setStatus('Save your current edits before creating a review branch.', 'error')
+      return
+    }
+
+    const sessionPaths = Array.from(state.sessionTouchedPaths)
+    if (!sessionPaths.length) {
+      setStatus('No session changes available for review flow.', 'error')
+      return
+    }
+
+    setGitBusy(true)
+    try {
+      reviewCanFinalize = false
+      const preview = await fetchGitPreview(sessionPaths)
+      renderReviewPreview(preview)
+      openModal(elements.reviewModal)
+      setStatus('Review preview loaded. Finalize to create and push a branch.', 'ok')
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Unable to build review preview.', 'error')
+    } finally {
+      setGitBusy(false)
+    }
+  }
+
+  async function finalizeReviewFlow() {
+    const sessionPaths = Array.from(state.sessionTouchedPaths)
+    if (!sessionPaths.length) {
+      setStatus('No session changes found for finalize flow.', 'error')
+      return
+    }
+
+    setGitBusy(true)
+    try {
+      const result = await finalizeGitReview(sessionPaths)
+      closeModal(elements.reviewModal)
+      reviewCanFinalize = false
+      elements.createdBranchName.textContent = result.branchName
+      openModal(elements.successModal)
+      state.sessionTouchedPaths.clear()
+      state.hasSessionChanges = false
+      syncToolbarState()
+      await refreshGitStatus({ reloadActiveOnPull: false })
+      setStatus(`Review branch created: ${result.branchName}`, 'ok')
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : 'Finalize flow failed.', 'error')
+    } finally {
+      setGitBusy(false)
+    }
   }
 
   async function switchMode(nextMode) {
@@ -209,6 +359,7 @@ export function createBackofficeApp(elements) {
   function bindEvents() {
     elements.refreshFiles.addEventListener('click', async () => {
       try {
+        await refreshGitStatus()
         if (state.mode === 'images') {
           await loadImages()
           renderImages()
@@ -285,11 +436,50 @@ export function createBackofficeApp(elements) {
         setStatus(error instanceof Error ? error.message : 'Save failed.', 'error')
       }
     })
+
+    elements.refreshGitStatus.addEventListener('click', async () => {
+      try {
+        await refreshGitStatus()
+        setStatus('Git status refreshed.', 'ok')
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : 'Git refresh failed.', 'error')
+      }
+    })
+
+    elements.openReviewFlow.addEventListener('click', async () => {
+      await openReviewFlow()
+    })
+
+    elements.cancelReviewFlow.addEventListener('click', () => {
+      reviewCanFinalize = false
+      syncToolbarState()
+      closeModal(elements.reviewModal)
+    })
+
+    elements.finalizeReviewFlow.addEventListener('click', async () => {
+      await finalizeReviewFlow()
+    })
+
+    elements.copyBranchName.addEventListener('click', async () => {
+      try {
+        const branchName = elements.createdBranchName.textContent.trim()
+        if (!branchName) return
+        await navigator.clipboard.writeText(branchName)
+        setStatus('Branch name copied to clipboard.', 'ok')
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : 'Unable to copy branch name.', 'error')
+      }
+    })
+
+    elements.closeSuccessModal.addEventListener('click', () => {
+      closeModal(elements.successModal)
+    })
   }
 
   async function init() {
     bindEvents()
     try {
+      await refreshGitStatus({ reloadActiveOnPull: false })
       await loadFiles()
       renderFileList()
       setStatus(`Loaded ${state.files.length} content file(s).`, 'ok')

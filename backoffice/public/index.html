@@ -30,10 +30,6 @@
             <h2 id="current-file">Choose a file</h2>
             <p id="status-text">Load a JSON file from the left panel.</p>
           </div>
-          <div class="toolbar-actions">
-            <button id="reload-file" type="button" disabled>Reload</button>
-            <button id="save-file" type="button" disabled>Save</button>
-          </div>
         </header>
 
         <section class="editor-shell">
@@ -47,6 +43,47 @@
           <div id="images-root" class="images-root" hidden></div>
         </section>
       </main>
+    </div>
+    <aside id="session-banner" class="session-banner">
+      <div class="session-actions">
+        <button id="reload-file" type="button" disabled>Reload</button>
+        <button id="save-file" type="button" disabled>Save</button>
+      </div>
+      <div class="git-status">
+        <p id="git-status-text">Git status: loading...</p>
+        <button id="refresh-git-status" type="button">Refresh git</button>
+      </div>
+      <div class="review-actions">
+        <button id="open-review-flow" type="button" disabled>Create Review Branch</button>
+      </div>
+    </aside>
+
+    <div id="review-modal" class="modal" hidden>
+      <div class="modal-panel">
+        <h3>Review Changes</h3>
+        <p>Preview of changes from this backoffice session.</p>
+        <pre id="review-summary" class="modal-summary"></pre>
+        <ul id="review-changes-list" class="review-list"></ul>
+        <div class="modal-actions">
+          <button id="cancel-review-flow" type="button">Cancel</button>
+          <button id="finalize-review-flow" type="button">Finalize & Push</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="success-modal" class="modal" hidden>
+      <div class="modal-panel">
+        <h3>Changes Submitted</h3>
+        <p>
+          Branch created and pushed successfully. Copy this branch name and send it to SoftAware
+          studios for review and merge.
+        </p>
+        <code id="created-branch-name" class="branch-name"></code>
+        <div class="modal-actions">
+          <button id="copy-branch-name" type="button">Copy branch name</button>
+          <button id="close-success-modal" type="button">Close</button>
+        </div>
+      </div>
     </div>
     <script src="/js/main.js" type="module"></script>
   </body>

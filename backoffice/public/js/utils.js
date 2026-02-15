@@ -68,3 +68,8 @@ export function collectImagePaths(value, output = []) {
 
   return output
 }
+
+export function toRepoPathFromPublicImagePath(publicPath) {
+  if (typeof publicPath !== 'string' || !publicPath.startsWith('/images/')) return ''
+  return `public${publicPath}`.replace(/\\/g, '/')
+}

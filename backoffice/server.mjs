@@ -6,6 +6,16 @@
 import { createServer } from 'node:http'
 import { HOST, PORT } from './server/config.mjs'
 import { handleRequest } from './server/request-handler.mjs'
+import { getGitStatusSummary } from './server/services/git.mjs'
+
+/**
+ * Why this exists:
+ * On every server restart (including watch-mode refresh), we proactively run
+ * the git sync check so content editors start from the latest main branch state.
+ */
+getGitStatusSummary().catch(() => {
+  // Ignore startup sync errors; runtime status endpoint still reports details.
+})
 
 const server = createServer(handleRequest)
 

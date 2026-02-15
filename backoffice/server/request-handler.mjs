@@ -5,6 +5,11 @@
  */
 import { BODY_LIMIT_BYTES, HOST, PORT, paths } from './config.mjs'
 import { listJsonFiles, readContentFile, writeContentFile } from './services/content-files.mjs'
+import {
+  createReviewBranchAndPush,
+  getGitStatusSummary,
+  getSessionChangePreview,
+} from './services/git.mjs'
 import { buildImageIndex, deleteImageWithVariants, uploadImage } from './services/images.mjs'
 import { serveFileFromBaseDir } from './services/static-files.mjs'
 import { sendJson, sendText, readJsonBody } from './utils/http.mjs'
@@ -46,6 +51,12 @@ export async function handleRequest(req, res) {
       return
     }
 
+    if (method === 'GET' && pathname === '/api/git/status') {
+      const status = await getGitStatusSummary()
+      sendJson(res, 200, { status })
+      return
+    }
+
     if (pathname.startsWith('/api/files/')) {
       const relativePath = pathname.replace('/api/files/', '')
 
@@ -70,6 +81,20 @@ export async function handleRequest(req, res) {
       const body = await readJsonBody(req, BODY_LIMIT_BYTES)
       const uploaded = await uploadImage(body)
       sendJson(res, 200, uploaded)
+      return
+    }
+
+    if (method === 'POST' && pathname === '/api/git/preview') {
+      const body = await readJsonBody(req, BODY_LIMIT_BYTES)
+      const preview = await getSessionChangePreview(body.sessionPaths)
+      sendJson(res, 200, { preview })
+      return
+    }
+
+    if (method === 'POST' && pathname === '/api/git/finalize') {
+      const body = await readJsonBody(req, BODY_LIMIT_BYTES)
+      const result = await createReviewBranchAndPush(body.sessionPaths)
+      sendJson(res, 200, { result })
       return
     }
 

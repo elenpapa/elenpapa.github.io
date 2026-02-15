@@ -28,6 +28,7 @@ backoffice/
     request-handler.mjs           # API/static routing
     services/
       content-files.mjs           # content JSON read/write/list
+      git.mjs                     # git sync/status/review-branch flow
       images.mjs                  # image index/upload/cleanup
       static-files.mjs            # static file serving helper
     utils/
@@ -63,10 +64,19 @@ backoffice/
   - runs `scripts/optimize-images.js --file ...` automatically
   - deletes replaced/removed old image files (including responsive variants) on save
 - Saves pretty-formatted JSON back to disk.
+- Always-visible session banner:
+  - save/reload actions stay fixed on screen
+  - git status summary is always visible
+  - includes review branch flow trigger
 - Includes a read-only `Images` section:
   - shows preview, file name, relative path, and size
   - shows all JSON references (`file -> json path`) where each image is used
   - includes quick `Open` actions to jump to the related content file editor
+- Git-assisted review workflow:
+  - on git status refresh, server fetches `origin/main` and auto-pulls when safe
+  - preview modal lists session-scoped changes before finalization
+  - finalize flow creates a new branch, commits (`ui-backoffice-YYYY-MM-DD`), pushes, and checks out `main` again
+  - success modal shows the generated branch name for sharing with SoftAware studios
 
 ## Next iteration (page-specific UX)
 

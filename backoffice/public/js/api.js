@@ -79,3 +79,26 @@ export async function uploadImageAsset({ file, activeFile, fieldPath, previousIm
 
   return payload.imagePath
 }
+
+export async function fetchGitStatus() {
+  const payload = await apiRequest('/api/git/status')
+  return payload.status
+}
+
+export async function fetchGitPreview(sessionPaths) {
+  const payload = await apiRequest('/api/git/preview', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ sessionPaths }),
+  })
+  return payload.preview
+}
+
+export async function finalizeGitReview(sessionPaths) {
+  const payload = await apiRequest('/api/git/finalize', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ sessionPaths }),
+  })
+  return payload.result
+}

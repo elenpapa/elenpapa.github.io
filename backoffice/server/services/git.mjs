@@ -272,6 +272,22 @@ async function createReviewBranchAndPushUnsafe(sessionPathsInput) {
   if (!sessionPreview.entries.length) {
     throw new Error('No git-tracked changes found for the current backoffice session.')
   }
+  /**
+   * Why this exists:
+   * Session path scope can include cleanup candidates that no longer exist
+   * (for example discarded temp uploads). We stage only concrete changed paths
+   * from git status to avoid pathspec failures during `git add`.
+   */
+  const stagePaths = Array.from(
+    new Set(
+      sessionPreview.entries
+        .map((entry) => entry?.path)
+        .filter((entryPath) => typeof entryPath === 'string' && entryPath.trim()),
+    ),
+  )
+  if (!stagePaths.length) {
+    throw new Error('No stageable changes found for the current backoffice session.')
+  }
 
   const now = new Date()
   const branchName = buildAutoBranchName(now)
@@ -281,9 +297,9 @@ async function createReviewBranchAndPushUnsafe(sessionPathsInput) {
   try {
     await runGit(['checkout', '-b', branchName])
     createdBranch = true
-    await runGit(['add', '-A', '--', ...sessionPaths])
+    await runGit(['add', '-A', '--', ...stagePaths])
 
-    const stagedCheck = await runGit(['diff', '--cached', '--quiet', '--', ...sessionPaths], {
+    const stagedCheck = await runGit(['diff', '--cached', '--quiet', '--', ...stagePaths], {
       allowFailure: true,
     })
     if (stagedCheck.code === 0) {

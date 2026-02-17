@@ -43,6 +43,19 @@ npm run backoffice
 
 This starts a local UI at `http://127.0.0.1:4310` where you can edit files in `public/content/*.json` with add/edit/delete controls and save changes directly to disk.
 
+### Backoffice (Double-click launchers)
+
+Use these root files to launch backoffice without typing terminal commands:
+
+- macOS: `Backoffice.command`
+- Windows: `Backoffice.bat`
+- Linux: `Backoffice.sh` or `Backoffice.desktop`
+
+Each launcher will:
+
+1. Start backoffice if it is not already running.
+2. Open `http://127.0.0.1:4310` in the default browser.
+
 ### Type-Check, Compile and Minify for Production
 
 ```sh

@@ -7,10 +7,20 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url))
+const projectRoot = path.resolve(currentDir, '..', '..')
+
+/**
+ * Why this exists:
+ * Config values are read during module initialization, so `.env` must load
+ * before exporting env-derived constants.
+ */
+if (typeof process.loadEnvFile === 'function') {
+  process.loadEnvFile(path.join(projectRoot, '.env'))
+}
 
 export const paths = {
   currentDir,
-  projectRoot: path.resolve(currentDir, '..', '..'),
+  projectRoot,
   staticDir: path.join(currentDir, '..', 'public'),
 }
 

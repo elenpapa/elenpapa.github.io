@@ -35,6 +35,8 @@ export function getElements() {
     finalizeReviewFlow: document.querySelector('#finalize-review-flow'),
     successModal: document.querySelector('#success-modal'),
     createdBranchName: document.querySelector('#created-branch-name'),
+    createdPrNote: document.querySelector('#created-pr-note'),
+    createdPrLink: document.querySelector('#created-pr-link'),
     copyBranchName: document.querySelector('#copy-branch-name'),
     closeSuccessModal: document.querySelector('#close-success-modal'),
     editorRoot: document.querySelector('#editor-root'),

@@ -26,6 +26,7 @@ import {
 import { buildEditorSchema, getSchemaById } from './services/schemas.mjs'
 import { assertBaseRevision, getContentRevision } from './services/revision.mjs'
 import { validateContentPayload } from './services/validation.mjs'
+import { createPullRequestForFinalize } from './services/github.mjs'
 import { serveFileFromBaseDir } from './services/static-files.mjs'
 import {
   HttpError,
@@ -247,8 +248,17 @@ export async function handleRequest(req, res) {
           .map((publicPath) => `public${publicPath}`)
           .map((repoPath) => repoPath.replace(/\\/g, '/')),
       ]
-      const result = await createReviewBranchAndPush(sessionPaths)
-      sendJson(res, 200, { result })
+      const gitResult = await createReviewBranchAndPush(sessionPaths)
+      const prResult = await createPullRequestForFinalize({
+        branchName: gitResult.branchName,
+        commitMessage: gitResult.commitMessage,
+      })
+      sendJson(res, 200, {
+        result: {
+          ...gitResult,
+          pullRequest: prResult,
+        },
+      })
       return
     }
 

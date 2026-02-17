@@ -621,6 +621,23 @@ export function createBackofficeApp(elements) {
       reviewCanFinalize = false
 
       elements.createdBranchName.textContent = result.branchName
+      elements.createdPrNote.hidden = true
+      elements.createdPrNote.textContent = ''
+      elements.createdPrLink.hidden = true
+      elements.createdPrLink.href = '#'
+
+      const pullRequest = result.pullRequest || null
+      if (pullRequest?.created && pullRequest.url) {
+        elements.createdPrLink.href = pullRequest.url
+        elements.createdPrLink.hidden = false
+        elements.createdPrNote.hidden = false
+        elements.createdPrNote.textContent =
+          `Pull Request #${pullRequest.number || ''} was created automatically.`.trim()
+      } else if (pullRequest?.warning) {
+        elements.createdPrNote.hidden = false
+        elements.createdPrNote.textContent = pullRequest.warning
+      }
+
       openModal(elements.successModal)
 
       state.sessionTouchedPaths.clear()
@@ -630,7 +647,13 @@ export function createBackofficeApp(elements) {
       syncToolbarState()
       await refreshGitStatus({ reloadActiveOnPull: false })
       setUiStatus(UiStatusState.SYNCED, `Review branch created: ${result.branchName}`)
-      toasts.show({ message: 'Review branch created and pushed.', type: 'ok' })
+      toasts.show({
+        message:
+          pullRequest?.created && pullRequest.url
+            ? 'Review branch pushed and Pull Request created.'
+            : 'Review branch created and pushed.',
+        type: 'ok',
+      })
     })
   }
 

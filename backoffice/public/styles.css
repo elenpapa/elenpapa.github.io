@@ -898,6 +898,25 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
+.pr-note {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #5e5547;
+  line-height: 1.35;
+}
+
+.pr-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #1b5c3d;
+  text-decoration: underline;
+}
+
+.pr-link:hover {
+  color: #123f2a;
+}
+
 .toast-root {
   position: fixed;
   right: 14px;

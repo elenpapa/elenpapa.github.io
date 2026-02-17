@@ -17,6 +17,21 @@ npm run backoffice
 
 Open `http://127.0.0.1:4310`.
 
+### Optional: auto-create GitHub PR on finalize
+
+Set these environment variables before running backoffice:
+
+```sh
+export BACKOFFICE_CREATE_PR_ON_FINALIZE=true
+export GITHUB_TOKEN=ghp_xxx
+export GITHUB_OWNER=your-org-or-user
+export GITHUB_REPO=your-repo
+```
+
+When enabled, the finalize flow will still create/push the review branch first,
+then attempt to open a Pull Request into `main`. If PR creation fails, branch
+push still succeeds and the warning is shown in the success modal.
+
 ## Structure
 
 ```text

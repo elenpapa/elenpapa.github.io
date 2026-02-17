@@ -1,27 +1,38 @@
 /**
  * Why this exists:
- * This controller coordinates backoffice state, mode transitions, API calls,
- * and view rendering; isolating it keeps feature modules composable as scope grows.
+ * This controller coordinates guided/advanced editing modes, API contracts,
+ * draft recovery, and review workflow in a single orchestration layer.
  */
 import {
-  fetchGitPreview,
-  fetchGitStatus,
   fetchFileContent,
   fetchFiles,
+  fetchGitPreview,
+  fetchGitStatus,
   fetchImages,
+  fetchSchema,
+  fetchSessionSummary,
   finalizeGitReview,
   saveFileContent,
   uploadImageAsset,
+  validateFileContent,
 } from './api.js'
 import { getFileUsageLabel } from './constants.js'
+import { bindShortcuts } from './app/shortcuts.js'
+import { saveDraft, loadDraft, clearDraft } from './app/draft-recovery.js'
+import { createToastController } from './app/toasts.js'
+import { buildLocalSemanticSummary } from './app/semantic-summary.js'
+import { UiStatusState, getStatusView } from './app/ui-status.js'
 import { createState, isSectionCollapsed, setSectionCollapsed } from './state.js'
 import { areValuesEqual, cloneValue, toRepoPathFromPublicImagePath } from './utils.js'
 import { renderContentEditor } from './views/content-editor.js'
-import { renderImagesLibrary } from './views/images-library.js'
+import { renderGuidedContentEditor } from './features/content/guided-editor.js'
+import { renderImagesLibrary } from './features/images/library.js'
 
 export function createBackofficeApp(elements) {
   const state = createState()
+  const toasts = createToastController(elements.toastRoot)
   let imageSearchDebounceTimer = null
+  let draftPersistTimer = null
   let reviewCanFinalize = false
   const gitBusyByAction = new Map()
   const DEFAULT_BUTTON_LABELS = {
@@ -30,11 +41,26 @@ export function createBackofficeApp(elements) {
     finalize: 'Finalize & Push',
   }
 
-  /**
-   * Why this exists:
-   * Git operations can nest (for example finalize -> refresh status), so we
-   * track busy state per action to keep button states and labels accurate.
-   */
+  function normalizeStatusMode(mode) {
+    if (!mode) return UiStatusState.READY
+    if (mode === 'dirty') return UiStatusState.UNSAVED
+    if (mode === 'ok') return UiStatusState.SYNCED
+    if (mode === 'error') return UiStatusState.ERROR
+    if (Object.values(UiStatusState).includes(mode)) return mode
+    return UiStatusState.READY
+  }
+
+  function setUiStatus(nextState, message) {
+    const stateKey = nextState || UiStatusState.READY
+    const view = getStatusView(stateKey)
+
+    elements.statusText.textContent = message || view.label
+    elements.statusText.className = `status-${stateKey}`
+    elements.statusStrip.dataset.status = stateKey
+    elements.statusIcon.textContent = view.icon
+    elements.statusLabel.textContent = view.label
+  }
+
   function setGitBusy(nextBusy, action = 'general') {
     const current = gitBusyByAction.get(action) ?? 0
     if (nextBusy) {
@@ -61,36 +87,27 @@ export function createBackofficeApp(elements) {
     }
   }
 
-  function setStatus(message, mode = '') {
-    elements.statusText.textContent = message
-    elements.statusText.className = ''
-    if (mode) elements.statusText.classList.add(`status-${mode}`)
-  }
-
   function formatGitStatusText(status) {
-    if (!status) return 'Git status: unavailable.'
+    if (!status) return 'Repository status unavailable.'
 
     const syncLabelByAction = {
-      blocked: 'Status: update available from production (needs manual action)',
-      error: 'Status: could not check production updates',
-      pulled: 'Status: latest production updates were applied',
-      'up-to-date': 'Status: up to date with production',
+      blocked: 'Production updates available (manual sync needed)',
+      error: 'Could not check production updates',
+      pulled: 'Latest production updates were applied',
+      'up-to-date': 'Up to date with production',
     }
-    const syncAction = status.sync?.action ?? 'error'
-    const syncLabel = syncLabelByAction[syncAction] || 'Status: unknown'
 
+    const syncAction = status.sync?.action ?? 'error'
+    const syncLabel = syncLabelByAction[syncAction] || 'Status unknown'
     const changesLabel = status.changeCount
-      ? `Current changes done: ${status.changeCount}`
-      : 'Current changes done: none'
+      ? `Current changes: ${status.changeCount}`
+      : 'Current changes: none'
     const deployLabel = status.mainAhead
-      ? `Commits ready to deploy to production: ${status.mainAhead}`
-      : 'Commits ready to deploy to production: none'
-    const incomingLabel = status.mainBehind
-      ? `New production updates available: ${status.mainBehind}`
-      : 'New production updates available: none'
+      ? `Commits ready for production: ${status.mainAhead}`
+      : 'Commits ready for production: none'
     const branchLabel = `Editing branch: ${status.currentBranch}`
 
-    return [branchLabel, syncLabel, changesLabel, deployLabel, incomingLabel].join(' | ')
+    return [branchLabel, syncLabel, changesLabel, deployLabel].join(' | ')
   }
 
   function renderGitStatus() {
@@ -100,14 +117,9 @@ export function createBackofficeApp(elements) {
   function markSessionPath(repoPath) {
     if (!repoPath || typeof repoPath !== 'string') return
     const normalized = repoPath.replace(/\\/g, '/')
-    if (!isManagedContentPath(normalized)) return
+    if (!normalized.startsWith('public/')) return
     state.sessionTouchedPaths.add(normalized)
     state.hasSessionChanges = true
-    syncToolbarState()
-  }
-
-  function isManagedContentPath(repoPath) {
-    return repoPath.startsWith('public/')
   }
 
   function seedSessionPathsFromGitStatus(status) {
@@ -116,30 +128,6 @@ export function createBackofficeApp(elements) {
       if (!entry || typeof entry.path !== 'string') return
       markSessionPath(entry.path)
     })
-  }
-
-  function renderReviewPreview(preview) {
-    elements.reviewErrorText.hidden = true
-    elements.reviewErrorText.textContent = ''
-    elements.reviewSummary.textContent = preview.summary || 'No diff summary available.'
-    elements.reviewChangesList.innerHTML = ''
-
-    if (!preview.entries.length) {
-      const empty = document.createElement('li')
-      empty.textContent = 'No changes found for this session.'
-      elements.reviewChangesList.append(empty)
-      reviewCanFinalize = false
-      syncToolbarState()
-      return
-    }
-
-    preview.entries.forEach((entry) => {
-      const item = document.createElement('li')
-      item.textContent = `${entry.code} ${entry.path}`
-      elements.reviewChangesList.append(item)
-    })
-    reviewCanFinalize = true
-    syncToolbarState()
   }
 
   function openModal(modal) {
@@ -155,9 +143,14 @@ export function createBackofficeApp(elements) {
   }
 
   function setReviewError(errorMessage) {
-    const message = errorMessage || 'Unknown review flow error.'
+    const message = errorMessage || 'Unexpected review flow error.'
     elements.reviewErrorText.textContent = message
     elements.reviewErrorText.hidden = false
+  }
+
+  function clearReviewError() {
+    elements.reviewErrorText.hidden = true
+    elements.reviewErrorText.textContent = ''
   }
 
   function syncDirtyState() {
@@ -168,14 +161,89 @@ export function createBackofficeApp(elements) {
     state.dirty = JSON.stringify(state.draftValue) !== JSON.stringify(state.originalValue)
   }
 
+  function scheduleDraftPersist() {
+    if (draftPersistTimer) clearTimeout(draftPersistTimer)
+    if (!state.activeFile || !state.activeRevision || !state.dirty) return
+
+    draftPersistTimer = setTimeout(() => {
+      const key = saveDraft({
+        filePath: state.activeFile,
+        revision: state.activeRevision,
+        value: state.draftValue,
+      })
+      state.draftRecovery.key = key
+    }, 250)
+  }
+
+  function renderReviewPreview(preview, sessionSummary) {
+    clearReviewError()
+    elements.reviewSummary.textContent = preview.summary || 'No diff summary available.'
+    elements.reviewChangesList.innerHTML = ''
+    elements.reviewSemanticList.innerHTML = ''
+
+    const semanticEntries = []
+    state.sessionSemanticChanges.forEach((entries, filePath) => {
+      entries.forEach((entry) => {
+        semanticEntries.push({
+          filePath,
+          ...entry,
+        })
+      })
+    })
+
+    if (semanticEntries.length) {
+      semanticEntries.forEach((entry) => {
+        const item = document.createElement('li')
+        item.textContent = `${entry.filePath}: ${entry.path || 'root'} (${entry.label}) ${entry.before ? `from "${entry.before}"` : ''}${entry.after ? ` to "${entry.after}"` : ''}`
+        elements.reviewSemanticList.append(item)
+      })
+    } else {
+      const fallback = document.createElement('li')
+      fallback.textContent = 'No field-level summary captured yet. Saved files will appear here.'
+      elements.reviewSemanticList.append(fallback)
+    }
+
+    if (sessionSummary?.pendingTempUploads?.dangling?.length) {
+      const tempNotice = document.createElement('li')
+      tempNotice.textContent = `Pending temp uploads to discard before push: ${sessionSummary.pendingTempUploads.dangling.length}`
+      elements.reviewSemanticList.append(tempNotice)
+    }
+
+    if (!preview.entries.length) {
+      const empty = document.createElement('li')
+      empty.textContent = 'No tracked changes found for this session.'
+      elements.reviewChangesList.append(empty)
+      reviewCanFinalize = false
+      syncToolbarState()
+      return
+    }
+
+    preview.entries.forEach((entry) => {
+      const item = document.createElement('li')
+      item.textContent = `${entry.code} ${entry.path}`
+      elements.reviewChangesList.append(item)
+    })
+
+    reviewCanFinalize = true
+    syncToolbarState()
+  }
+
   function syncToolbarState() {
     const isContentMode = state.mode === 'content'
     const hasFile = Boolean(state.activeFile)
+
     elements.reloadFile.disabled = !isContentMode || !hasFile
     elements.saveFile.disabled = !isContentMode || !hasFile || !state.dirty
     elements.refreshGitStatus.disabled = state.gitBusy
     elements.openReviewFlow.disabled = !state.hasSessionChanges || state.dirty || state.gitBusy
     elements.finalizeReviewFlow.disabled = state.gitBusy || !reviewCanFinalize
+
+    elements.editorModeSwitch.hidden = !isContentMode || !hasFile
+    elements.editorModeGuided.disabled = !isContentMode || !hasFile
+    elements.editorModeJson.disabled = !isContentMode || !hasFile
+    elements.editorModeGuided.classList.toggle('is-active', state.activeViewMode === 'guided')
+    elements.editorModeJson.classList.toggle('is-active', state.activeViewMode === 'json')
+
     elements.refreshGitStatus.textContent = isGitActionBusy('refresh')
       ? 'Refreshing...'
       : DEFAULT_BUTTON_LABELS.refresh
@@ -197,6 +265,7 @@ export function createBackofficeApp(elements) {
 
     elements.fileList.hidden = false
     state.files.forEach((filePath) => {
+      const descriptor = state.fileDescriptors.find((entry) => entry.file === filePath)
       const listItem = document.createElement('li')
       const button = document.createElement('button')
       button.type = 'button'
@@ -208,9 +277,18 @@ export function createBackofficeApp(elements) {
 
       const usage = document.createElement('span')
       usage.className = 'file-item-usage'
-      usage.textContent = getFileUsageLabel(filePath)
+      usage.textContent = descriptor?.usage?.length
+        ? `Usage: ${descriptor.usage.join(' • ')}`
+        : getFileUsageLabel(filePath)
 
-      button.append(title, usage)
+      const meta = document.createElement('span')
+      meta.className = 'file-item-usage'
+      const bytes = descriptor?.sizeBytes
+      const updatedAt = descriptor?.updatedAt
+      const unsavedTag = filePath === state.activeFile && state.dirty ? ' • Unsaved changes' : ''
+      meta.textContent = `${bytes ? `Size: ${(bytes / 1024).toFixed(1)} KB` : ''}${updatedAt ? ` • Updated: ${new Date(updatedAt).toLocaleString()}` : ''}${unsavedTag}`
+
+      button.append(title, usage, meta)
       button.addEventListener('click', () => openFile(filePath))
       listItem.append(button)
       elements.fileList.append(listItem)
@@ -221,6 +299,8 @@ export function createBackofficeApp(elements) {
     if (!state.activeFile) {
       elements.editorRoot.hidden = true
       elements.emptyState.hidden = false
+      elements.imagesTools.hidden = true
+      elements.imagesRoot.hidden = true
       return
     }
 
@@ -229,22 +309,57 @@ export function createBackofficeApp(elements) {
     elements.imagesTools.hidden = true
     elements.imagesRoot.hidden = true
 
+    const replaceRoot = (nextValue, { rerender = true } = {}) => {
+      state.draftValue = nextValue
+      state.validationIssues = []
+      syncDirtyState()
+      syncToolbarState()
+      scheduleDraftPersist()
+
+      if (state.dirty) {
+        setUiStatus(
+          UiStatusState.UNSAVED,
+          'You have unsaved content changes. Click Save when ready.',
+        )
+      } else {
+        setUiStatus(UiStatusState.READY, 'No unsaved changes.')
+      }
+
+      if (rerender) renderEditor()
+    }
+
+    if (state.activeViewMode === 'guided') {
+      renderGuidedContentEditor({
+        mount: elements.editorRoot,
+        value: state.draftValue,
+        activeFile: state.activeFile,
+        schema: state.activeSchema,
+        validationIssues: state.validationIssues,
+        onReplaceRoot: replaceRoot,
+        onStatus: (message, mode = UiStatusState.READY) =>
+          setUiStatus(normalizeStatusMode(mode), message),
+        onMarkImageForDeletion: (imagePath) => state.deletedImages.add(imagePath),
+        uploadImage: async ({ file, fieldPath, previousImagePath }) => {
+          const imagePath = await uploadImageAsset({
+            file,
+            activeFile: state.activeFile,
+            fieldPath,
+            previousImagePath,
+          })
+          markSessionPath(toRepoPathFromPublicImagePath(imagePath))
+          return imagePath
+        },
+      })
+      return
+    }
+
     renderContentEditor({
       mount: elements.editorRoot,
       value: state.draftValue,
       activeFile: state.activeFile,
-      onReplaceRoot: (nextValue, { rerender = true } = {}) => {
-        state.draftValue = nextValue
-        syncDirtyState()
-        syncToolbarState()
-
-        if (state.dirty) {
-          setStatus('Unsaved changes.', 'dirty')
-        }
-
-        if (rerender) renderEditor()
-      },
-      onStatus: setStatus,
+      onReplaceRoot: replaceRoot,
+      onStatus: (message, mode = UiStatusState.READY) =>
+        setUiStatus(normalizeStatusMode(mode), message),
       onMarkImageForDeletion: (imagePath) => state.deletedImages.add(imagePath),
       uploadImage: async ({ file, fieldPath, previousImagePath }) => {
         const imagePath = await uploadImageAsset({
@@ -274,13 +389,18 @@ export function createBackofficeApp(elements) {
       onOpenUsage: async (usage) => {
         await switchMode('content')
         await openFile(usage.file, { force: true })
-        setStatus(`Image reference at ${usage.file} -> ${usage.jsonPath}`, 'ok')
+        setUiStatus(
+          UiStatusState.READY,
+          `Opened usage location: ${usage.file} -> ${usage.jsonPath}`,
+        )
       },
     })
   }
 
   async function loadFiles() {
-    state.files = await fetchFiles()
+    const payload = await fetchFiles()
+    state.files = payload.files
+    state.fileDescriptors = payload.descriptors
     renderFileList()
   }
 
@@ -296,29 +416,101 @@ export function createBackofficeApp(elements) {
       if (!confirmed) return
     }
 
-    const content = await fetchFileContent(filePath)
+    const filePayload = await fetchFileContent(filePath)
+    const schema = await fetchSchema(filePayload.schemaId || filePath)
+
     state.activeFile = filePath
-    state.originalValue = cloneValue(content)
-    state.draftValue = cloneValue(content)
+    state.activeSchema = schema
+    state.activeRevision = filePayload.revision || ''
+    state.activeUsage = Array.isArray(filePayload.usage) ? filePayload.usage : []
+    state.validationIssues = []
+    state.hasConflicts = false
+    state.draftRecovery = {
+      restored: false,
+      key: '',
+    }
     state.deletedImages.clear()
+
+    state.originalValue = cloneValue(filePayload.content)
+    state.draftValue = cloneValue(filePayload.content)
+
+    const draft = loadDraft({
+      filePath: state.activeFile,
+      revision: state.activeRevision,
+    })
+    if (draft && !force) {
+      const shouldRestore = globalThis.confirm(
+        `A draft was found from ${new Date(draft.savedAt).toLocaleString()}. Restore it?`,
+      )
+      if (shouldRestore) {
+        state.draftValue = cloneValue(draft.value)
+        state.draftRecovery = {
+          restored: true,
+          key: draft.key,
+        }
+      } else {
+        clearDraft({ filePath: state.activeFile, revision: state.activeRevision })
+        state.draftRecovery = {
+          restored: false,
+          key: '',
+        }
+      }
+    }
+
     syncDirtyState()
     renderFileList()
     elements.currentFile.textContent = filePath
+    elements.currentUsage.textContent = state.activeUsage.length
+      ? `Used in: ${state.activeUsage.join(' • ')}`
+      : getFileUsageLabel(filePath)
     renderEditor()
     syncToolbarState()
-    setStatus(`File loaded. ${getFileUsageLabel(filePath)}`, 'ok')
+
+    if (state.draftRecovery.restored) {
+      setUiStatus(UiStatusState.UNSAVED, 'Draft restored. Review and save when ready.')
+      toasts.show({ message: 'Draft restored successfully.', type: 'ok' })
+    } else {
+      setUiStatus(UiStatusState.READY, 'File loaded. You can start editing in Guided mode.')
+    }
   }
 
   async function saveActiveFile() {
     if (!state.activeFile) return
 
+    setUiStatus(UiStatusState.SAVING, 'Validating content before save...')
+    const validation = await validateFileContent({
+      filePath: state.activeFile,
+      content: state.draftValue,
+    })
+
+    if (!validation.ok) {
+      state.validationIssues = validation.issues
+      renderEditor()
+      setUiStatus(
+        UiStatusState.ERROR,
+        'Some fields need attention before saving. Check messages in the form and try again.',
+      )
+      toasts.show({
+        message: `Validation failed on ${validation.issues.length} field(s).`,
+        type: 'error',
+        timeoutMs: 5000,
+      })
+      return
+    }
+
     const deletedImagesSnapshot = Array.from(state.deletedImages)
+    const originalSnapshot = cloneValue(state.originalValue)
     const draftSnapshot = cloneValue(state.draftValue)
+
+    setUiStatus(UiStatusState.SAVING, 'Saving file and finalizing pending image updates...')
+
     const saveResult = await saveFileContent({
       filePath: state.activeFile,
       content: draftSnapshot,
       deletedImages: deletedImagesSnapshot,
+      baseRevision: state.activeRevision,
     })
+
     const expectedPersistedContent =
       saveResult &&
       typeof saveResult === 'object' &&
@@ -326,25 +518,33 @@ export function createBackofficeApp(elements) {
         ? saveResult.content
         : draftSnapshot
 
-    /**
-     * Why this exists:
-     * We verify persisted JSON immediately after save to avoid silent mismatch
-     * cases where the UI draft diverges from what is actually stored on disk.
-     */
-    const persistedContent = await fetchFileContent(state.activeFile)
+    const latestFilePayload = await fetchFileContent(state.activeFile)
+    const persistedContent = latestFilePayload.content
     if (!areValuesEqual(persistedContent, expectedPersistedContent)) {
       throw new Error(
-        'Save verification failed: file content on disk differs from the editor state.',
+        'Save verification failed because on-disk content differs from the current editor state. Reload and try again.',
       )
     }
 
+    const semanticEntries = buildLocalSemanticSummary({
+      before: originalSnapshot,
+      after: persistedContent,
+    })
+
+    state.sessionSemanticChanges.set(state.activeFile, semanticEntries)
     state.originalValue = cloneValue(persistedContent)
     state.draftValue = cloneValue(persistedContent)
+    state.activeRevision = saveResult.revision || latestFilePayload.revision || state.activeRevision
+    state.validationIssues = []
     state.deletedImages.clear()
+
+    clearDraft({ filePath: state.activeFile, revision: state.activeRevision })
+
     markSessionPath(`public/content/${state.activeFile}`)
-    deletedImagesSnapshot.forEach((publicPath) =>
-      markSessionPath(toRepoPathFromPublicImagePath(publicPath)),
-    )
+    deletedImagesSnapshot.forEach((publicPath) => {
+      markSessionPath(toRepoPathFromPublicImagePath(publicPath))
+    })
+
     if (saveResult && Array.isArray(saveResult.finalizedImages)) {
       saveResult.finalizedImages.forEach((entry) => {
         if (!entry || typeof entry !== 'object') return
@@ -356,9 +556,12 @@ export function createBackofficeApp(elements) {
         }
       })
     }
+
     syncDirtyState()
     syncToolbarState()
-    setStatus('Saved. Commit and push when ready.', 'ok')
+    renderFileList()
+    setUiStatus(UiStatusState.SYNCED, 'Saved successfully. You can now create a review branch.')
+    toasts.show({ message: 'Content saved successfully.', type: 'ok' })
   }
 
   async function refreshGitStatus({ reloadActiveOnPull = true } = {}) {
@@ -367,6 +570,7 @@ export function createBackofficeApp(elements) {
       state.gitStatus = status
       seedSessionPathsFromGitStatus(status)
       renderGitStatus()
+
       if (
         reloadActiveOnPull &&
         status.sync?.action === 'pulled' &&
@@ -381,61 +585,53 @@ export function createBackofficeApp(elements) {
 
   async function openReviewFlow() {
     if (state.dirty) {
-      setStatus('Save your current edits before creating a review branch.', 'error')
+      setUiStatus(UiStatusState.ERROR, 'Please save current edits before creating a review branch.')
       return
     }
 
     const sessionPaths = Array.from(state.sessionTouchedPaths)
     if (!sessionPaths.length) {
-      setStatus('No session changes available for review flow.', 'error')
+      setUiStatus(UiStatusState.ERROR, 'No session changes found to review.')
       return
     }
 
-    try {
-      await runGitTask('preview', async () => {
-        reviewCanFinalize = false
-        elements.reviewErrorText.hidden = true
-        elements.reviewErrorText.textContent = ''
-        const preview = await fetchGitPreview(sessionPaths)
-        renderReviewPreview(preview)
-        openModal(elements.reviewModal)
-        setStatus('Review preview loaded. Finalize to create and push a branch.', 'ok')
-      })
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to build review preview.'
-      setReviewError(message)
-      setStatus(message, 'error')
-      console.error('Review preview error:', error)
+    await runGitTask('preview', async () => {
+      reviewCanFinalize = false
+      clearReviewError()
+      const [preview, sessionSummary] = await Promise.all([
+        fetchGitPreview(sessionPaths),
+        fetchSessionSummary(sessionPaths),
+      ])
+      renderReviewPreview(preview, sessionSummary)
       openModal(elements.reviewModal)
-    }
+      setUiStatus(UiStatusState.READY, 'Review preview loaded. Finalize when ready.')
+    })
   }
 
   async function finalizeReviewFlow() {
     const sessionPaths = Array.from(state.sessionTouchedPaths)
     if (!sessionPaths.length) {
-      setStatus('No session changes found for finalize flow.', 'error')
+      setUiStatus(UiStatusState.ERROR, 'No session changes found for finalize flow.')
       return
     }
 
-    try {
-      await runGitTask('finalize', async () => {
-        const result = await finalizeGitReview(sessionPaths)
-        closeModal(elements.reviewModal)
-        reviewCanFinalize = false
-        elements.createdBranchName.textContent = result.branchName
-        openModal(elements.successModal)
-        state.sessionTouchedPaths.clear()
-        state.hasSessionChanges = false
-        syncToolbarState()
-        await refreshGitStatus({ reloadActiveOnPull: false })
-        setStatus(`Review branch created: ${result.branchName}`, 'ok')
-      })
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Finalize flow failed.'
-      setReviewError(message)
-      setStatus(message, 'error')
-      console.error('Finalize review flow error:', error)
-    }
+    await runGitTask('finalize', async () => {
+      const result = await finalizeGitReview(sessionPaths)
+      closeModal(elements.reviewModal)
+      reviewCanFinalize = false
+
+      elements.createdBranchName.textContent = result.branchName
+      openModal(elements.successModal)
+
+      state.sessionTouchedPaths.clear()
+      state.sessionSemanticChanges.clear()
+      state.hasSessionChanges = false
+
+      syncToolbarState()
+      await refreshGitStatus({ reloadActiveOnPull: false })
+      setUiStatus(UiStatusState.SYNCED, `Review branch created: ${result.branchName}`)
+      toasts.show({ message: 'Review branch created and pushed.', type: 'ok' })
+    })
   }
 
   async function switchMode(nextMode) {
@@ -447,22 +643,29 @@ export function createBackofficeApp(elements) {
     if (nextMode === 'content') {
       elements.imagesTools.hidden = true
       elements.currentFile.textContent = state.activeFile || 'Choose a file'
+      elements.currentUsage.textContent = state.activeFile
+        ? state.activeUsage.length
+          ? `Used in: ${state.activeUsage.join(' • ')}`
+          : getFileUsageLabel(state.activeFile)
+        : 'Usage details will appear here.'
+
       renderFileList()
       if (state.activeFile) {
         renderEditor()
-        setStatus('Content editor active.', 'ok')
+        setUiStatus(UiStatusState.READY, 'Content editor active.')
       } else {
         elements.imagesRoot.hidden = true
         elements.editorRoot.hidden = true
         elements.emptyState.hidden = false
-        setStatus('Load a JSON file from the left panel.', 'ok')
+        setUiStatus(UiStatusState.READY, 'Load a content file from the left panel.')
       }
     } else {
       elements.currentFile.textContent = 'Image library'
+      elements.currentUsage.textContent = 'Browse all uploaded images and where they are used.'
       renderFileList()
       await loadImages()
       renderImages()
-      setStatus(`Loaded ${state.images.length} image(s) with usage references.`, 'ok')
+      setUiStatus(UiStatusState.READY, `Loaded ${state.images.length} image(s).`)
     }
 
     syncToolbarState()
@@ -475,13 +678,16 @@ export function createBackofficeApp(elements) {
         if (state.mode === 'images') {
           await loadImages()
           renderImages()
-          setStatus(`Loaded ${state.images.length} image(s).`, 'ok')
+          setUiStatus(UiStatusState.READY, `Loaded ${state.images.length} image(s).`)
         } else {
           await loadFiles()
-          setStatus(`Loaded ${state.files.length} content file(s).`, 'ok')
+          setUiStatus(UiStatusState.READY, `Loaded ${state.files.length} content file(s).`)
         }
       } catch (error) {
-        setStatus(error instanceof Error ? error.message : 'Refresh failed.', 'error')
+        setUiStatus(
+          UiStatusState.ERROR,
+          `${error instanceof Error ? error.message : 'Refresh failed.'} Please retry.`,
+        )
       }
     })
 
@@ -489,7 +695,10 @@ export function createBackofficeApp(elements) {
       try {
         await switchMode('content')
       } catch (error) {
-        setStatus(error instanceof Error ? error.message : 'Unable to switch mode.', 'error')
+        setUiStatus(
+          UiStatusState.ERROR,
+          `${error instanceof Error ? error.message : 'Unable to switch mode.'} Please retry.`,
+        )
       }
     })
 
@@ -497,8 +706,27 @@ export function createBackofficeApp(elements) {
       try {
         await switchMode('images')
       } catch (error) {
-        setStatus(error instanceof Error ? error.message : 'Unable to switch mode.', 'error')
+        setUiStatus(
+          UiStatusState.ERROR,
+          `${error instanceof Error ? error.message : 'Unable to switch mode.'} Please retry.`,
+        )
       }
+    })
+
+    elements.editorModeGuided.addEventListener('click', () => {
+      if (!state.activeFile) return
+      state.activeViewMode = 'guided'
+      renderEditor()
+      syncToolbarState()
+      setUiStatus(UiStatusState.READY, 'Guided mode enabled.')
+    })
+
+    elements.editorModeJson.addEventListener('click', () => {
+      if (!state.activeFile) return
+      state.activeViewMode = 'json'
+      renderEditor()
+      syncToolbarState()
+      setUiStatus(UiStatusState.READY, 'Advanced mode enabled.')
     })
 
     elements.imageSearch.addEventListener('input', () => {
@@ -509,12 +737,15 @@ export function createBackofficeApp(elements) {
         try {
           await loadImages()
           renderImages()
-          setStatus(
+          setUiStatus(
+            UiStatusState.READY,
             `Found ${state.images.length} image(s) for "${state.imageSearchQuery.trim()}".`,
-            'ok',
           )
         } catch (error) {
-          setStatus(error instanceof Error ? error.message : 'Image search failed.', 'error')
+          setUiStatus(
+            UiStatusState.ERROR,
+            `${error instanceof Error ? error.message : 'Image search failed.'} Please try again.`,
+          )
         }
       }, 250)
     })
@@ -526,9 +757,12 @@ export function createBackofficeApp(elements) {
       try {
         await loadImages()
         renderImages()
-        setStatus(`Loaded ${state.images.length} image(s).`, 'ok')
+        setUiStatus(UiStatusState.READY, `Loaded ${state.images.length} image(s).`)
       } catch (error) {
-        setStatus(error instanceof Error ? error.message : 'Unable to clear image search.', 'error')
+        setUiStatus(
+          UiStatusState.ERROR,
+          `${error instanceof Error ? error.message : 'Unable to clear image search.'} Please retry.`,
+        )
       }
     })
 
@@ -538,7 +772,10 @@ export function createBackofficeApp(elements) {
         await openFile(state.activeFile, { force: true })
         await refreshGitStatus({ reloadActiveOnPull: false })
       } catch (error) {
-        setStatus(error instanceof Error ? error.message : 'Reload failed.', 'error')
+        setUiStatus(
+          UiStatusState.ERROR,
+          `${error instanceof Error ? error.message : 'Reload failed.'} Please retry.`,
+        )
       }
     })
 
@@ -547,16 +784,36 @@ export function createBackofficeApp(elements) {
         await saveActiveFile()
         await refreshGitStatus({ reloadActiveOnPull: false })
       } catch (error) {
-        setStatus(error instanceof Error ? error.message : 'Save failed.', 'error')
+        if (error && typeof error === 'object' && error.statusCode === 409) {
+          state.hasConflicts = true
+          setUiStatus(
+            UiStatusState.ERROR,
+            'This file changed outside the editor. Reload to merge latest content first.',
+          )
+          toasts.show({
+            message: 'Save blocked due to content conflict. Reload required.',
+            type: 'error',
+            timeoutMs: 6000,
+          })
+          return
+        }
+
+        setUiStatus(
+          UiStatusState.ERROR,
+          `${error instanceof Error ? error.message : 'Save failed.'} Please retry.`,
+        )
       }
     })
 
     elements.refreshGitStatus.addEventListener('click', async () => {
       try {
         await refreshGitStatus()
-        setStatus('Git status refreshed.', 'ok')
+        setUiStatus(UiStatusState.READY, 'Repository status refreshed.')
       } catch (error) {
-        setStatus(error instanceof Error ? error.message : 'Git refresh failed.', 'error')
+        setUiStatus(
+          UiStatusState.ERROR,
+          `${error instanceof Error ? error.message : 'Git refresh failed.'} Please retry.`,
+        )
       }
     })
 
@@ -564,10 +821,9 @@ export function createBackofficeApp(elements) {
       try {
         await openReviewFlow()
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unexpected review flow error.'
+        const message = error instanceof Error ? error.message : 'Unable to open review flow.'
         setReviewError(message)
-        setStatus(message, 'error')
-        console.error('Open review flow fatal error:', error)
+        setUiStatus(UiStatusState.ERROR, `${message} Please retry.`)
       }
     })
 
@@ -581,10 +837,9 @@ export function createBackofficeApp(elements) {
       try {
         await finalizeReviewFlow()
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unexpected finalize flow error.'
+        const message = error instanceof Error ? error.message : 'Finalize flow failed.'
         setReviewError(message)
-        setStatus(message, 'error')
-        console.error('Finalize review flow fatal error:', error)
+        setUiStatus(UiStatusState.ERROR, `${message} Please retry.`)
       }
     })
 
@@ -593,9 +848,12 @@ export function createBackofficeApp(elements) {
         const branchName = elements.createdBranchName.textContent.trim()
         if (!branchName) return
         await navigator.clipboard.writeText(branchName)
-        setStatus('Branch name copied to clipboard.', 'ok')
+        setUiStatus(UiStatusState.READY, 'Branch name copied to clipboard.')
       } catch (error) {
-        setStatus(error instanceof Error ? error.message : 'Unable to copy branch name.', 'error')
+        setUiStatus(
+          UiStatusState.ERROR,
+          `${error instanceof Error ? error.message : 'Unable to copy branch name.'} Please retry.`,
+        )
       }
     })
 
@@ -603,11 +861,6 @@ export function createBackofficeApp(elements) {
       closeModal(elements.successModal)
     })
 
-    /**
-     * Why this exists:
-     * Modal interactions should follow standard UX expectations: escape key and
-     * backdrop click dismiss dialogs when no blocking git action is running.
-     */
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape' || state.gitBusy) return
       if (!elements.reviewModal.hidden) {
@@ -630,18 +883,48 @@ export function createBackofficeApp(elements) {
       if (event.target !== elements.successModal || state.gitBusy) return
       closeModal(elements.successModal)
     })
+
+    bindShortcuts({
+      onSave: async () => {
+        if (elements.saveFile.disabled) return
+        await elements.saveFile.click()
+      },
+      onReload: async () => {
+        if (elements.reloadFile.disabled) return
+        await elements.reloadFile.click()
+      },
+      onCloseModal: () => {
+        if (!elements.reviewModal.hidden) {
+          reviewCanFinalize = false
+          syncToolbarState()
+          closeModal(elements.reviewModal)
+          return
+        }
+        if (!elements.successModal.hidden) {
+          closeModal(elements.successModal)
+        }
+      },
+      onFocusSearch: () => {
+        if (state.mode !== 'images') return
+        elements.imageSearch.focus()
+      },
+    })
   }
 
   async function init() {
     bindEvents()
     try {
+      setUiStatus(UiStatusState.READY, 'Initializing backoffice...')
       await refreshGitStatus({ reloadActiveOnPull: false })
       await loadFiles()
       renderFileList()
-      setStatus(`Loaded ${state.files.length} content file(s).`, 'ok')
       await switchMode('content')
+      setUiStatus(UiStatusState.READY, `Loaded ${state.files.length} content file(s).`)
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : 'Initialization failed.', 'error')
+      setUiStatus(
+        UiStatusState.ERROR,
+        `${error instanceof Error ? error.message : 'Initialization failed.'} Please retry.`,
+      )
     }
   }
 

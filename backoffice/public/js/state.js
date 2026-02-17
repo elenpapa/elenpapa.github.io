@@ -7,6 +7,7 @@ export function createState() {
   return {
     mode: 'content',
     files: [],
+    fileDescriptors: [],
     images: [],
     imageSearchQuery: '',
     /**
@@ -16,11 +17,22 @@ export function createState() {
      */
     expandedImageSections: new Set(),
     activeFile: '',
+    activeSchema: null,
+    activeRevision: '',
+    activeUsage: [],
+    activeViewMode: 'guided',
     originalValue: null,
     draftValue: null,
+    validationIssues: [],
+    hasConflicts: false,
+    draftRecovery: {
+      restored: false,
+      key: '',
+    },
     dirty: false,
     deletedImages: new Set(),
     sessionTouchedPaths: new Set(),
+    sessionSemanticChanges: new Map(),
     hasSessionChanges: false,
     gitStatus: null,
     gitBusy: false,

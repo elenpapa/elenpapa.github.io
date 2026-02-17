@@ -579,6 +579,47 @@ export async function cleanupDanglingTempUploads() {
   return { removedPublicPaths: Array.from(new Set(removedPublicPaths)) }
 }
 
+/**
+ * Why this exists:
+ * Session summaries and UX badges need visibility into unsaved temp uploads
+ * without mutating files, so this read-only inspector mirrors cleanup detection.
+ */
+export async function listPendingTempUploads() {
+  const [imageFiles, referencedPaths] = await Promise.all([
+    listImageFiles(paths.imagesDir),
+    collectReferencedImagePaths(),
+  ])
+
+  const referencedTempKeys = new Set(
+    Array.from(referencedPaths)
+      .map((publicPath) => getTempBaseKey(publicPath))
+      .filter(Boolean),
+  )
+  const candidateTempKeys = new Set(
+    imageFiles.map((relativePath) => getTempBaseKey(`/images/${relativePath}`)).filter(Boolean),
+  )
+
+  const referenced = []
+  const dangling = []
+  candidateTempKeys.forEach((tempKey) => {
+    const lastSlashIndex = tempKey.lastIndexOf('/')
+    const dir = lastSlashIndex >= 0 ? tempKey.slice(0, lastSlashIndex) : '.'
+    const baseName = lastSlashIndex >= 0 ? tempKey.slice(lastSlashIndex + 1) : tempKey
+    if (!baseName) return
+    const canonicalPublicPath = buildPublicPathFromDirAndName(dir, baseName, '.webp')
+    if (referencedTempKeys.has(tempKey)) {
+      referenced.push(canonicalPublicPath)
+    } else {
+      dangling.push(canonicalPublicPath)
+    }
+  })
+
+  return {
+    referenced: Array.from(new Set(referenced)),
+    dangling: Array.from(new Set(dangling)),
+  }
+}
+
 export async function deleteImageWithVariants(publicPath) {
   if (!isSupportedPublicImagePath(publicPath)) return []
   const targetPath = resolveSafeImageDeletePath(publicPath)

@@ -39,7 +39,10 @@ export async function apiRequest(url, options = {}) {
   }
 
   if (!response.ok) {
-    throw new Error(payload.error || 'Request failed.')
+    const error = new Error(payload.error || 'Request failed.')
+    error.statusCode = response.status
+    error.payload = payload
+    throw error
   }
 
   return payload
@@ -47,7 +50,9 @@ export async function apiRequest(url, options = {}) {
 
 export async function fetchFiles() {
   const payload = await apiRequest('/api/files')
-  return Array.isArray(payload.files) ? payload.files : []
+  const files = Array.isArray(payload.files) ? payload.files : []
+  const descriptors = Array.isArray(payload.descriptors) ? payload.descriptors : []
+  return { files, descriptors }
 }
 
 export async function fetchImages(query) {
@@ -60,10 +65,15 @@ export async function fetchImages(query) {
 export async function fetchFileContent(filePath) {
   const encodedFile = encodeURIComponent(filePath)
   const payload = await apiRequest(`/api/files/${encodedFile}`)
-  return payload.content
+  return {
+    content: payload.content,
+    revision: payload.revision || '',
+    schemaId: payload.schemaId || filePath,
+    usage: Array.isArray(payload.usage) ? payload.usage : [],
+  }
 }
 
-export async function saveFileContent({ filePath, content, deletedImages }) {
+export async function saveFileContent({ filePath, content, deletedImages, baseRevision }) {
   const encodedFile = encodeURIComponent(filePath)
   return apiRequest(`/api/files/${encodedFile}`, {
     method: 'PUT',
@@ -71,8 +81,28 @@ export async function saveFileContent({ filePath, content, deletedImages }) {
     body: JSON.stringify({
       content,
       deletedImages,
+      baseRevision,
     }),
   })
+}
+
+export async function fetchSchema(schemaId) {
+  const encodedSchema = encodeURIComponent(schemaId)
+  const payload = await apiRequest(`/api/schemas/${encodedSchema}`)
+  return payload.schema
+}
+
+export async function validateFileContent({ filePath, content }) {
+  const encodedFile = encodeURIComponent(filePath)
+  const payload = await apiRequest(`/api/validate/${encodedFile}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ content }),
+  })
+  return {
+    ok: Boolean(payload.ok),
+    issues: Array.isArray(payload.issues) ? payload.issues : [],
+  }
 }
 
 export async function uploadImageAsset({ file, activeFile, fieldPath, previousImagePath }) {
@@ -126,4 +156,15 @@ export async function finalizeGitReview(sessionPaths) {
     body: JSON.stringify({ sessionPaths }),
   })
   return payload.result
+}
+
+export async function fetchSessionSummary(sessionPaths) {
+  const normalizedPaths = Array.isArray(sessionPaths)
+    ? sessionPaths.filter((entry) => typeof entry === 'string' && entry.trim())
+    : []
+  const query = normalizedPaths.length
+    ? `?paths=${encodeURIComponent(normalizedPaths.join(','))}`
+    : ''
+  const payload = await apiRequest(`/api/session/summary${query}`)
+  return payload.summary
 }

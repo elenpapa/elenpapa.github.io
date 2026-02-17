@@ -4,9 +4,10 @@
  * routing so future validation and per-file business rules can be added cleanly.
  */
 import path from 'node:path'
-import { readdir, readFile, writeFile } from 'node:fs/promises'
+import { readdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { paths } from '../config.mjs'
 import { getSafeContentPath } from '../utils/path-guards.mjs'
+import { getSchemaIdForFilePath, getUsageForFilePath } from './schemas.mjs'
 
 export async function listJsonFiles(dir = paths.contentDir, baseDir = dir) {
   const entries = await readdir(dir, { withFileTypes: true })
@@ -33,6 +34,29 @@ export async function readContentFile(relativePath) {
   const filePath = getSafeContentPath(relativePath)
   const fileContent = await readFile(filePath, 'utf-8')
   return JSON.parse(fileContent)
+}
+
+/**
+ * Why this exists:
+ * The backoffice sidebar needs operational metadata (size, update time, usage)
+ * so editors can orient faster before opening a specific JSON file.
+ */
+export async function listContentFileDescriptors() {
+  const files = await listJsonFiles(paths.contentDir)
+  const descriptors = await Promise.all(
+    files.map(async (filePath) => {
+      const absolutePath = getSafeContentPath(filePath)
+      const fileStats = await stat(absolutePath)
+      return {
+        file: filePath,
+        sizeBytes: fileStats.size,
+        updatedAt: fileStats.mtime.toISOString(),
+        usage: getUsageForFilePath(filePath),
+        schemaId: getSchemaIdForFilePath(filePath),
+      }
+    }),
+  )
+  return descriptors
 }
 
 export async function writeContentFile(relativePath, nextContent) {

@@ -152,6 +152,9 @@ body.modal-open {
 }
 
 .toolbar {
+  position: sticky;
+  top: 10px;
+  z-index: 30;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -160,6 +163,13 @@ body.modal-open {
   justify-content: space-between;
   gap: 14px;
   align-items: flex-start;
+}
+
+.toolbar-right {
+  display: grid;
+  gap: 10px;
+  min-width: 260px;
+  justify-items: end;
 }
 
 .toolbar-title h2 {
@@ -171,6 +181,75 @@ body.modal-open {
   margin: 4px 0 0;
   color: var(--muted);
   font-size: 14px;
+}
+
+.current-usage {
+  font-size: 12px;
+  color: #5a5448;
+  line-height: 1.4;
+}
+
+.status-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #ddd6c4;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  background: #fff9ec;
+  color: #50462f;
+}
+
+.status-icon {
+  font-size: 10px;
+}
+
+.status-strip[data-status='ready'] {
+  background: #f5f4ef;
+}
+
+.status-strip[data-status='unsaved'] {
+  background: #fff2da;
+  border-color: #e3be79;
+}
+
+.status-strip[data-status='saving'] {
+  background: #ecf6ff;
+  border-color: #8db7dd;
+}
+
+.status-strip[data-status='synced'] {
+  background: #eaf7ea;
+  border-color: #9ac89d;
+}
+
+.status-strip[data-status='error'] {
+  background: #fff0ed;
+  border-color: #e0a097;
+}
+
+.editor-mode-switch {
+  display: inline-flex;
+  border: 1px solid #ddd6c4;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.editor-mode-switch button {
+  border: 0;
+  border-right: 1px solid #ddd6c4;
+  border-radius: 0;
+  padding: 7px 11px;
+}
+
+.editor-mode-switch button:last-child {
+  border-right: 0;
+}
+
+.editor-mode-switch button.is-active {
+  background: #f4ecdc;
+  color: #3f3420;
 }
 
 .toolbar-actions {
@@ -279,6 +358,22 @@ button:disabled {
 .empty-state {
   color: var(--muted);
   font-size: 15px;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px;
+  color: #3d382f;
+}
+
+.empty-state p {
+  margin: 0 0 10px;
+}
+
+.empty-state ol {
+  margin: 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
 }
 
 .editor-root {
@@ -521,12 +616,191 @@ button:disabled {
   color: var(--accent);
 }
 
+.status-ready {
+  color: #4e493f;
+}
+
+.status-unsaved {
+  color: #8c5608;
+}
+
+.status-saving {
+  color: #2d638e;
+}
+
+.status-synced {
+  color: #1f6b2f;
+}
+
 .status-error {
   color: var(--danger);
 }
 
 .status-ok {
   color: #1f6b2f;
+}
+
+.guided-toc {
+  border: 1px solid #e0d9c8;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fbf8ef;
+  margin-bottom: 12px;
+}
+
+.guided-toc-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #635743;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.guided-toc-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.guided-toc-list button {
+  font-size: 12px;
+  padding: 6px 8px;
+}
+
+.guided-section {
+  border: 1px solid #e2ddcf;
+  border-radius: 10px;
+  background: #fffdf8;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.guided-section-head {
+  border-bottom: 1px solid #eee7d8;
+  padding: 10px 12px;
+  background: #f8f3e6;
+}
+
+.guided-section-head h3 {
+  margin: 0;
+  font-size: 15px;
+  color: #3e372a;
+}
+
+.guided-section-head p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #665d4f;
+}
+
+.guided-section-body {
+  padding: 12px;
+}
+
+.guided-group {
+  display: grid;
+  gap: 10px;
+}
+
+.guided-row {
+  border: 1px solid #eee7d8;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fffeff;
+}
+
+.guided-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3f3728;
+  margin-bottom: 4px;
+}
+
+.guided-helper {
+  margin: 0 0 8px;
+  color: #716657;
+  font-size: 12px;
+}
+
+.guided-input {
+  width: 100%;
+  border: 1px solid #d8d2c2;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.guided-textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.guided-array {
+  display: grid;
+  gap: 10px;
+}
+
+.guided-array-item {
+  border: 1px solid #e8e2d3;
+  border-radius: 8px;
+  background: #fbf9f4;
+  padding: 10px;
+}
+
+.guided-array-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.guided-array-controls span {
+  font-size: 12px;
+  color: #6b6151;
+  margin-right: auto;
+}
+
+.guided-image-field {
+  display: grid;
+  gap: 8px;
+}
+
+.guided-image-preview {
+  width: min(280px, 100%);
+  border-radius: 8px;
+  border: 1px solid #ddd6c4;
+  background: #f3efdf;
+}
+
+.guided-image-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.guided-temp-badge {
+  font-size: 11px;
+  color: #8a5e1b;
+  border: 1px solid #ddb66f;
+  border-radius: 999px;
+  padding: 3px 8px;
+  background: #fff1d7;
+}
+
+.guided-field-errors {
+  margin-top: 8px;
+  border: 1px solid #efb4ad;
+  border-radius: 8px;
+  background: #fff2f0;
+  padding: 6px 8px;
+}
+
+.guided-field-error {
+  margin: 0;
+  color: #8a2a21;
+  font-size: 12px;
 }
 
 /*
@@ -556,6 +830,12 @@ button:disabled {
 
 .modal-panel h3 {
   margin: 0 0 8px;
+}
+
+.modal-panel h4 {
+  margin: 12px 0 8px;
+  font-size: 13px;
+  color: #4c4336;
 }
 
 .modal-summary {
@@ -597,6 +877,10 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
+.review-semantic-list li {
+  background: #f8f5eb;
+}
+
 .modal-actions {
   display: flex;
   gap: 8px;
@@ -612,6 +896,36 @@ button:disabled {
   border: 1px solid #d5ceb8;
   background: #f8f3e7;
   overflow-wrap: anywhere;
+}
+
+.toast-root {
+  position: fixed;
+  right: 14px;
+  bottom: 90px;
+  z-index: 90;
+  display: grid;
+  gap: 8px;
+  width: min(360px, calc(100vw - 28px));
+}
+
+.toast {
+  border: 1px solid #ddd6c4;
+  background: #fffdf8;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #3f372b;
+  box-shadow: 0 8px 24px rgba(31, 22, 11, 0.1);
+}
+
+.toast-ok {
+  border-color: #9ccba0;
+  background: #eff9ef;
+}
+
+.toast-error {
+  border-color: #e6a39a;
+  background: #fff2f0;
 }
 
 @media (max-width: 980px) {
@@ -639,5 +953,22 @@ button:disabled {
 
   .git-status {
     grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    flex-direction: column;
+  }
+
+  .toolbar-right {
+    justify-items: start;
+    width: 100%;
+  }
+
+  .editor-mode-switch {
+    width: 100%;
+  }
+
+  .editor-mode-switch button {
+    flex: 1;
   }
 }

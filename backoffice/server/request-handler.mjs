@@ -4,7 +4,12 @@
  * service modules can be tested/reused independently from HTTP wiring.
  */
 import { BODY_LIMIT_BYTES, HOST, PORT, paths } from './config.mjs'
-import { listJsonFiles, readContentFile, writeContentFile } from './services/content-files.mjs'
+import {
+  listContentFileDescriptors,
+  listJsonFiles,
+  readContentFile,
+  writeContentFile,
+} from './services/content-files.mjs'
 import {
   createReviewBranchAndPush,
   getGitStatusSummary,
@@ -15,8 +20,12 @@ import {
   cleanupDanglingTempUploads,
   deleteImageWithVariants,
   finalizeTempImagesInContent,
+  listPendingTempUploads,
   uploadImage,
 } from './services/images.mjs'
+import { buildEditorSchema, getSchemaById } from './services/schemas.mjs'
+import { assertBaseRevision, getContentRevision } from './services/revision.mjs'
+import { validateContentPayload } from './services/validation.mjs'
 import { serveFileFromBaseDir } from './services/static-files.mjs'
 import {
   HttpError,
@@ -89,7 +98,8 @@ export async function handleRequest(req, res) {
 
     if (method === 'GET' && pathname === '/api/files') {
       const files = await listJsonFiles(paths.contentDir)
-      sendJson(res, 200, { files })
+      const descriptors = await listContentFileDescriptors()
+      sendJson(res, 200, { files, descriptors })
       return
     }
 
@@ -106,25 +116,107 @@ export async function handleRequest(req, res) {
       return
     }
 
+    if (method === 'GET' && pathname.startsWith('/api/schemas/')) {
+      const schemaId = pathname.replace('/api/schemas/', '')
+      const content = await readContentFile(schemaId)
+      const schema = getSchemaById(schemaId, content)
+      sendJson(res, 200, { schema })
+      return
+    }
+
+    if (method === 'GET' && pathname === '/api/session/summary') {
+      const rawPaths = url.searchParams.get('paths') ?? ''
+      const sessionPaths = rawPaths
+        .split(',')
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+      const preview = await getSessionChangePreview(sessionPaths)
+      const pendingTempUploads = await listPendingTempUploads()
+      sendJson(res, 200, {
+        summary: {
+          touchedPaths: preview.paths,
+          changedEntries: preview.entries,
+          pendingTempUploads,
+        },
+      })
+      return
+    }
+
     if (pathname.startsWith('/api/files/')) {
       const relativePath = pathname.replace('/api/files/', '')
 
       if (method === 'GET') {
         const content = await readContentFile(relativePath)
-        sendJson(res, 200, { file: relativePath, content })
+        const revision = await getContentRevision(relativePath)
+        const schema = buildEditorSchema({ filePath: relativePath, content })
+        sendJson(res, 200, {
+          file: relativePath,
+          content,
+          revision,
+          schemaId: schema.id,
+          usage: schema.usage,
+        })
         return
       }
 
       if (method === 'PUT') {
         assertJsonRequest(req)
         const body = await readJsonBody(req, BODY_LIMIT_BYTES)
+        const currentContent = await readContentFile(relativePath)
+        const revisionCheck = await assertBaseRevision(relativePath, body.baseRevision)
+        if (!revisionCheck.matched) {
+          sendJson(res, 409, {
+            error: 'This file changed elsewhere. Reload to sync latest content before saving.',
+            currentRevision: revisionCheck.currentRevision,
+          })
+          return
+        }
+
         const payloadContent = extractContentPayload(body)
+        const validation = validateContentPayload({
+          currentContent,
+          nextContent: payloadContent,
+        })
+        if (!validation.ok) {
+          sendJson(res, 422, {
+            error: 'Validation failed. Please review highlighted fields and try again.',
+            issues: validation.issues,
+          })
+          return
+        }
+
         const { content: nextContent, finalizedImages } =
           await finalizeTempImagesInContent(payloadContent)
         const deletedImages = extractDeletedImages(body)
         await writeContentFile(relativePath, nextContent)
         await Promise.all(deletedImages.map((imagePath) => deleteImageWithVariants(imagePath)))
-        sendJson(res, 200, { ok: true, file: relativePath, content: nextContent, finalizedImages })
+        const revision = await getContentRevision(relativePath)
+        sendJson(res, 200, {
+          ok: true,
+          file: relativePath,
+          content: nextContent,
+          finalizedImages,
+          revision,
+        })
+        return
+      }
+    }
+
+    if (pathname.startsWith('/api/validate/')) {
+      if (method === 'POST') {
+        assertJsonRequest(req)
+        const relativePath = pathname.replace('/api/validate/', '')
+        const body = await readJsonBody(req, BODY_LIMIT_BYTES)
+        const nextContent = extractContentPayload(body)
+        const currentContent = await readContentFile(relativePath)
+        const validation = validateContentPayload({
+          currentContent,
+          nextContent,
+        })
+        sendJson(res, 200, {
+          ok: validation.ok,
+          issues: validation.issues,
+        })
         return
       }
     }

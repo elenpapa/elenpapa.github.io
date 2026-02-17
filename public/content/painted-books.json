@@ -209,6 +209,15 @@
           "src": "/images/painted-books/book-23.webp",
           "alt": "Ζωγραφισμένες άκρες Ο Μπλε Κλήρος"
         }
+      },
+      {
+        "id": "55",
+        "title": "τεστ",
+        "author": "τεστ",
+        "media": {
+          "src": "/images/painted-books/intro-1771325429328.webp",
+          "alt": "τεστ"
+        }
       }
     ]
   },

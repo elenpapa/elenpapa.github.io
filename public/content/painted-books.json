@@ -209,6 +209,15 @@
           "src": "/images/painted-books/book-23.webp",
           "alt": "Ζωγραφισμένες άκρες Ο Μπλε Κλήρος"
         }
+      },
+      {
+        "id": "23",
+        "title": "The Kiss Curse",
+        "author": "Erin Sterling",
+        "media": {
+          "src": "/images/painted-books/kisscurse-1771685943821.webp",
+          "alt": "Ζωγραφισμένες άκρες The Kiss Curse"
+        }
       }
     ]
   },

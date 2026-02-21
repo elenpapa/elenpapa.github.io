@@ -1,28 +1,40 @@
 @echo off
-REM Why this exists:
-REM Windows double-click launcher that starts backoffice (if not already running)
-REM and opens the editor in the default browser.
-setlocal
+setlocal EnableExtensions
 
-cd /d "%~dp0"
+pushd "%~dp0" || (
+  echo [Backoffice] Failed to access the script directory.
+  exit /b 1
+)
+
 set "URL=http://127.0.0.1:4310"
-set "LOG_FILE=%~dp0.backoffice-launch.log"
 
 where npm >nul 2>nul
 if errorlevel 1 (
   echo [Backoffice] npm was not found. Please install Node.js.
   pause
+  popd
   exit /b 1
 )
 
-for /f "tokens=5" %%a in ('netstat -ano ^| findstr /R /C:":4310 .*LISTENING"') do (
+netstat -ano | findstr /R /C:":4310 .*LISTENING" >nul
+if not errorlevel 1 (
   start "" "%URL%"
+  popd
   exit /b 0
 )
 
-start "" /B cmd /c "npm run backoffice >> \"%LOG_FILE%\" 2>&1"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -WindowStyle Hidden -FilePath 'npm' -ArgumentList 'run','backoffice' -WorkingDirectory '%CD%'"
+if errorlevel 1 (
+  echo [Backoffice] Failed to start npm run backoffice.
+  popd
+  exit /b 1
+)
 
-powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$deadline=(Get-Date).AddSeconds(30); while((Get-Date)-lt $deadline){ try { $ok=Test-NetConnection -ComputerName 127.0.0.1 -Port 4310 -WarningAction SilentlyContinue -InformationLevel Quiet } catch { $ok=$false }; if($ok){ Start-Process '%URL%'; exit 0 }; Start-Sleep -Seconds 1 }; Start-Process '%URL%'"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$deadline=(Get-Date).AddSeconds(30); do { Start-Sleep -Milliseconds 500; $ok=$false; try { $c=New-Object Net.Sockets.TcpClient; $ar=$c.BeginConnect('127.0.0.1',4310,$null,$null); $ok=$ar.AsyncWaitHandle.WaitOne(250); $c.Close() } catch {}; if($ok){ exit 0 } } while((Get-Date)-lt $deadline); exit 1"
+if errorlevel 1 (
+  echo [Backoffice] Server did not respond within 30 seconds. Opening anyway.
+)
 
+start "" "%URL%"
+popd
 exit /b 0

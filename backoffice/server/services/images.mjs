@@ -436,9 +436,16 @@ function collectTempImagePathsFromContent(value, output = new Set()) {
   return output
 }
 
+/*
+ * Saved JSON can point at any optimized member of a temp upload family.
+ * Finalization needs to rewrite every matching family path so the persisted
+ * content never keeps a `-temp` reference after the rename completes.
+ */
 function replaceImagePathValues(value, replacements) {
   if (typeof value === 'string') {
-    return replacements.get(value) ?? value
+    const normalized = stripImageQueryAndHash(value)
+    if (!replacements.has(normalized)) return value
+    return value.replace(normalized, replacements.get(normalized))
   }
 
   if (Array.isArray(value)) {
@@ -456,49 +463,81 @@ function replaceImagePathValues(value, replacements) {
   return value
 }
 
-/**
- * Why this exists:
- * Temp uploads must become stable filenames only on explicit JSON save, and
- * their optimizer variants must be renamed together to keep src/srcset valid.
+function isTempFamilyMember(fileName, tempFamilyName) {
+  const candidateName = path.parse(fileName).name
+  return candidateName === tempFamilyName || candidateName.startsWith(`${tempFamilyName}-`)
+}
+
+function toRenamedPublicPath({ dir, fileName }) {
+  const parsed = path.parse(fileName)
+  return buildPublicPathFromDirAndName(dir, removeTempMarker(parsed.name), parsed.ext)
+}
+
+/*
+ * A temp upload may produce original, webp, and responsive siblings.
+ * These files must be renamed as one family so save and later git flows stay
+ * aligned with the committed JSON paths.
  */
-async function finalizeTempImageAtPath(tempPublicPath) {
+async function finalizeTempImageFamilyAtPath(tempPublicPath) {
   const parsed = parsePublicImagePath(tempPublicPath)
-  if (!parsed || !hasTempMarkerInBaseName(parsed.name)) {
-    return tempPublicPath
+  if (!parsed) {
+    return {
+      primaryPath: tempPublicPath,
+      replacements: [],
+    }
   }
 
-  const tempAbsolutePath = getSafeImagePath(parsed.normalized)
-  if (!(await pathExists(tempAbsolutePath))) {
-    return tempPublicPath
+  const tempFamilyName = canonicalizeResponsiveBaseName(parsed.name)
+  if (!hasTempMarkerInBaseName(tempFamilyName)) {
+    return {
+      primaryPath: tempPublicPath,
+      replacements: [],
+    }
   }
 
-  const finalBaseName = removeTempMarker(parsed.name)
-  if (!finalBaseName || finalBaseName === parsed.name) {
-    throw new Error(`Invalid temp image name: ${parsed.base}`)
+  const absoluteDirectory = path.dirname(getSafeImagePath(parsed.normalized))
+  const directoryEntries = await readdir(absoluteDirectory).catch(() => [])
+  const candidateFiles = directoryEntries.filter((fileName) =>
+    isTempFamilyMember(fileName, tempFamilyName),
+  )
+
+  if (!candidateFiles.length) {
+    return {
+      primaryPath: tempPublicPath,
+      replacements: [],
+    }
   }
 
-  const absoluteDirectory = path.dirname(tempAbsolutePath)
-  const directoryEntries = await readdir(absoluteDirectory)
-  const candidateFiles = directoryEntries.filter((fileName) => {
-    const candidateName = path.parse(fileName).name
-    if (candidateName === parsed.name) return true
-    return candidateName.startsWith(`${parsed.name}-`)
+  const renamePlan = candidateFiles.map((fileName) => {
+    const sourcePath = path.join(absoluteDirectory, fileName)
+    const targetName = `${removeTempMarker(path.parse(fileName).name)}${path.extname(fileName)}`
+    const targetPath = path.join(absoluteDirectory, targetName)
+    return { fileName, sourcePath, targetName, targetPath }
   })
 
-  for (const fileName of candidateFiles) {
-    const fileParsed = path.parse(fileName)
-    const targetName = `${removeTempMarker(fileParsed.name)}${fileParsed.ext}`
-    if (targetName === fileName) continue
-
-    const sourcePath = path.join(absoluteDirectory, fileName)
-    const targetPath = path.join(absoluteDirectory, targetName)
-    if (await pathExists(targetPath)) {
-      throw new Error(`Cannot finalize image because target already exists: ${targetName}`)
+  const sourcePathSet = new Set(renamePlan.map((entry) => entry.sourcePath))
+  for (const entry of renamePlan) {
+    if (entry.sourcePath === entry.targetPath) continue
+    if (!sourcePathSet.has(entry.targetPath) && (await pathExists(entry.targetPath))) {
+      throw new Error(`Cannot finalize image because target already exists: ${entry.targetName}`)
     }
-    await rename(sourcePath, targetPath)
   }
 
-  return buildPublicPathFromDirAndName(parsed.dir, finalBaseName, parsed.ext)
+  for (const entry of renamePlan) {
+    if (entry.sourcePath === entry.targetPath) continue
+    await rename(entry.sourcePath, entry.targetPath)
+  }
+
+  const replacements = candidateFiles.map((fileName) => ({
+    from: buildPublicPathFromDirAndName(parsed.dir, path.parse(fileName).name, path.extname(fileName)),
+    to: toRenamedPublicPath({ dir: parsed.dir, fileName }),
+  }))
+
+  const primaryMatch = replacements.find((entry) => entry.from === parsed.normalized)
+  return {
+    primaryPath: primaryMatch?.to || tempPublicPath.replace(TEMP_IMAGE_MARKER, ''),
+    replacements,
+  }
 }
 
 export async function finalizeTempImagesInContent(content) {
@@ -509,12 +548,29 @@ export async function finalizeTempImagesInContent(content) {
 
   const replacements = new Map()
   const finalizedImages = []
+  const processedFamilies = new Set()
 
   for (const tempPath of tempPaths) {
-    const finalizedPath = await finalizeTempImageAtPath(tempPath)
-    replacements.set(tempPath, finalizedPath)
-    if (finalizedPath !== tempPath) {
-      finalizedImages.push({ from: tempPath, to: finalizedPath })
+    const familyKey = getTempBaseKey(tempPath)
+    if (!familyKey || processedFamilies.has(familyKey)) continue
+    processedFamilies.add(familyKey)
+
+    const { replacements: familyReplacements } = await finalizeTempImageFamilyAtPath(tempPath)
+    familyReplacements.forEach((entry) => {
+      replacements.set(entry.from, entry.to)
+      if (entry.from !== entry.to) {
+        finalizedImages.push(entry)
+      }
+    })
+  }
+
+  for (const tempPath of tempPaths) {
+    if (!replacements.has(tempPath)) {
+      const finalizedPath = tempPath.replace(TEMP_IMAGE_MARKER, '')
+      replacements.set(tempPath, finalizedPath)
+      if (finalizedPath !== tempPath) {
+        finalizedImages.push({ from: tempPath, to: finalizedPath })
+      }
     }
   }
 

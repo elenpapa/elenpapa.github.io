@@ -48,13 +48,15 @@ This starts a local UI at `http://127.0.0.1:4310` where you can edit files in `p
 Use these root files to launch backoffice without typing terminal commands:
 
 - macOS: `Backoffice.command`
-- Windows: `Backoffice.bat`
+- Windows: `Backoffice.vbs` (recommended) or `Backoffice.bat`
 - Linux: `Backoffice.sh` or `Backoffice.desktop`
 
 Each launcher will:
 
 1. Start backoffice if it is not already running.
 2. Open `http://127.0.0.1:4310` in the default browser.
+
+If Windows opens `.bat` files in a text editor because of the local file association, use `Backoffice.vbs`. It starts the batch launcher through `cmd.exe` directly, so it still runs on double-click.
 
 ### Type-Check, Compile and Minify for Production
 

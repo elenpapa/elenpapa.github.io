@@ -248,22 +248,71 @@
     {
       "year": 2026,
       "title": "Do you know? Jobs and work people do",
-      "cover": "/images/books/Do you know? Jobs and work people do.jpg",
+      "cover": "/images/books/Jobs-and-work-people-do-1775383556659.webp",
       "blurb": "Βιβλίο για παιδιά",
       "actions": "Μετάφραση"
     },
     {
       "year": 2026,
-      "title": "Κακό Ρομάντζο",
-      "cover": "/images/books/bad romance.jpg",
+      "title": "Το Παρίσι μπορεί να περιμένει",
+      "cover": "/images/books/To-parisi-mporei-na-perimenei-1775383492673.webp",
       "blurb": "Ρομαντικό μυθιστόρημα",
       "actions": "Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Φου",
+      "cover": "/images/books/Fou-1775383928668.webp",
+      "blurb": "Βιβλίο για παιδιά",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Παιχνίδια Εξουσίας",
+      "cover": "/images/books/Paixnidia-exousias-1775384227539.webp",
+      "blurb": "Ρομαντικό μυθιστόρημα",
+      "actions": "Επιμέλεια-Διόρθωση"
     },
     {
       "year": 2026,
       "title": "Υπόθεση Πολέτη",
       "cover": "/images/books/casepoleti.jpg",
       "blurb": "Μυθιστόρημα μυστηρίου",
+      "actions": "Επιμέλεια-Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "The Rescue of the Invincibles",
+      "cover": "",
+      "blurb": "Μυθιστόρημα Φαντασίας",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Στην Υπηρεσία του Βασιλιά",
+      "cover": "",
+      "blurb": "Μυθιστόρημα Φαντασίας",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "56 Ημέρες",
+      "cover": "",
+      "blurb": "Μυθιστόρημα μυστηρίου-θρίλερ",
+      "actions": "Επιμέλεια Μετάφρασης-Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Αιώνιος Εραστής",
+      "cover": "",
+      "blurb": "Μυθιστόρημα Φαντασίας",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Σιδηρά Φρουρά",
+      "cover": "",
+      "blurb": "Μυθιστόρημα Φαντασίας ",
       "actions": "Επιμέλεια-Διόρθωση"
     }
   ]

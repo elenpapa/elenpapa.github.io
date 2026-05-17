@@ -304,14 +304,14 @@
     {
       "year": 2026,
       "title": "Αιώνιος Εραστής",
-      "cover": "",
+      "cover": "/images/books/Aiwnios-Erastis-1779026845109.webp",
       "blurb": "Μυθιστόρημα Φαντασίας",
       "actions": "Διόρθωση Επανέκδοσης"
     },
     {
       "year": 2026,
       "title": "Σιδηρά Φρουρά",
-      "cover": "",
+      "cover": "/images/books/SIDIRA-FROURA-1779026964176.webp",
       "blurb": "Μυθιστόρημα Φαντασίας ",
       "actions": "Επιμέλεια-Διόρθωση"
     },
@@ -334,6 +334,13 @@
       "title": "Μουσείο Κατεστραμμένων Σχέσεων",
       "cover": "/images/books/Museum-1777486883671.webp",
       "blurb": "Ανθολογία ",
+      "actions": "Διόρθωση"
+    },
+    {
+      "year": 2026,
+      "title": "Η Πύλη της Μέδουσας",
+      "cover": "/images/books/H-PYLH-THS-MEDOUSAS-1779027065412.webp",
+      "blurb": "Μυθιστόρημα Φαντασίας ",
       "actions": "Διόρθωση"
     }
   ]

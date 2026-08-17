@@ -39,7 +39,7 @@
     }
   },
   "logo": {
-    "src": "/logo.png",
+    "src": "/logo.webp",
     "alt": "Site logo"
   },
   "nav": [

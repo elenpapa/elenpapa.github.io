@@ -15,7 +15,7 @@ import 'vite-ssg'
 const isSSGBuild = process.env.VITE_SSG === 'true'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
   // Base URL for GitHub Pages / custom domain
   base: '/',
   plugins: [
@@ -24,10 +24,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       // Disable PWA during SSG to prevent regeneration issues with workbox paths
-      disable: isSSGBuild,
+      disable: isSSGBuild || Boolean(isSsrBuild),
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,json,svg}'],
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // Increase limit to 5MB for other assets if needed
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.destination === 'image',
@@ -46,35 +46,42 @@ export default defineConfig({
         ],
       },
     }),
-    ViteImageOptimizer({
-      png: {
-        quality: 80,
-      },
-      jpeg: {
-        quality: 80,
-      },
-      jpg: {
-        quality: 80,
-      },
-      webp: {
-        quality: 80,
-      },
-    }),
-    viteCompression({
-      algorithm: 'brotliCompress',
-      ext: '.br',
-    }),
-    viteCompression({
-      algorithm: 'gzip',
-      ext: '.gz',
-    }),
-    visualizer({
-      filename: './dist/stats.html',
-      open: false,
-      gzipSize: true,
-      brotliSize: true,
-    }),
-    {
+    // Image optimizer & compression only run on client build, never during ephemeral SSR server passes
+    !isSsrBuild &&
+      ViteImageOptimizer({
+        cache: true,
+        cacheLocation: '.cache/image-optimizer',
+        png: {
+          quality: 80,
+        },
+        jpeg: {
+          quality: 80,
+        },
+        jpg: {
+          quality: 80,
+        },
+        webp: {
+          quality: 80,
+        },
+      }),
+    !isSsrBuild &&
+      viteCompression({
+        algorithm: 'brotliCompress',
+        ext: '.br',
+      }),
+    !isSsrBuild &&
+      viteCompression({
+        algorithm: 'gzip',
+        ext: '.gz',
+      }),
+    !isSsrBuild &&
+      visualizer({
+        filename: './dist/stats.html',
+        open: false,
+        gzipSize: true,
+        brotliSize: true,
+      }),
+    !isSsrBuild && {
       name: 'copy-backoffice-plugin',
       closeBundle() {
         try {
@@ -89,7 +96,7 @@ export default defineConfig({
         }
       },
     },
-  ],
+  ].filter(Boolean),
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -129,4 +136,4 @@ export default defineConfig({
   server: {
     host: '127.0.0.1',
   },
-})
+}))

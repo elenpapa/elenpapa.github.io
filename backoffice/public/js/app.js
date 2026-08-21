@@ -4,6 +4,7 @@
  * draft recovery, and review workflow in a single orchestration layer.
  */
 import {
+  fetchAuthSession,
   fetchFileContent,
   fetchFiles,
   fetchGitPreview,
@@ -12,6 +13,8 @@ import {
   fetchSchema,
   fetchSessionSummary,
   finalizeGitReview,
+  loginAdmin,
+  logoutAdmin,
   saveFileContent,
   uploadImageAsset,
   validateFileContent,
@@ -137,9 +140,134 @@ export function createBackofficeApp(elements) {
 
   function closeModal(modal) {
     modal.hidden = true
+    const isLoginOpen =
+      elements.loginModal && (elements.loginModal.open || !elements.loginModal.hidden)
+    if (elements.reviewModal.hidden && elements.successModal.hidden && !isLoginOpen) {
+      document.body.classList.remove('modal-open')
+    }
+  }
+
+  function setSessionUser(user) {
+    if (elements.sessionUser) {
+      if (user) {
+        elements.sessionUser.hidden = false
+        if (elements.sessionUsername) {
+          elements.sessionUsername.textContent = user
+        }
+      } else {
+        elements.sessionUser.hidden = true
+      }
+    }
+  }
+
+  function showLoginModal(errorMessage = '') {
+    if (elements.loginError) {
+      if (errorMessage) {
+        elements.loginError.textContent = errorMessage
+        elements.loginError.hidden = false
+      } else {
+        elements.loginError.textContent = ''
+        elements.loginError.hidden = true
+      }
+    }
+    if (elements.loginPassword) {
+      elements.loginPassword.value = ''
+    }
+    if (elements.loginModal) {
+      elements.loginModal.hidden = false
+      elements.loginModal.setAttribute('open', '')
+      if (typeof elements.loginModal.showModal === 'function' && !elements.loginModal.open) {
+        try {
+          elements.loginModal.showModal()
+        } catch {
+          // Dialog fallback
+        }
+      }
+      document.body.classList.add('modal-open')
+      setTimeout(() => elements.loginPassword?.focus(), 50)
+    }
+  }
+
+  function hideLoginModal() {
+    if (elements.loginModal) {
+      elements.loginModal.hidden = true
+      elements.loginModal.removeAttribute('open')
+      if (typeof elements.loginModal.close === 'function' && elements.loginModal.open) {
+        try {
+          elements.loginModal.close()
+        } catch {
+          // Dialog fallback
+        }
+      }
+    }
     if (elements.reviewModal.hidden && elements.successModal.hidden) {
       document.body.classList.remove('modal-open')
     }
+  }
+
+  async function handleLoginSubmit(event) {
+    event.preventDefault()
+    const username = elements.loginUsername?.value?.trim() || 'admin'
+    const password = elements.loginPassword?.value || ''
+
+    if (!password) {
+      if (elements.loginError) {
+        elements.loginError.textContent = 'Password is required.'
+        elements.loginError.hidden = false
+      }
+      return
+    }
+
+    if (elements.loginSubmit) {
+      elements.loginSubmit.disabled = true
+      elements.loginSubmit.textContent = 'Signing in...'
+    }
+
+    try {
+      if (elements.loginError) {
+        elements.loginError.hidden = true
+      }
+      const response = await loginAdmin({ username, password })
+      hideLoginModal()
+      setSessionUser(response.user || username)
+      toasts.show('Signed in successfully.', { type: 'ok' })
+      await loadBackofficeData()
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Invalid credentials.'
+      if (elements.loginError) {
+        elements.loginError.textContent = msg
+        elements.loginError.hidden = false
+      }
+      setUiStatus(UiStatusState.ERROR, 'Authentication failed.')
+    } finally {
+      if (elements.loginSubmit) {
+        elements.loginSubmit.disabled = false
+        elements.loginSubmit.textContent = 'Sign In'
+      }
+    }
+  }
+
+  async function handleLogout() {
+    try {
+      await logoutAdmin()
+      setSessionUser(null)
+      toasts.show('Signed out successfully.', { type: 'ok' })
+      setUiStatus(UiStatusState.READY, 'Signed out.')
+      showLoginModal()
+    } catch (error) {
+      toasts.show(`Logout failed: ${error instanceof Error ? error.message : String(error)}`, {
+        type: 'error',
+      })
+    }
+  }
+
+  async function loadBackofficeData() {
+    setUiStatus(UiStatusState.READY, 'Initializing backoffice...')
+    await refreshGitStatus({ reloadActiveOnPull: false })
+    await loadFiles()
+    renderFileList()
+    await switchMode('content')
+    setUiStatus(UiStatusState.READY, `Loaded ${state.files.length} content file(s).`)
   }
 
   function setReviewError(errorMessage) {
@@ -884,6 +1012,18 @@ export function createBackofficeApp(elements) {
       closeModal(elements.successModal)
     })
 
+    if (elements.loginForm) {
+      elements.loginForm.addEventListener('submit', handleLoginSubmit)
+    }
+
+    if (elements.logoutButton) {
+      elements.logoutButton.addEventListener('click', handleLogout)
+    }
+
+    window.addEventListener('backoffice:unauthorized', () => {
+      showLoginModal('Session expired or unauthorized. Please sign in again.')
+    })
+
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape' || state.gitBusy) return
       if (!elements.reviewModal.hidden) {
@@ -937,16 +1077,21 @@ export function createBackofficeApp(elements) {
   async function init() {
     bindEvents()
     try {
-      setUiStatus(UiStatusState.READY, 'Initializing backoffice...')
-      await refreshGitStatus({ reloadActiveOnPull: false })
-      await loadFiles()
-      renderFileList()
-      await switchMode('content')
-      setUiStatus(UiStatusState.READY, `Loaded ${state.files.length} content file(s).`)
+      setUiStatus(UiStatusState.READY, 'Checking session...')
+      const session = await fetchAuthSession()
+      if (!session.authenticated) {
+        setUiStatus(UiStatusState.UNSAVED, 'Authentication required.')
+        showLoginModal()
+        return
+      }
+
+      setSessionUser(session.user)
+      await loadBackofficeData()
     } catch (error) {
+      showLoginModal()
       setUiStatus(
         UiStatusState.ERROR,
-        `${error instanceof Error ? error.message : 'Initialization failed.'} Please retry.`,
+        `${error instanceof Error ? error.message : 'Session verification failed.'} Please sign in.`,
       )
     }
   }

@@ -29,12 +29,14 @@ try {
 
     const sourceStats = await sharp(sourcePath).metadata()
     const originalSize = statSync(sourcePath).size
-    console.log(`  Original: ${sourceStats.width}x${sourceStats.height} (${(originalSize / 1024).toFixed(0)}KB)`)
+    console.log(
+      `  Original: ${sourceStats.width}x${sourceStats.height} (${(originalSize / 1024).toFixed(0)}KB)`,
+    )
 
     await sharp(sourcePath)
       .resize(img.maxWidth, null, {
         fit: 'inside',
-        withoutEnlargement: true
+        withoutEnlargement: true,
       })
       .webp({
         quality: img.quality,
@@ -45,7 +47,9 @@ try {
     const targetStats = await sharp(targetPath).metadata()
     const newSize = statSync(targetPath).size
 
-    console.log(`  ✓ → ${name}.webp: ${targetStats.width}x${targetStats.height} (${(newSize / 1024).toFixed(0)}KB)`)
+    console.log(
+      `  ✓ → ${name}.webp: ${targetStats.width}x${targetStats.height} (${(newSize / 1024).toFixed(0)}KB)`,
+    )
     console.log(`    Reduction: ${((1 - newSize / originalSize) * 100).toFixed(0)}%`)
   }
 

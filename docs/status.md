@@ -8,6 +8,7 @@ Updated: 2025-11-16
 - Progress is tracked here and in the internal TODO list.
 - **Major optimization and accessibility improvements completed** (Phases 1-3)
 
+- **NEW**: **Vercel-Ready Git-Backed CMS & Backoffice** (Serverless API, JWT Auth, In-Memory Sharp Optimization, Automated PR Review Flow)
 ## Checklist
 
 - [x] Content JSON schema defined and created (`public/content/*.json`)
@@ -48,6 +49,35 @@ Updated: 2025-11-16
 - [x] VS Code settings to enforce formatting and ESLint
 - [x] **A11y + perf pass (Phases 1-3 completed)**
 
+
+## Vercel-Ready Git-Backed CMS Architecture ✅
+
+### Implementation Overview
+Migrated the local Backoffice into a production-grade, Git-backed Headless CMS operating on Vercel Serverless Functions (`api/`) without requiring local filesystem mutations or external paid CMS SaaS.
+
+1. **Authentication & Session Security (`api/lib/auth.ts`, `api/auth/*`)**
+   - Encrypted `HttpOnly; Secure; SameSite=Lax` cookie (`backoffice_session`) using `jose` JWT tokens signed with `AUTH_SECRET`.
+   - `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/session`.
+   - Accessible login modal dialog in the Backoffice UI with 401 automatic interception.
+
+2. **Git-Backed Content & Optimistic Concurrency (`api/lib/github.ts`, `api/files/*`)**
+   - Reads content files directly via GitHub REST / Git Data API (`@octokit/rest`).
+   - Uses Git Blob SHAs as `baseRevision` tokens for optimistic conflict detection (`409 Conflict`).
+   - Full Zod runtime validation on save (`422 Unprocessable Entity` with structured field errors).
+
+3. **In-Memory Serverless Sharp Image Pipeline (`api/lib/image-processor.ts`, `api/images/*`)**
+   - In-memory raster image optimization to WebP (quality: 85, effort: 4).
+   - Responsive variant generation (`-400w.webp`, `-800w.webp`) for posts, books, painted-books, and moonlight.
+   - Media library indexing across the GitHub Git tree with reverse usage mapping.
+
+4. **Automated Review Branching & Pull Requests (`api/git/*`)**
+   - Multi-file atomic commits via GitHub Git Data API (`createTree`, `createCommit`, `updateRef`).
+   - Automated creation of review branches (`ui-backoffice-YYYY-MM-DD-xxxx`) and GitHub Pull Requests into `main`.
+   - Vercel automated CI/CD builds preview deployments for review branches and updates production on merge.
+
+5. **Full Test Suite & Cross-Check Verification**
+   - 64 automated unit & integration tests covering auth, files, images, git, and github adapters.
+   - Real browser verification completed using headless Chromium (login, schema editing, media library, logout).
 ## Performance Optimizations (Phase 1)
 
 ### Completed ✅

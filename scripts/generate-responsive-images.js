@@ -120,9 +120,7 @@ async function processImages() {
   }
 
   console.log(`\n✅ Generated ${processedCount} responsive image variants`)
-  console.log(
-    `   Original sources: ${(totalOriginal / 1024 / 1024).toFixed(2)}MB`,
-  )
+  console.log(`   Original sources: ${(totalOriginal / 1024 / 1024).toFixed(2)}MB`)
   console.log(`   New variants: ${(totalNew / 1024 / 1024).toFixed(2)}MB`)
 }
 

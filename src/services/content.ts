@@ -382,7 +382,11 @@ async function fetchAndParse<T>(url: string, schema: z.ZodSchema<T>): Promise<T>
   // SSR/SSG: use file system during build, fetch during runtime
   let json: unknown
 
-  if (typeof globalThis.fetch === 'undefined' || import.meta.env.SSR) {
+  if (
+    typeof window === 'undefined' ||
+    typeof globalThis.fetch === 'undefined' ||
+    import.meta.env.SSR
+  ) {
     // During SSG build, read from file system
     const fs = await import('node:fs/promises')
     const path = await import('node:path')

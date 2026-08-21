@@ -96,6 +96,44 @@ export async function handleRequest(req, res) {
 
   try {
     assertSameOriginForMutation(req, method, pathname)
+    if (pathname === '/api/auth/login' && method === 'POST') {
+      assertJsonRequest(req)
+      const body = await readJsonBody(req, BODY_LIMIT_BYTES)
+      const password = typeof body?.password === 'string' ? body.password : ''
+      const expectedPassword = process.env.ADMIN_PASSWORD || 'admin'
+      if (password !== expectedPassword) {
+        sendJson(res, 401, { ok: false, error: 'Invalid admin credentials.' })
+        return
+      }
+      const token = Buffer.from(JSON.stringify({ user: body?.username || 'admin', exp: Date.now() + 7 * 24 * 60 * 60 * 1000 })).toString('base64')
+      res.setHeader('Set-Cookie', `backoffice_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`)
+      sendJson(res, 200, { ok: true, user: body?.username || 'admin' })
+      return
+    }
+
+    if (pathname === '/api/auth/logout' && method === 'POST') {
+      res.setHeader('Set-Cookie', 'backoffice_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0')
+      sendJson(res, 200, { ok: true })
+      return
+    }
+
+    if (pathname === '/api/auth/session' && method === 'GET') {
+      const cookieHeader = req.headers.cookie || ''
+      const match = cookieHeader.match(/backoffice_session=([^;]+)/)
+      if (match) {
+        try {
+          const decoded = JSON.parse(Buffer.from(match[1], 'base64').toString('utf-8'))
+          if (decoded.exp > Date.now()) {
+            sendJson(res, 200, { authenticated: true, user: decoded.user || 'admin' })
+            return
+          }
+        } catch {
+          // Invalid cookie, proceed to unauthenticated
+        }
+      }
+      sendJson(res, 200, { authenticated: false })
+      return
+    }
 
     if (method === 'GET' && pathname === '/api/files') {
       const files = await listJsonFiles(paths.contentDir)

@@ -125,7 +125,13 @@ const trackMoonlightLink = (label: string, href: string, location: string) => {
               rel="noopener noreferrer nofollow"
               class="pillar-link"
               :aria-label="`Δείτε περισσότερα για τον/την ${pillar.firstName} ${pillar.lastName}`"
-              @click="trackMoonlightLink(`${pillar.firstName} ${pillar.lastName}`, pillar.href, 'moonlight_mission')"
+              @click="
+                trackMoonlightLink(
+                  `${pillar.firstName} ${pillar.lastName}`,
+                  pillar.href,
+                  'moonlight_mission',
+                )
+              "
             >
               <div class="pillar-image">
                 <img
@@ -198,7 +204,13 @@ const trackMoonlightLink = (label: string, href: string, location: string) => {
             rel="noopener noreferrer nofollow"
             class="instagram-highlight-link"
             :aria-label="`Δείτε τα ${bookJournal.instagramHighlight.label} στο Instagram`"
-            @click="trackMoonlightLink(bookJournal.instagramHighlight.label, bookJournal.instagramHighlight.href, 'moonlight_book_journal')"
+            @click="
+              trackMoonlightLink(
+                bookJournal.instagramHighlight.label,
+                bookJournal.instagramHighlight.href,
+                'moonlight_book_journal',
+              )
+            "
           >
             <div class="highlight-bubble">
               <img

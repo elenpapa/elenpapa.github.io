@@ -10,12 +10,7 @@ const sharp = (await import('sharp')).default
 
 // Icon images that need optimization - displayed at 150px max (bubble-size)
 // Optimize for 300px (2x for retina) with high quality
-const iconFiles = [
-  'icon-bachelor.png',
-  'icon-seminar.png',
-  'icon-master1.png',
-  'icon-master2.png'
-]
+const iconFiles = ['icon-bachelor.png', 'icon-seminar.png', 'icon-master1.png', 'icon-master2.png']
 
 const TARGET_SIZE = 300 // 2x display size for retina
 
@@ -38,7 +33,7 @@ try {
     await sharp(sourcePath)
       .resize(TARGET_SIZE, TARGET_SIZE, {
         fit: 'contain',
-        background: { r: 0, g: 0, b: 0, alpha: 0 }
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
       })
       .webp({
         quality: 90,
@@ -51,8 +46,12 @@ try {
     const newSize = (await import('fs')).statSync(targetPath).size
 
     console.log(`  ✓ ${file} → ${name}.webp`)
-    console.log(`    Size: ${(originalSize / 1024 / 1024).toFixed(2)}MB → ${(newSize / 1024).toFixed(0)}KB`)
-    console.log(`    Dimensions: ${sourceStats.width}x${sourceStats.height} → ${targetStats.width}x${targetStats.height}`)
+    console.log(
+      `    Size: ${(originalSize / 1024 / 1024).toFixed(2)}MB → ${(newSize / 1024).toFixed(0)}KB`,
+    )
+    console.log(
+      `    Dimensions: ${sourceStats.width}x${sourceStats.height} → ${targetStats.width}x${targetStats.height}`,
+    )
   }
 
   console.log('\n✅ Icon images optimized successfully!')

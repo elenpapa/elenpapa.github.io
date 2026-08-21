@@ -13,7 +13,7 @@ async function optimizePostsImages() {
   console.log('Starting post image optimization...\n')
 
   const files = await readdir(POSTS_DIR)
-  const webpFiles = files.filter(f => f.toLowerCase().endsWith('.webp'))
+  const webpFiles = files.filter((f) => f.toLowerCase().endsWith('.webp'))
 
   let totalOriginal = 0
   let totalOptimized = 0
@@ -33,12 +33,12 @@ async function optimizePostsImages() {
         .resize({
           width: 800,
           withoutEnlargement: true,
-          fit: 'inside'
+          fit: 'inside',
         })
         .webp({
           quality: 78,
           effort: 6,
-          nearLossless: false
+          nearLossless: false,
         })
         .toFile(outputPath)
 
@@ -52,7 +52,6 @@ async function optimizePostsImages() {
       console.log(`  Original: ${(originalSize / 1024).toFixed(0)} KB`)
       console.log(`  Optimized: ${(optimizedSize / 1024).toFixed(0)} KB`)
       console.log(`  Savings: ${savings}%\n`)
-
     } catch (error) {
       console.error(`✗ Error optimizing ${file}:`, error.message)
     }

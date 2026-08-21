@@ -17,7 +17,11 @@ export async function apiRequest(url, options = {}) {
 
   try {
     response = await fetch(url, {
+      credentials: 'same-origin',
       ...options,
+      headers: {
+        ...options.headers,
+      },
       signal: controller.signal,
       cache: 'no-store',
     })
@@ -37,6 +41,13 @@ export async function apiRequest(url, options = {}) {
   } catch {
     payload = {}
   }
+  if (response.status === 401 && typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('backoffice:unauthorized', {
+        detail: { url, payload },
+      }),
+    )
+  }
 
   if (!response.ok) {
     const error = new Error(payload.error || 'Request failed.')
@@ -44,7 +55,6 @@ export async function apiRequest(url, options = {}) {
     error.payload = payload
     throw error
   }
-
   return payload
 }
 
@@ -167,4 +177,36 @@ export async function fetchSessionSummary(sessionPaths) {
     : ''
   const payload = await apiRequest(`/api/session/summary${query}`)
   return payload.summary
+}
+
+export async function loginAdmin(credentials) {
+  const payloadBody =
+    typeof credentials === 'string'
+      ? { password: credentials, username: 'admin' }
+      : {
+          password: credentials?.password || '',
+          username: credentials?.username || 'admin',
+        }
+
+  const payload = await apiRequest('/api/auth/login', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payloadBody),
+  })
+  return payload
+}
+
+export async function logoutAdmin() {
+  const payload = await apiRequest('/api/auth/logout', {
+    method: 'POST',
+  })
+  return payload
+}
+
+export async function fetchAuthSession() {
+  const payload = await apiRequest('/api/auth/session')
+  return {
+    authenticated: Boolean(payload?.authenticated),
+    user: payload?.user || null,
+  }
 }

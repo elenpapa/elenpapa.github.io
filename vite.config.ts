@@ -1,6 +1,6 @@
 import { fileURLToPath, URL } from 'node:url'
 import process from 'node:process'
-
+import { cpSync, existsSync, mkdirSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
@@ -74,6 +74,21 @@ export default defineConfig({
       gzipSize: true,
       brotliSize: true,
     }),
+    {
+      name: 'copy-backoffice-plugin',
+      closeBundle() {
+        try {
+          const sourceDir = fileURLToPath(new URL('./backoffice/public', import.meta.url))
+          const targetDir = fileURLToPath(new URL('./dist/backoffice', import.meta.url))
+          if (existsSync(sourceDir)) {
+            mkdirSync(targetDir, { recursive: true })
+            cpSync(sourceDir, targetDir, { recursive: true })
+          }
+        } catch (e) {
+          console.warn('Could not copy backoffice assets in closeBundle:', e)
+        }
+      },
+    },
   ],
   resolve: {
     alias: {

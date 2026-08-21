@@ -7,6 +7,8 @@ import satori from 'satori'
 import { Resvg } from '@resvg/resvg-js'
 import sharp from 'sharp'
 import { readFile, writeFile, mkdir, access } from 'node:fs/promises'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -418,8 +420,46 @@ function createOgTemplate(
   }
 }
 
+const TEMPLATE_VERSION = 'v2'
+const MANIFEST_PATH = join(rootDir, 'public', 'images', 'og', '.cache-manifest.json')
+
+function computeImageHash({ title, description, siteName, accentColor, imageDataUri, fontHash }) {
+  return createHash('sha256')
+    .update(
+      JSON.stringify({
+        version: TEMPLATE_VERSION,
+        title: title || '',
+        description: description || '',
+        siteName: siteName || '',
+        accentColor: accentColor || '',
+        avatarHash: imageDataUri ? createHash('sha256').update(imageDataUri).digest('hex') : null,
+        fontHash,
+      }),
+    )
+    .digest('hex')
+}
+
+function loadCacheManifest() {
+  try {
+    if (existsSync(MANIFEST_PATH)) {
+      return JSON.parse(readFileSync(MANIFEST_PATH, 'utf-8'))
+    }
+  } catch {
+    // If corrupt or missing, return empty manifest
+  }
+  return {}
+}
+
+function saveCacheManifest(manifest) {
+  try {
+    writeFileSync(MANIFEST_PATH, JSON.stringify(manifest, null, 2), 'utf-8')
+  } catch (error) {
+    console.warn('Could not persist OG cache manifest:', error.message)
+  }
+}
+
 /**
- * Generate OG image for a single post or page
+ * Generate OG image for a single post or page with hash caching
  */
 async function generateOgImage(
   title,
@@ -427,8 +467,26 @@ async function generateOgImage(
   siteName,
   outputPath,
   fontData,
+  fontHash,
   imageDataUri = null,
+  manifest = {},
+  force = false,
 ) {
+  const filename = dirname(outputPath) === dirname(MANIFEST_PATH) ? outputPath.split('/').pop() : outputPath
+  const currentHash = computeImageHash({
+    title,
+    description,
+    siteName,
+    accentColor: '#b39ddb',
+    imageDataUri,
+    fontHash,
+  })
+
+  if (!force && existsSync(outputPath) && manifest[filename] === currentHash) {
+    console.log(`⚡ Cached (unchanged): ${filename}`)
+    return
+  }
+
   const template = createOgTemplate(title, description, siteName, '#b39ddb', imageDataUri)
 
   // Generate SVG with satori (using JSX objects directly)
@@ -468,6 +526,8 @@ async function generateOgImage(
   // Write PNG file
   await writeFile(outputPath, pngBuffer)
 
+  // Update manifest
+  manifest[filename] = currentHash
   console.log(`✓ Generated: ${outputPath}`)
 }
 
@@ -475,7 +535,10 @@ async function generateOgImage(
  * Main function to generate all OG images
  */
 async function main() {
-  console.log('🎨 Generating OG images...\n')
+  const force = process.argv.includes('--force')
+  console.log(`🎨 Generating OG images...${force ? ' (force rebuild)' : ''}\n`)
+
+  const manifest = loadCacheManifest()
 
   // Load posts data
   const postsPath = join(rootDir, 'public', 'content', 'posts.json')
@@ -523,11 +586,13 @@ async function main() {
     }
   }
 
+  const fontHash = createHash('sha256').update(Buffer.from(fontData)).digest('hex')
+
   // Output directory for OG images
   const outputDir = join(rootDir, 'public', 'images', 'og')
 
   // Generate OG image for each post (using post's own image)
-  console.log('\n📝 Generating post OG images...')
+  console.log('\n📝 Processing post OG images...')
   for (let i = 0; i < postsData.items.length; i++) {
     const post = postsData.items[i]
     const outputPath = join(outputDir, `post-${i}.png`)
@@ -551,12 +616,15 @@ async function main() {
       siteName,
       outputPath,
       fontData,
+      fontHash,
       postImageDataUri,
+      manifest,
+      force,
     )
   }
 
   // Generate default OG image for the site (using intro image as avatar)
-  console.log('\n🌐 Generating site default OG image...')
+  console.log('\n🌐 Processing site default OG image...')
   const defaultOutputPath = join(outputDir, 'default.png')
   await generateOgImage(
     'Έλενα Παπαδοπούλου - Συγγραφέας, Επιμελήτρια & Σύμβουλος Εκδόσεων',
@@ -564,11 +632,14 @@ async function main() {
     siteName,
     defaultOutputPath,
     fontData,
+    fontHash,
     introImageDataUri,
+    manifest,
+    force,
   )
 
   // Generate OG images for main pages
-  console.log('\n📄 Generating page-specific OG images...')
+  console.log('\n📄 Processing page-specific OG images...')
 
   const getPageMeta = (pageKey, fallbackTitle, fallbackDescription) => {
     const page = pagesMeta[pageKey]
@@ -624,10 +695,21 @@ async function main() {
     )
     const pageOgPath = join(outputDir, page.filename)
 
-    await generateOgImage(title, description, siteName, pageOgPath, fontData, introImageDataUri)
+    await generateOgImage(
+      title,
+      description,
+      siteName,
+      pageOgPath,
+      fontData,
+      fontHash,
+      introImageDataUri,
+      manifest,
+      force,
+    )
   }
 
-  console.log('\n✅ OG image generation complete!')
+  saveCacheManifest(manifest)
+  console.log('\n✅ OG image processing complete!')
 }
 
 main().catch(console.error)

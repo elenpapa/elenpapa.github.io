@@ -1,14 +1,14 @@
 /**
  * Why this exists:
- * Vercel Serverless Function retrieving the editor form schema definition and metadata
+ * Handler retrieving the editor form schema definition and metadata
  * for a specific content type (`GET /api/schemas/:id`).
  */
 
 import path from 'node:path'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { readContentFileFromGit } from '../lib/github'
-import { HttpError, isHttpError, sendJson } from '../lib/http'
-import { getSchemaById } from '../lib/schemas'
+import { readContentFileFromGit } from '../github'
+import { HttpError, isHttpError, sendJson } from '../http'
+import { getSchemaById } from '../schemas'
 
 function extractSchemaId(req: VercelRequest): string {
   const queryId = req.query.id
@@ -36,7 +36,7 @@ function extractSchemaId(req: VercelRequest): string {
   return baseName.endsWith('.json') ? baseName : `${baseName}.json`
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+export default async function handleSchemasDetail(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     sendJson(res, 405, { ok: false, error: 'Method not allowed' })
     return

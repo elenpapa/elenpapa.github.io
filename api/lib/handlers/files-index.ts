@@ -1,17 +1,17 @@
 /**
  * Why this exists:
- * Vercel Serverless Function listing all editable content JSON files and their
+ * Handler listing all editable content JSON files and their
  * operational metadata descriptors (`GET /api/files`) for the Backoffice sidebar.
  */
 
 import { stat } from 'node:fs/promises'
 import path from 'node:path'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { listContentFilesFromGit } from '../lib/github'
-import { isHttpError, sendJson } from '../lib/http'
-import { listContentFileDescriptors } from '../lib/schemas'
+import { listContentFilesFromGit } from '../github'
+import { isHttpError, sendJson } from '../http'
+import { listContentFileDescriptors } from '../schemas'
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+export default async function handleFilesIndex(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     sendJson(res, 405, { ok: false, error: 'Method not allowed' })
     return

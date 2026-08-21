@@ -1,14 +1,14 @@
 /**
  * Why this exists:
- * Vercel Serverless Function performing draft validation against registered Zod schemas
+ * Handler performing draft validation against registered Zod schemas
  * and structural templates (`POST /api/validate/:file`) before persisting edits.
  */
 
 import path from 'node:path'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { readContentFileFromGit } from '../lib/github'
-import { HttpError, isHttpError, readJsonBody, sendJson } from '../lib/http'
-import { validateContentPayload } from '../lib/schemas'
+import { readContentFileFromGit } from '../github'
+import { HttpError, isHttpError, readJsonBody, sendJson } from '../http'
+import { validateContentPayload } from '../schemas'
 
 function extractFilePath(req: VercelRequest): string {
   const queryFile = req.query.file
@@ -36,7 +36,7 @@ function extractFilePath(req: VercelRequest): string {
   return baseName.endsWith('.json') ? baseName : `${baseName}.json`
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+export default async function handleValidateFile(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'POST') {
     sendJson(res, 405, { ok: false, error: 'Method not allowed' })
     return

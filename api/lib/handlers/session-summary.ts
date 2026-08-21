@@ -1,12 +1,12 @@
 /**
  * Why this exists:
- * Vercel Serverless Function providing session change summary (`GET /api/session/summary`).
+ * Handler providing session change summary (`GET /api/session/summary`).
  * Returns touched session paths, field-level changed entries, and pending temporary uploads.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import path from 'node:path'
-import { sendJson } from '../lib/http'
+import { sendJson } from '../http'
 
 export interface SessionSummaryResult {
   touchedPaths: string[]
@@ -22,26 +22,23 @@ export interface SessionSummaryResult {
   }
 }
 
-/**
- * Extracts and normalizes comma-separated or array paths from the query parameter.
- */
 function parseQueryPaths(raw: unknown): string[] {
   if (!raw) return []
   const list: string[] = []
 
   if (Array.isArray(raw)) {
-    for (const item of raw) {
+    raw.forEach((item) => {
       if (typeof item === 'string') {
         list.push(...item.split(','))
       }
-    }
+    })
   } else if (typeof raw === 'string') {
     list.push(...raw.split(','))
   }
 
   const unique = new Set<string>()
   for (const item of list) {
-    const clean = item.trim().replace(/\\/g, '/').replace(/^\/+/, '').replace(/^\.\//, '')
+    const clean = item.trim().replace(/\\/g, '/').replace(/^\/+/, '')
     if (!clean) continue
     const normalized = path.posix.normalize(clean)
     if (
@@ -58,39 +55,33 @@ function parseQueryPaths(raw: unknown): string[] {
   return Array.from(unique)
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+export default async function handleSessionSummary(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'GET') {
     sendJson(res, 405, { ok: false, error: 'Method not allowed' })
     return
   }
 
   try {
-    let rawPaths: string | string[] | undefined = req.query?.paths
-    if (!rawPaths && req.url) {
-      try {
-        const parsedUrl = new URL(req.url, 'http://localhost')
-        rawPaths = parsedUrl.searchParams.get('paths') || undefined
-      } catch {
-        // url parsing fallback
-      }
-    }
-
+    const rawPaths = req.query.paths
     const touchedPaths = parseQueryPaths(rawPaths)
 
-    const changedEntries = touchedPaths.map((repoPath) => {
-      const name = path.basename(repoPath)
-      const isContent = repoPath.startsWith('public/content/') || repoPath.endsWith('.json')
-      const isAsset =
-        repoPath.startsWith('public/images/') || /\.(webp|png|jpe?g|svg|gif)$/i.test(repoPath)
+    const changedEntries = touchedPaths.map((itemPath) => {
+      const fileName = path.posix.basename(itemPath)
+      let type: 'content' | 'asset' | 'unknown' = 'unknown'
+
+      if (itemPath.includes('content/') || itemPath.endsWith('.json')) {
+        type = 'content'
+      } else if (
+        itemPath.includes('images/') ||
+        /\.(png|jpe?g|webp|svg|jfif)$/i.test(itemPath)
+      ) {
+        type = 'asset'
+      }
 
       return {
-        path: repoPath,
-        name,
-        type: isContent
-          ? ('content' as const)
-          : isAsset
-            ? ('asset' as const)
-            : ('unknown' as const),
+        path: itemPath,
+        name: fileName,
+        type,
       }
     })
 

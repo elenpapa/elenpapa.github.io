@@ -1,14 +1,14 @@
 /**
  * Why this exists:
- * Vercel Serverless Function providing repository status (`GET /api/git/status`).
+ * Handler providing repository status (`GET /api/git/status`).
  * Returns sync state with origin/main, latest commit metadata, and pull request info.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { getGitStatusSummary } from '../lib/github'
-import { sendJson } from '../lib/http'
+import { getGitStatusSummary } from '../github'
+import { sendJson } from '../http'
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+export default async function handleGitStatus(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'GET') {
     sendJson(res, 405, { ok: false, error: 'Method not allowed' })
     return
@@ -17,7 +17,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   try {
     const summary = await getGitStatusSummary()
 
-    // Provide complete status including backward-compatible properties for admin UI
     const status = {
       ...summary,
       currentBranch: summary.branch,
@@ -27,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       changeCount: summary.clean ? 0 : 1,
       changes: [],
       sync: {
-        action: summary.configured ? 'up-to-date' : 'up-to-date',
+        action: 'up-to-date',
         details: summary.statusText,
       },
     }

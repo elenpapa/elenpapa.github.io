@@ -1,16 +1,16 @@
 /**
  * Why this exists:
- * Vercel Serverless Function providing read and write operations for a specific
+ * Handler providing read and write operations for a specific
  * content JSON file (`GET/PUT /api/files/:file`) with Zod validation and optimistic concurrency.
  */
 
 import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { requireAuth } from '../lib/auth-guard'
-import { calculateGitBlobSha, readContentFileFromGit } from '../lib/github'
-import { HttpError, isHttpError, readJsonBody, sendJson } from '../lib/http'
-import { buildEditorSchema, validateContentPayload } from '../lib/schemas'
+import { requireAuth } from '../auth-guard'
+import { calculateGitBlobSha, readContentFileFromGit } from '../github'
+import { HttpError, isHttpError, readJsonBody, sendJson } from '../http'
+import { buildEditorSchema, validateContentPayload } from '../schemas'
 
 function extractFilePath(req: VercelRequest): string {
   const queryFile = req.query.file
@@ -38,7 +38,7 @@ function extractFilePath(req: VercelRequest): string {
   return baseName.endsWith('.json') ? baseName : `${baseName}.json`
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+export default async function handleFilesDetail(req: VercelRequest, res: VercelResponse): Promise<void> {
   const method = req.method?.toUpperCase()
 
   if (method !== 'GET' && method !== 'PUT' && method !== 'HEAD') {
@@ -47,41 +47,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   }
 
   try {
-    const filePath = extractFilePath(req)
+    const fileName = extractFilePath(req)
 
-    // GET /api/files/:file
     if (method === 'GET' || method === 'HEAD') {
-      const result = await readContentFileFromGit({ filePath })
-      const schema = buildEditorSchema({ filePath, content: result.content })
+      const { content, sha } = await readContentFileFromGit({ filePath: fileName })
+      const schema = buildEditorSchema({ filePath: fileName, content })
 
       sendJson(res, 200, {
-        file: filePath,
-        content: result.content,
-        revision: result.sha,
+        file: fileName,
+        content,
+        revision: sha,
         schemaId: schema.id,
         usage: schema.usage,
       })
       return
     }
 
-    // PUT /api/files/:file
     if (method === 'PUT') {
       const user = await requireAuth(req, res)
       if (!user) return
 
-      const body = await readJsonBody<Record<string, unknown>>(req)
-      const current = await readContentFileFromGit({ filePath })
+      const body = await readJsonBody<{
+        baseRevision?: string
+        content?: unknown
+        deletedImages?: string[]
+      }>(req)
 
-      const baseRevision =
-        typeof body?.baseRevision === 'string' && body.baseRevision.trim()
-          ? body.baseRevision.trim()
-          : undefined
+      const { content: currentContent, sha: currentSha } = await readContentFileFromGit({
+        filePath: fileName,
+      })
 
-      if (baseRevision && baseRevision !== current.sha) {
+      if (body?.baseRevision && body.baseRevision !== currentSha) {
         sendJson(res, 409, {
           ok: false,
           error: 'This file changed elsewhere. Reload to sync latest content before saving.',
-          currentRevision: current.sha,
+          currentRevision: currentSha,
         })
         return
       }
@@ -90,9 +90,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         body && typeof body === 'object' && 'content' in body ? body.content : body
 
       const validation = validateContentPayload({
-        currentContent: current.content,
+        currentContent,
         nextContent: payloadContent,
-        schemaId: filePath,
+        schemaId: fileName,
       })
 
       if (!validation.ok) {
@@ -104,22 +104,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         return
       }
 
-      const serialized = `${JSON.stringify(payloadContent, null, 2)}\n`
-      const newRevision = calculateGitBlobSha(serialized)
+      const formattedJson = `${JSON.stringify(payloadContent, null, 2)}\n`
+      const nextSha = calculateGitBlobSha(formattedJson)
 
       try {
-        const localPath = path.join(process.cwd(), 'public/content', filePath)
+        const localPath = path.join(process.cwd(), 'public/content', fileName)
         await mkdir(path.dirname(localPath), { recursive: true })
-        await writeFile(localPath, serialized, 'utf-8')
+        await writeFile(localPath, formattedJson, 'utf-8')
       } catch {
-        // Filesystem is read-only in cloud serverless environments
+        // In read-only serverless environments, local disk write may not apply
       }
 
       sendJson(res, 200, {
         ok: true,
-        file: filePath,
+        file: fileName,
         content: payloadContent,
-        revision: newRevision,
+        revision: nextSha,
       })
       return
     }
@@ -133,7 +133,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       return
     }
 
-    const message = error instanceof Error ? error.message : 'Content file operation failed.'
+    const message = error instanceof Error ? error.message : 'Operation failed on content file.'
     sendJson(res, 500, {
       ok: false,
       error: message,

@@ -1,12 +1,12 @@
 /**
  * Why this exists:
- * Vercel Serverless Function generating change preview (`POST /api/git/preview`).
+ * Handler generating change preview (`POST /api/git/preview`).
  * Takes session paths and returns diff preview entries and summary.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import path from 'node:path'
-import { readJsonBody, sendJson } from '../lib/http'
+import { readJsonBody, sendJson } from '../http'
 
 interface PreviewRequestBody {
   sessionPaths?: string[]
@@ -24,9 +24,6 @@ export interface GitPreviewResult {
   summary: string
 }
 
-/**
- * Normalizes input paths from backoffice session.
- */
 function normalizeSessionPaths(sessionPaths: unknown): string[] {
   if (!Array.isArray(sessionPaths)) return []
   const unique = new Set<string>()
@@ -50,7 +47,7 @@ function normalizeSessionPaths(sessionPaths: unknown): string[] {
   return Array.from(unique)
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+export default async function handleGitPreview(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'POST') {
     sendJson(res, 405, { ok: false, error: 'Method not allowed' })
     return

@@ -1,20 +1,20 @@
 /**
  * Why this exists:
- * Vercel Serverless Function handling admin authentication (`POST /api/auth/login`).
+ * Handler for admin authentication (`POST /api/auth/login`).
  * Validates admin credentials, issues a signed JWT session cookie (`backoffice_session`),
  * and returns the authenticated user details.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { createSessionToken, setAuthCookie, verifyAdminPassword } from '../lib/auth'
-import { readJsonBody, sendJson } from '../lib/http'
+import { createSessionToken, setAuthCookie, verifyAdminPassword } from '../auth'
+import { readJsonBody, sendJson } from '../http'
 
 interface LoginRequestBody {
   username?: string
   password?: string
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+export default async function handleAuthLogin(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'POST') {
     sendJson(res, 405, { ok: false, error: 'Method not allowed' })
     return

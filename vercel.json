@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/**/*.ts": {
+    "api/[...path].ts": {
       "memory": 1024,
       "maxDuration": 60
     }
@@ -143,7 +143,11 @@
     },
     {
       "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "destination": "/api/[...path]"
+    },
+    {
+      "source": "/api",
+      "destination": "/api/[...path]"
     },
     {
       "source": "/((?!api|backoffice|admin|assets|images|content|.*\\..*).*)",
